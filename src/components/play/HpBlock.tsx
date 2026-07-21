@@ -62,22 +62,9 @@ export function HpBlock({
         />
       </div>
 
-      <div className="mt-4 grid grid-cols-4 gap-2">
-        <Button onClick={() => send({ type: "hp.delta", amount: -5 })}>
-          −5
-        </Button>
-        <Button onClick={() => send({ type: "hp.delta", amount: -1 })}>
-          −1
-        </Button>
-        <Button onClick={() => send({ type: "hp.delta", amount: 1 })}>
-          +1
-        </Button>
-        <Button onClick={() => send({ type: "hp.delta", amount: 5 })}>
-          +5
-        </Button>
-      </div>
-
-      <div className="mt-2 grid grid-cols-3 gap-2">
+      {/* Ein Weg statt zweier: Betrag eintippen, Richtung wählen. Der
+          Schaden am Tisch ist ohnehin nie −5, sondern 13. */}
+      <div className="mt-4 grid grid-cols-3 gap-2">
         <input
           type="number"
           inputMode="numeric"
@@ -88,12 +75,12 @@ export function HpBlock({
           }}
           placeholder="Betrag"
           aria-label="Betrag für Schaden oder Heilung"
-          className="min-w-0 min-h-12 rounded-md border border-edge bg-ink px-2 text-center text-fg placeholder:text-faint focus:border-patina focus:outline-none"
+          className="min-w-0 min-h-12 rounded-md border border-edge bg-ink px-2 text-center text-lg font-semibold text-fg placeholder:text-base placeholder:font-normal placeholder:text-faint focus:border-patina focus:outline-none"
         />
         <Button variant="danger" className="px-2" onClick={() => applyTyped(-1)}>
           Schaden
         </Button>
-        <Button className="px-2" onClick={() => applyTyped(1)}>
+        <Button variant="heal" className="px-2" onClick={() => applyTyped(1)}>
           Heilung
         </Button>
       </div>

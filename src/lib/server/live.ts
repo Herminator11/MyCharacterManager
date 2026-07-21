@@ -101,6 +101,25 @@ function apply(characterId: number, mutation: LiveMutation) {
       return;
     }
 
+    case "hitdice.spend": {
+      const live = getLiveState(characterId);
+      const entry = live?.hitDice.find((h) => h.classId === mutation.classId);
+      if (!live || !entry || entry.used >= entry.total) return;
+
+      db.update(characterClasses)
+        .set({ hitDiceUsed: entry.used + 1 })
+        .where(eq(characterClasses.id, entry.classId))
+        .run();
+
+      // Ein schlechter Wurf bei negativem CON heilt null, nie negativ —
+      // der Würfel ist dann trotzdem weg. So steht es in den Regeln.
+      const healed = Math.max(0, Math.round(mutation.roll) + live.conModifier);
+      changeHp(characterId, (state, hpMax) =>
+        applyHpDelta(state, hpMax, healed),
+      );
+      return;
+    }
+
     case "slot.set":
       setSlotUsed(characterId, mutation.poolId, mutation.level, mutation.used);
       return;

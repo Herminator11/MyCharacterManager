@@ -56,6 +56,8 @@ export type LiveState = {
   deathSaveFailures: number;
   inspiration: boolean;
   hitDice: LiveHitDice[];
+  /** CON-Modifikator — geht in jeden ausgegebenen Trefferwürfel ein. */
+  conModifier: number;
   pools: LivePool[];
   resources: LiveResource[];
   /** Keys der aktiven Conditions. */
@@ -80,6 +82,12 @@ export type LiveMutation =
   | { type: "death.set"; successes: number; failures: number }
   | { type: "inspiration.set"; value: boolean }
   | { type: "hitdice.set"; classId: number; used: number }
+  /**
+   * Trefferwürfel ausgeben und dafür heilen. `roll` ist das, was der Spieler
+   * tatsächlich gewürfelt hat — die App würfelt bewusst nicht selbst; der
+   * CON-Modifikator kommt serverseitig dazu.
+   */
+  | { type: "hitdice.spend"; classId: number; roll: number }
   | { type: "slot.set"; poolId: number; level: number; used: number }
   | { type: "resource.set"; resourceId: number; current: number }
   | { type: "condition.set"; key: string; active: boolean }

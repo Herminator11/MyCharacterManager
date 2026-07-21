@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 
 import { Dashboard } from "@/components/play/Dashboard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { AbilityColumn } from "@/components/sheet/AbilityColumn";
-import { Panel, SectionLabel } from "@/components/ui";
+import { AbilityPanel } from "@/components/sheet/AbilityPanel";
 import { CLASSES } from "@/lib/rules/classes";
 import {
   getLiveState,
@@ -11,6 +10,7 @@ import {
   listConditions,
 } from "@/lib/server/characters";
 
+import { saveAbilityScoresAction } from "./sheet/actions";
 import { uploadPortraitAction } from "./portrait-actions";
 
 export const dynamic = "force-dynamic";
@@ -62,25 +62,13 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
             ihres längsten Inhalts — die Fertigkeitsnamen würden die Spalte
             am Handy über den Bildschirmrand hinausdrücken. */}
         <div className="order-2 min-w-0 lg:order-1">
-          <Panel>
-            <SectionLabel
-              right={
-                <span className="text-[0.6875rem] text-faint">
-                  Bearbeiten im Bogen
-                </span>
-              }
-            >
-              Attribute
-            </SectionLabel>
-            {/* Reihenfolge bleibt STR–DEX–CON–INT–WIS–CHA wie auf jedem
-                gedruckten Bogen. CON hat keine Fertigkeiten und wird
-                dadurch von selbst zur kürzesten Zeile. */}
-            <div className="space-y-4">
-              {abilities.map((ability) => (
-                <AbilityColumn key={ability.key} ability={ability} />
-              ))}
-            </div>
-          </Panel>
+          <AbilityPanel
+            abilities={abilities}
+            save={async (scores: Record<string, number>) => {
+              "use server";
+              await saveAbilityScoresAction(characterId, scores);
+            }}
+          />
         </div>
 
         <div className="order-1 min-w-0 lg:order-2">

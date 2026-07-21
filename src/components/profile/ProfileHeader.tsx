@@ -1,3 +1,4 @@
+import { CombatStats } from "@/components/profile/CombatStats";
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
@@ -8,10 +9,10 @@ import type { SheetView } from "@/lib/server/characters";
 /**
  * Der Kopf der Charakterseite: wer das ist und was dauerhaft für ihn gilt.
  *
- * Bewusst ohne AC, Initiative, Speed und Passive Perception — die stehen
- * schon in der klebenden Leiste darüber und sind von dort aus auf jedem
- * Reiter erreichbar. Hier stehen stattdessen die Werte, die man beim
- * Nachschlagen braucht, nicht beim Kämpfen.
+ * Rechts stehen die drei Werte, die im Kampf laut genannt werden — AC,
+ * Initiative, Speed — als eigene Instrumente. Die klebende Leiste darüber
+ * zeigt dieselben Zahlen noch einmal klein; das ist keine Dopplung, sondern
+ * Arbeitsteilung: hier liest man sie, dort behält man sie beim Scrollen.
  */
 export function ProfileHeader({
   sheet,
@@ -29,7 +30,7 @@ export function ProfileHeader({
   ].filter(Boolean);
 
   return (
-    <Panel className="flex gap-4">
+    <Panel className="flex flex-wrap items-start gap-4">
       <PortraitUpload
         characterId={character.id}
         name={character.name}
@@ -80,6 +81,12 @@ export function ProfileHeader({
           ) : null}
         </dl>
       </div>
+
+      <CombatStats
+        armorClass={sheet.armorClass}
+        initiative={formatModifier(sheet.initiative)}
+        speed={character.speed}
+      />
     </Panel>
   );
 }

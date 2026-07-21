@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { Button, cx, Panel, SectionLabel } from "@/components/ui";
-import type { LiveState } from "@/lib/live-types";
+import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
+import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { useLiveState } from "@/lib/useLiveState";
 
 import { HpBlock } from "./HpBlock";
@@ -85,44 +85,13 @@ export function Dashboard({
         <SectionLabel>Hit Dice &amp; Inspiration</SectionLabel>
         <div className="divide-y divide-edge">
           {state.hitDice.map((entry) => (
-            <div key={entry.classId} className="flex items-center gap-3 py-2">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">
-                  {classLabels[entry.classKey] ?? entry.classKey}
-                </p>
-                <p className="text-xs text-faint">d{entry.hitDie}</p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  className="w-11 px-0"
-                  disabled={entry.used >= entry.total}
-                  onClick={() =>
-                    send({ type: "hitdice.set", classId: entry.classId, used: entry.used + 1 })
-                  }
-                  aria-label={`Hit Die ${entry.classKey} ausgeben`}
-                >
-                  −
-                </Button>
-                <span className="w-14 text-center text-sm">
-                  <span className={entry.total - entry.used > 0 ? "font-semibold" : "text-faint"}>
-                    {entry.total - entry.used}
-                  </span>
-                  <span className="text-faint">/{entry.total}</span>
-                </span>
-                <Button
-                  size="sm"
-                  className="w-11 px-0"
-                  disabled={entry.used <= 0}
-                  onClick={() =>
-                    send({ type: "hitdice.set", classId: entry.classId, used: entry.used - 1 })
-                  }
-                  aria-label={`Hit Die ${entry.classKey} zurückgeben`}
-                >
-                  +
-                </Button>
-              </div>
-            </div>
+            <HitDiceRow
+              key={entry.classId}
+              entry={entry}
+              label={classLabels[entry.classKey] ?? entry.classKey}
+              conModifier={state.conModifier}
+              send={send}
+            />
           ))}
 
           <div className="flex items-center gap-3 py-2">
@@ -157,6 +126,119 @@ export function Dashboard({
           Keine Live-Verbindung — Änderungen werden gespeichert, andere Geräte
           sehen sie aber erst nach dem Neuladen.
         </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Ein Trefferwürfel-Vorrat, mit dem Weg von der kurzen Rast zurück zu HP.
+ *
+ * Die App würfelt nicht — das war von Anfang an so entschieden, und es ist
+ * am Tisch auch die richtige Reihenfolge: erst rollt der echte Würfel über
+ * den Tisch, dann trägt man ein, was oben liegt. Der CON-Modifikator kommt
+ * automatisch dazu, weil genau der beim Kopfrechnen untergeht.
+ */
+function HitDiceRow({
+  entry,
+  label,
+  conModifier,
+  send,
+}: {
+  entry: LiveState["hitDice"][number];
+  label: string;
+  conModifier: number;
+  send: (mutation: LiveMutation) => void;
+}) {
+  const [roll, setRoll] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const free = entry.total - entry.used;
+  const value = Number(roll);
+  const valid = Number.isFinite(value) && value >= 1 && value <= entry.hitDie;
+  const healed = valid ? Math.max(0, value + conModifier) : null;
+
+  const commit = () => {
+    if (!valid) return;
+    send({ type: "hitdice.spend", classId: entry.classId, roll: value });
+    setRoll("");
+    setOpen(false);
+  };
+
+  return (
+    <div className="py-2">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{label}</p>
+          <p className="text-xs text-faint">d{entry.hitDie}</p>
+        </div>
+
+        <span className="text-sm">
+          <Ratio
+            current={free}
+            total={entry.total}
+            className={free > 0 ? "font-semibold" : "text-faint"}
+          />
+        </span>
+
+        <Button
+          size="sm"
+          disabled={free <= 0}
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+        >
+          Ausgeben
+        </Button>
+
+        {entry.used > 0 ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="w-9 px-0"
+            onClick={() =>
+              send({
+                type: "hitdice.set",
+                classId: entry.classId,
+                used: entry.used - 1,
+              })
+            }
+            aria-label={`Trefferwürfel ${label} zurückgeben`}
+          >
+            ↩
+          </Button>
+        ) : null}
+      </div>
+
+      {open ? (
+        <div className="mt-2 flex items-center gap-2 rounded-md border border-edge bg-ink px-3 py-2">
+          <label className="flex items-center gap-2 text-sm text-mute">
+            <span className="whitespace-nowrap">d{entry.hitDie} gewürfelt</span>
+            <input
+              autoFocus
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={entry.hitDie}
+              value={roll}
+              onChange={(event) => setRoll(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") commit();
+                if (event.key === "Escape") setOpen(false);
+              }}
+              className="min-h-11 w-16 rounded-md border border-edge bg-panel px-2 text-center font-semibold tabular-nums focus:border-patina focus:outline-none"
+            />
+          </label>
+
+          <span className="min-w-0 flex-1 truncate text-xs text-faint">
+            {healed !== null
+              ? `${value} ${conModifier < 0 ? "−" : "+"} ${Math.abs(conModifier)} CON = ${healed} HP`
+              : `1 bis ${entry.hitDie}`}
+          </span>
+
+          <Button size="sm" variant="heal" disabled={!valid} onClick={commit}>
+            Heilen
+          </Button>
+        </div>
       ) : null}
     </div>
   );
@@ -323,6 +405,12 @@ function RestControls({
             <>Es gibt nichts zurückzusetzen.</>
           )}
         </p>
+        {pending === "short" ? (
+          <p className="mt-1.5 text-xs text-faint">
+            Trefferpunkte bleiben, wo sie sind — die holst du dir über
+            Trefferwürfel zurück, so viele du willst.
+          </p>
+        ) : null}
         <div className="mt-3 grid grid-cols-2 gap-2">
           <Button onClick={() => setPending(null)}>Abbrechen</Button>
           <Button

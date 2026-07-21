@@ -39,8 +39,34 @@ export function SectionLabel({
   );
 }
 
+/**
+ * Verbraucht von Vorrat — Zauberplätze, Ressourcen, Trefferwürfel.
+ *
+ * Der Schrägstrich bekommt Luft nach beiden Seiten und bleibt matt: er
+ * trennt zwei Zahlen, er ist keine. Ohne diesen Abstand verschmelzen
+ * "2/2" und "5/5" aus Armlänge zu einem einzigen Zeichenklumpen.
+ */
+export function Ratio({
+  current,
+  total,
+  className,
+}: {
+  current: ReactNode;
+  total: ReactNode;
+  /** Farbe des vorderen Werts — der hintere bleibt immer zurückgenommen. */
+  className?: string;
+}) {
+  return (
+    <span className="tabular-nums whitespace-nowrap">
+      <span className={className}>{current}</span>
+      <span className="mx-[0.2em] text-faint">/</span>
+      <span className="text-faint">{total}</span>
+    </span>
+  );
+}
+
 type ButtonProps = ComponentProps<"button"> & {
-  variant?: "solid" | "outline" | "ghost" | "danger";
+  variant?: "solid" | "outline" | "ghost" | "danger" | "heal";
   size?: "sm" | "md" | "lg";
 };
 
@@ -51,6 +77,9 @@ const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   ghost: "text-mute hover:text-fg",
   danger:
     "border border-ember-dim bg-ember-deep text-ember hover:border-ember",
+  // Spiegelbild zu danger: gleiche Form, gegenteilige Farbe. Schaden und
+  // Heilung stehen nebeneinander und müssen ohne Lesen unterscheidbar sein.
+  heal: "border border-patina-dim bg-patina-deep text-patina hover:border-patina",
 };
 
 const SIZES: Record<NonNullable<ButtonProps["size"]>, string> = {

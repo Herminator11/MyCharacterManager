@@ -43,6 +43,22 @@ export function predict(state: LiveState, mutation: LiveMutation): LiveState {
         ),
       };
 
+    case "hitdice.spend": {
+      const entry = state.hitDice.find((h) => h.classId === mutation.classId);
+      if (!entry || entry.used >= entry.total) return state;
+
+      const healed = Math.max(0, Math.round(mutation.roll) + state.conModifier);
+      return withHp(
+        {
+          ...state,
+          hitDice: state.hitDice.map((h) =>
+            h.classId === mutation.classId ? { ...h, used: h.used + 1 } : h,
+          ),
+        },
+        applyHpDelta(state, state.hpMax, healed),
+      );
+    }
+
     case "slot.set":
       return mapSlot(state, mutation.poolId, mutation.level, (slot) => ({
         ...slot,

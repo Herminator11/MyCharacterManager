@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, cx } from "@/components/ui";
+import { Button, cx, Ratio } from "@/components/ui";
 import type { LiveResource } from "@/lib/live-types";
 
 const RECOVERY_LABEL: Record<string, string> = {
@@ -63,15 +63,14 @@ export function ResourceRow({
           >
             −
           </Button>
-          <span className="w-14 text-center text-sm">
-            <span
+          <span className="w-16 text-center text-sm">
+            <Ratio
+              current={resource.current}
+              total={resource.max}
               className={
                 resource.current > 0 ? "font-semibold text-brass" : "text-faint"
               }
-            >
-              {resource.current}
-            </span>
-            <span className="text-faint">/{resource.max}</span>
+            />
           </span>
           <Button
             size="sm"

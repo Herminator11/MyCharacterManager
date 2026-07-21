@@ -1,6 +1,6 @@
 "use client";
 
-import { cx } from "@/components/ui";
+import { cx, Ratio } from "@/components/ui";
 
 /**
  * Die Zauberplätze eines Grades als Reihe von Sockeln.
@@ -57,9 +57,12 @@ export function SlotRail({
         })}
       </div>
 
-      <span className="ml-auto shrink-0 text-sm tracking-tight text-faint">
-        <span className={free > 0 ? "text-fg" : "text-ember"}>{free}</span>
-        <span className="text-faint">/{total}</span>
+      <span className="ml-auto shrink-0 text-sm">
+        <Ratio
+          current={free}
+          total={total}
+          className={free > 0 ? "font-semibold text-fg" : "text-ember"}
+        />
       </span>
     </div>
   );

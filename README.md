@@ -72,6 +72,16 @@ dem Bogen, sondern rechnet sie aus Klasse und Level. Zaubernamen werden mit
 dem SRD-Katalog abgeglichen; was dort fehlt (Hex etwa steht nur im PHB),
 wird als eigener Eintrag angelegt statt verworfen.
 
+### Nur ein Wert geändert? Dann kein neuer Bogen
+
+Für eine reine Attributsverbesserung lohnt der Umweg über Aurora nicht.
+Auf der Charakterseite steht über den Attributen **Werte ändern** — sechs
+Felder, speichern, fertig. Rettungswürfe, Fertigkeiten, Zauber-DC und das
+HP-Maximum rechnen sich mit.
+
+Der volle Re-Import bleibt für alles, was mehr als Zahlen verschiebt: neue
+Klassenstufen, neue Zauber, neue Angriffe.
+
 ### Levelaufstieg: denselben Charakter aktualisieren
 
 Nach einem Levelaufstieg exportierst du in Aurora neu und lädst den Bogen
@@ -139,6 +149,17 @@ sondern ein kombinierter Caster-Level in einer gemeinsamen Tabelle — und
 Warlock ist davon ausgenommen. Ein einzelner Halbcaster benutzt dagegen
 weiter seine eigene Tabelle. `src/lib/rules/multiclass.test.ts` hält beide
 Fälle fest.
+
+### Was die App nicht tut
+
+Sie würfelt nicht. Auf einer kurzen Rast gibst du Trefferwürfel aus, indem
+du eintippst, was der echte Würfel zeigt; den CON-Modifikator zählt die App
+dazu und schreibt die HP hoch. Der Würfel ist auch dann weg, wenn ein
+niedriger Wurf nichts einbringt — so steht es in den Regeln.
+
+Conditions sind Merkzettel, keine Mechanik: ein aktives *Poisoned* färbt
+den Chip und zeigt den Regeltext, verändert aber keinen Wurf. Die App weiß
+nicht, gegen wen du gerade angreifst, und rät deshalb nicht.
 
 Klassenressourcen (Rage, Ki, Sorcery Points, …) kommen aus derselben Quelle
 und werden über `src/lib/rules/resourceTemplates.ts` auf konfigurierbare

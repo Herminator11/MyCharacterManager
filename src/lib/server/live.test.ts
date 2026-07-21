@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "@/db";
-import { characterClasses, spellPoolSlots } from "@/db/schema";
+import { characterClasses, characters, spellPoolSlots } from "@/db/schema";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { getClass } from "@/lib/rules/classes";
 
@@ -308,6 +308,77 @@ describe("Rast", () => {
     const state = send({ type: "rest.long" });
     expect(state.hitDice.find((h) => h.classKey === "sorcerer")!.used).toBe(3); // 5 − 2
     expect(state.hitDice.find((h) => h.classKey === "warlock")!.used).toBe(2); // 3 − 1
+  });
+});
+
+describe("Trefferwürfel ausgeben", () => {
+  const sorcererDie = () =>
+    live().hitDice.find((h) => h.classKey === "sorcerer")!;
+
+  it("heilt um Wurf plus CON-Modifikator und verbraucht einen Würfel", () => {
+    const start = send({ type: "hp.delta", amount: -20 });
+    const entry = sorcererDie();
+
+    const state = send({
+      type: "hitdice.spend",
+      classId: entry.classId,
+      roll: 5,
+    });
+
+    expect(state.hpCurrent).toBe(start.hpCurrent + 5 + state.conModifier);
+    expect(state.hitDice.find((h) => h.classId === entry.classId)!.used).toBe(
+      entry.used + 1,
+    );
+  });
+
+  it("heilt nie über das Maximum hinaus", () => {
+    send({ type: "hp.delta", amount: -1 });
+    const state = send({
+      type: "hitdice.spend",
+      classId: sorcererDie().classId,
+      roll: 6,
+    });
+
+    expect(state.hpCurrent).toBe(state.hpMax);
+  });
+
+  it("tut nichts, wenn keine Würfel mehr übrig sind", () => {
+    const entry = sorcererDie();
+    send({ type: "hitdice.set", classId: entry.classId, used: entry.total });
+    const before = send({ type: "hp.delta", amount: -10 });
+
+    const state = send({
+      type: "hitdice.spend",
+      classId: entry.classId,
+      roll: 6,
+    });
+
+    expect(state.hpCurrent).toBe(before.hpCurrent);
+    expect(state.hitDice.find((h) => h.classId === entry.classId)!.used).toBe(
+      entry.total,
+    );
+  });
+
+  it("verbraucht den Würfel auch dann, wenn der Wurf nichts einbringt", () => {
+    // Negativer CON-Modifikator kann einen niedrigen Wurf auf null drücken.
+    // Der Würfel ist trotzdem weg — sonst würfelte man risikolos nach.
+    db.update(characters).set({ con: 6 }).where(eq(characters.id, id)).run();
+    refreshDerived(id);
+
+    const entry = sorcererDie();
+    const before = send({ type: "hp.delta", amount: -15 });
+
+    const state = send({
+      type: "hitdice.spend",
+      classId: entry.classId,
+      roll: 1,
+    });
+
+    expect(state.conModifier).toBe(-2);
+    expect(state.hpCurrent).toBe(before.hpCurrent);
+    expect(state.hitDice.find((h) => h.classId === entry.classId)!.used).toBe(
+      entry.used + 1,
+    );
   });
 });
 
