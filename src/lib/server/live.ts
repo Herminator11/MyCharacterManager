@@ -14,6 +14,7 @@ import {
   type Recovery,
 } from "@/db/schema";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
+import { isSlotCost, type ActionSlot } from "@/lib/rules/actions";
 import {
   applyHpDelta,
   setHp,
@@ -120,6 +121,34 @@ function apply(characterId: number, mutation: LiveMutation) {
       return;
     }
 
+    case "turn.set":
+      spendSlot(characterId, mutation.slot, mutation.used);
+      return;
+
+    case "turn.move": {
+      const live = getLiveState(characterId);
+      if (!live) return;
+      db.update(characters)
+        // Über die eigene Bewegungsrate hinaus geht nichts — Dashen zählt
+        // als Aktion und verdoppelt sie, das trägt man dort ein.
+        .set({ movementUsed: clamp(mutation.used, 0, live.turn.speed) })
+        .where(eq(characters.id, characterId))
+        .run();
+      return;
+    }
+
+    case "turn.end":
+      db.update(characters)
+        .set({
+          actionUsed: false,
+          bonusActionUsed: false,
+          reactionUsed: false,
+          movementUsed: 0,
+        })
+        .where(eq(characters.id, characterId))
+        .run();
+      return;
+
     case "slot.set":
       setSlotUsed(characterId, mutation.poolId, mutation.level, mutation.used);
       return;
@@ -213,6 +242,12 @@ function apply(characterId: number, mutation: LiveMutation) {
           mutation.level,
         );
       }
+
+      // Erst nachdem der Slot sicher gebucht ist: sonst stünde die Aktion
+      // als verbraucht da, obwohl der Zauber nie zustande kam.
+      if (isSlotCost(mutation.cost)) {
+        spendSlot(characterId, mutation.cost, true);
+      }
       return;
     }
 
@@ -250,6 +285,19 @@ function changeHp(
         ? { deathSaveSuccesses: 0, deathSaveFailures: 0 }
         : {}),
     })
+    .where(eq(characters.id, characterId))
+    .run();
+}
+
+const SLOT_COLUMN = {
+  action: "actionUsed",
+  bonus: "bonusActionUsed",
+  reaction: "reactionUsed",
+} as const;
+
+function spendSlot(characterId: number, slot: ActionSlot, used: boolean) {
+  db.update(characters)
+    .set({ [SLOT_COLUMN[slot]]: used })
     .where(eq(characters.id, characterId))
     .run();
 }
@@ -321,6 +369,18 @@ function rest(characterId: number, kind: "short" | "long") {
   // Eine lange Rast bringt auch alles zurück, was schon eine kurze erneuert.
   const recoveries: Recovery[] =
     kind === "short" ? ["short"] : ["short", "long"];
+
+  // Wer rastet, kämpft nicht mehr. Ein verbraucht stehengebliebener Zug
+  // wäre in der nächsten Begegnung eine stille Falle.
+  db.update(characters)
+    .set({
+      actionUsed: false,
+      bonusActionUsed: false,
+      reactionUsed: false,
+      movementUsed: 0,
+    })
+    .where(eq(characters.id, characterId))
+    .run();
 
   const pools = db
     .select()

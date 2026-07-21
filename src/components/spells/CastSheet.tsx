@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Button, cx } from "@/components/ui";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
+import { ACTION_LABELS, isSlotCost, parseActionCost } from "@/lib/rules/actions";
 
 export type CastableSpell = {
   id: number;
@@ -82,6 +83,7 @@ export function CastSheet({
       spellId: spell.id,
       spellName: spell.name,
       concentration: spell.concentration,
+      cost: parseActionCost(spell.castingTime),
     });
     onClose();
   };
@@ -129,6 +131,18 @@ export function CastSheet({
             <Detail label="Dauer" value={spell.duration} />
             <Detail label="Komponenten" value={spell.components} />
           </dl>
+
+          {(() => {
+            // Der Zug ist keine Sperre — vielleicht hast du Action Surge
+            // oder der DM erlaubt es. Aber gesagt haben will man es.
+            const cost = parseActionCost(spell.castingTime);
+            if (!isSlotCost(cost) || !state.turn[cost]) return null;
+            return (
+              <p className="mt-4 rounded-md border border-ember-dim bg-ember-deep/50 px-3 py-2.5 text-sm text-ember">
+                Deine {ACTION_LABELS[cost]} ist in diesem Zug schon verbraucht.
+              </p>
+            );
+          })()}
 
           {spell.concentration && state.concentration ? (
             <p className="mt-4 rounded-md border border-brass/50 bg-brass/10 px-3 py-2.5 text-sm text-brass">

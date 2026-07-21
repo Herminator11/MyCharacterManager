@@ -252,6 +252,13 @@ export function getLiveState(characterId: number): LiveState | null {
     deathSaveFailures: character.deathSaveFailures,
     inspiration: character.inspiration,
     conModifier: abilityModifier(character.con),
+    turn: {
+      action: character.actionUsed,
+      bonus: character.bonusActionUsed,
+      reaction: character.reactionUsed,
+      movementUsed: character.movementUsed,
+      speed: character.speed,
+    },
     hitDice: classes.map((c) => ({
       classId: c.id,
       classKey: c.classKey,

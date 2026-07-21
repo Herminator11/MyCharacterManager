@@ -9,6 +9,7 @@ import { useLiveState } from "@/lib/useLiveState";
 import { HpBlock } from "./HpBlock";
 import { ResourceRow } from "./ResourceRow";
 import { SlotRail } from "./SlotRail";
+import { TurnBar } from "./TurnBar";
 
 export type ConditionOption = { key: string; name: string; description: string };
 
@@ -27,6 +28,8 @@ export function Dashboard({
   return (
     <div className="space-y-3">
       <ConcentrationBanner state={state} onClear={() => send({ type: "concentration.clear" })} />
+
+      <TurnBar state={state} send={send} />
 
       <HpBlock state={state} send={send} />
 

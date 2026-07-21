@@ -4,6 +4,12 @@ import { useMemo, useState } from "react";
 
 import { Button, cx, EmptyState, Panel } from "@/components/ui";
 import type { LiveState } from "@/lib/live-types";
+import {
+  ACTION_COSTS,
+  ACTION_LABELS,
+  parseActionCost,
+  type ActionCost,
+} from "@/lib/rules/actions";
 import { useLiveState } from "@/lib/useLiveState";
 
 import { CastSheet, type CastableSpell } from "./CastSheet";
@@ -19,6 +25,7 @@ type Filter = {
   level: number | "all";
   school: string | "all";
   preparedOnly: boolean;
+  cost: ActionCost | "all";
 };
 
 export function SpellList({
@@ -39,6 +46,7 @@ export function SpellList({
     level: "all",
     school: "all",
     preparedOnly: false,
+    cost: "all",
   });
 
   const schools = useMemo(
@@ -52,7 +60,20 @@ export function SpellList({
     [spells],
   );
 
+  // Nur die Wirkzeiten anbieten, die dieser Charakter überhaupt hat —
+  // ein leerer Filter ist schlimmer als kein Filter.
+  const costs = useMemo(() => {
+    const present = new Set(spells.map((s) => parseActionCost(s.castingTime)));
+    return ACTION_COSTS.filter((cost) => present.has(cost));
+  }, [spells]);
+
   const visible = spells.filter((spell) => {
+    if (
+      filter.cost !== "all" &&
+      parseActionCost(spell.castingTime) !== filter.cost
+    ) {
+      return false;
+    }
     if (filter.level !== "all" && spell.level !== filter.level) return false;
     if (filter.school !== "all" && spell.school !== filter.school) return false;
     if (filter.preparedOnly && !(spell.prepared || spell.alwaysPrepared)) {
@@ -136,6 +157,27 @@ export function SpellList({
               onClick={() => setFilter((f) => ({ ...f, level }))}
             >
               {level === 0 ? "Cantrips" : level}
+            </FilterChip>
+          ))}
+        </div>
+
+        {/* Die Frage mitten im Kampf lautet nicht "welchen Grad?", sondern
+            "was geht als Bonusaktion noch?". Die Wirkzeit steht in jedem
+            SRD-Eintrag — der Filter fällt daraus ab. */}
+        <div className="flex flex-wrap gap-1.5">
+          <FilterChip
+            active={filter.cost === "all"}
+            onClick={() => setFilter((f) => ({ ...f, cost: "all" }))}
+          >
+            Jede Wirkzeit
+          </FilterChip>
+          {costs.map((cost) => (
+            <FilterChip
+              key={cost}
+              active={filter.cost === cost}
+              onClick={() => setFilter((f) => ({ ...f, cost }))}
+            >
+              {ACTION_LABELS[cost]}
             </FilterChip>
           ))}
         </div>

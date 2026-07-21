@@ -1,4 +1,5 @@
 import type { Recovery } from "@/db/schema";
+import type { ActionCost, ActionSlot } from "@/lib/rules/actions";
 
 /**
  * Der Teil des Charakters, der sich mitten im Kampf ständig ändert.
@@ -41,6 +42,16 @@ export type LiveResource = {
   note: string;
 };
 
+/** Die vier Konten eines Zuges. `movementUsed` in Fuß. */
+export type LiveTurn = {
+  action: boolean;
+  bonus: boolean;
+  reaction: boolean;
+  movementUsed: number;
+  /** Bewegungsrate aus dem Bogen — der Nenner der Anzeige. */
+  speed: number;
+};
+
 export type LiveConcentration = {
   spellId: number | null;
   label: string;
@@ -58,6 +69,7 @@ export type LiveState = {
   hitDice: LiveHitDice[];
   /** CON-Modifikator — geht in jeden ausgegebenen Trefferwürfel ein. */
   conModifier: number;
+  turn: LiveTurn;
   pools: LivePool[];
   resources: LiveResource[];
   /** Keys der aktiven Conditions. */
@@ -88,6 +100,9 @@ export type LiveMutation =
    * CON-Modifikator kommt serverseitig dazu.
    */
   | { type: "hitdice.spend"; classId: number; roll: number }
+  | { type: "turn.set"; slot: ActionSlot; used: boolean }
+  | { type: "turn.move"; used: number }
+  | { type: "turn.end" }
   | { type: "slot.set"; poolId: number; level: number; used: number }
   | { type: "resource.set"; resourceId: number; current: number }
   | { type: "condition.set"; key: string; active: boolean }
@@ -106,6 +121,12 @@ export type LiveMutation =
       spellId: number | null;
       spellName: string;
       concentration: boolean;
+      /**
+       * Was das Wirken im Zug kostet, aus der Wirkzeit abgeleitet. Der Slot
+       * hakt sich dadurch beim Wirken von selbst ab — sonst müsste man
+       * jeden Zauber zweimal buchen und würde es beim zweiten Mal vergessen.
+       */
+      cost: ActionCost;
     }
   | { type: "rest.short" }
   | { type: "rest.long" };

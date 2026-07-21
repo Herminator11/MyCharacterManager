@@ -29,6 +29,13 @@
       "when": 1784649984284,
       "tag": "0003_split_imported_spell_source",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784666802384,
+      "tag": "0004_abandoned_hydra",
+      "breakpoints": true
     }
   ]
 }

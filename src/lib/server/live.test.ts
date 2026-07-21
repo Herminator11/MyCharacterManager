@@ -153,6 +153,7 @@ describe("Zauber wirken", () => {
       spellId: null,
       spellName: "Misty Step",
       concentration: false,
+      cost: "action",
     });
 
     expect(slot(state, "Zauberplätze", 2).used).toBe(before + 1);
@@ -169,6 +170,7 @@ describe("Zauber wirken", () => {
       spellId: null,
       spellName: "Eldritch Blast",
       concentration: false,
+      cost: "action",
     });
     expect(state.pools).toEqual(before);
   });
@@ -185,6 +187,7 @@ describe("Zauber wirken", () => {
         spellId: null,
         spellName: "Hold Person",
         concentration: false,
+        cost: "action",
       });
 
     for (let i = 0; i < total; i++) cast();
@@ -204,6 +207,7 @@ describe("Zauber wirken", () => {
       spellId: null,
       spellName: "Banishment",
       concentration: true,
+      cost: "action",
     });
     expect(state.concentration).toBeNull();
   });
@@ -218,6 +222,7 @@ describe("Zauber wirken", () => {
       spellId: null,
       spellName: "Shield of Faith",
       concentration: true,
+      cost: "action",
     });
     expect(first.concentration?.label).toBe("Shield of Faith");
 
@@ -228,6 +233,7 @@ describe("Zauber wirken", () => {
       spellId: null,
       spellName: "Hold Person",
       concentration: true,
+      cost: "action",
     });
     expect(second.concentration?.label).toBe("Hold Person");
     expect(second.concentration?.castAtLevel).toBe(2);
@@ -241,6 +247,7 @@ describe("Zauber wirken", () => {
       spellId: null,
       spellName: "Hold Person",
       concentration: true,
+      cost: "action",
     });
     expect(state.concentration?.castAtLevel).toBe(3);
     expect(slot(state, "Zauberplätze", 3).used).toBe(1);
@@ -296,6 +303,7 @@ describe("Rast", () => {
       spellId: null,
       spellName: "Bless",
       concentration: true,
+      cost: "action",
     });
     expect(send({ type: "rest.long" }).concentration).toBeNull();
   });
@@ -308,6 +316,97 @@ describe("Rast", () => {
     const state = send({ type: "rest.long" });
     expect(state.hitDice.find((h) => h.classKey === "sorcerer")!.used).toBe(3); // 5 − 2
     expect(state.hitDice.find((h) => h.classKey === "warlock")!.used).toBe(2); // 3 − 1
+  });
+});
+
+describe("Zug", () => {
+  it("startet mit allen vier Konten frei", () => {
+    expect(live().turn).toMatchObject({
+      action: false,
+      bonus: false,
+      reaction: false,
+      movementUsed: 0,
+    });
+    expect(live().turn.speed).toBeGreaterThan(0);
+  });
+
+  it("verbraucht und gibt einzelne Konten zurück", () => {
+    expect(send({ type: "turn.set", slot: "bonus", used: true }).turn.bonus).toBe(
+      true,
+    );
+    expect(live().turn.action).toBe(false);
+    expect(
+      send({ type: "turn.set", slot: "bonus", used: false }).turn.bonus,
+    ).toBe(false);
+  });
+
+  it("begrenzt die Bewegung auf die eigene Bewegungsrate", () => {
+    const state = send({ type: "turn.move", used: 9999 });
+    expect(state.turn.movementUsed).toBe(state.turn.speed);
+  });
+
+  it("setzt bei „Zug beenden“ alles zurück", () => {
+    send({ type: "turn.set", slot: "action", used: true });
+    send({ type: "turn.set", slot: "reaction", used: true });
+    send({ type: "turn.move", used: 15 });
+
+    expect(send({ type: "turn.end" }).turn).toMatchObject({
+      action: false,
+      reaction: false,
+      movementUsed: 0,
+    });
+  });
+
+  it("hakt beim Wirken den passenden Slot ab", () => {
+    const state = send({
+      type: "cast",
+      poolId: poolByName(live(), "Zauberplätze").id,
+      level: 2,
+      spellId: null,
+      spellName: "Misty Step",
+      concentration: false,
+      cost: "bonus",
+    });
+
+    expect(state.turn.bonus).toBe(true);
+    expect(state.turn.action).toBe(false);
+  });
+
+  it("verbraucht nichts, wenn der Cast am fehlenden Slot scheitert", () => {
+    // Sonst stünde die Aktion als weg da, obwohl nie gezaubert wurde.
+    const state = send({
+      type: "cast",
+      poolId: poolByName(live(), "Zauberplätze").id,
+      level: 4,
+      spellId: null,
+      spellName: "Banishment",
+      concentration: false,
+      cost: "action",
+    });
+
+    expect(state.turn.action).toBe(false);
+  });
+
+  it("belastet bei langer Wirkzeit kein Konto", () => {
+    const state = send({
+      type: "cast",
+      poolId: poolByName(live(), "Zauberplätze").id,
+      level: 1,
+      spellId: null,
+      spellName: "Ritual",
+      concentration: false,
+      cost: "long",
+    });
+
+    expect(state.turn).toMatchObject({ action: false, bonus: false });
+  });
+
+  it("räumt den Zug bei jeder Rast ab", () => {
+    send({ type: "turn.set", slot: "action", used: true });
+    expect(send({ type: "rest.short" }).turn.action).toBe(false);
+
+    send({ type: "turn.set", slot: "reaction", used: true });
+    expect(send({ type: "rest.long" }).turn.reaction).toBe(false);
   });
 });
 

@@ -33,6 +33,9 @@ export type ConfigSource = "auto" | "manual";
  */
 export type SpellSource = "srd" | "custom" | "imported";
 
+/** Wozu ein Notizeintrag da ist — siehe Kommentar an der Spalte `kind`. */
+export type NoteKind = "page" | "log" | "pin";
+
 export const ABILITIES = ["str", "dex", "con", "int", "wis", "cha"] as const;
 export type Ability = (typeof ABILITIES)[number];
 
@@ -71,6 +74,24 @@ export const characters = sqliteTable("characters", {
   inspiration: integer("inspiration", { mode: "boolean" })
     .notNull()
     .default(false),
+
+  /**
+   * Aktionsökonomie des laufenden Zuges.
+   *
+   * Die App zählt mit, sie entscheidet nicht: sie weiß nicht, was am Tisch
+   * gerade passiert. "Zug beenden" setzt alle vier zurück.
+   */
+  actionUsed: integer("action_used", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  bonusActionUsed: integer("bonus_action_used", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  reactionUsed: integer("reaction_used", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  /** Schon gegangene Fuß im laufenden Zug. */
+  movementUsed: integer("movement_used").notNull().default(0),
 
   // Abgeleitete Werte — null bedeutet "automatisch berechnen"
   hpMaxOverride: integer("hp_max_override"),
@@ -351,6 +372,16 @@ export const inventoryItems = sqliteTable(
     /** Wert pro Stück in Kupfer, damit die Summe ganzzahlig bleibt. */
     valueCp: integer("value_cp").notNull().default(0),
     equipped: integer("equipped", { mode: "boolean" }).notNull().default(false),
+    /**
+     * Eingestimmt. Getrennt von `equipped`, weil beides unabhängig ist: man
+     * kann einen Umhang tragen, ohne auf ihn eingestimmt zu sein. Drei
+     * gleichzeitig sind das Limit — die App zählt, sperrt aber nicht.
+     */
+    attuned: integer("attuned", { mode: "boolean" }).notNull().default(false),
+    /** Braucht der Gegenstand überhaupt Einstimmung? Sonst kein Häkchen. */
+    requiresAttunement: integer("requires_attunement", { mode: "boolean" })
+      .notNull()
+      .default(false),
     description: text("description").notNull().default(""),
     sortOrder: integer("sort_order").notNull().default(0),
   },
@@ -412,6 +443,15 @@ export const notes = sqliteTable(
       .references(() => characters.id, { onDelete: "cascade" }),
     title: text("title").notNull().default("Neue Notiz"),
     body: text("body").notNull().default(""),
+    /**
+     * Wozu der Eintrag da ist — drei Dinge mit sehr verschiedenem Lebenslauf:
+     *
+     * `page` — ausformulierte Seite, wird überarbeitet.
+     * `log`  — was passiert ist. Chronologisch, wächst an, darf ins Archiv.
+     * `pin`  — was gerade gilt: Fluch, Pakt, Segen. Muss sichtbar sein,
+     *          nicht auffindbar, und steht deshalb auf der Charakterseite.
+     */
+    kind: text("kind").$type<NoteKind>().notNull().default("page"),
     createdAt: integer("created_at").notNull().default(now),
     updatedAt: integer("updated_at").notNull().default(now),
   },
