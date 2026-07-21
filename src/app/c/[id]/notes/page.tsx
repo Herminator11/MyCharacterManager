@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 
 import { Button, Field, inputClass, Panel, SectionLabel } from "@/components/ui";
-import { getCharacter, getNotes } from "@/lib/server/characters";
+import {
+  getCharacter,
+  getLogEntries,
+  getNotes,
+} from "@/lib/server/characters";
 
 import {
   addNoteAction,
@@ -15,6 +19,15 @@ export const dynamic = "force-dynamic";
 const textareaClass =
   "w-full rounded-md border border-edge bg-ink px-3 py-2.5 text-fg " +
   "placeholder:text-faint focus:border-patina focus:outline-none";
+
+/** Im Logbuch steht das volle Datum — hier liest man Monate später nach. */
+function formatStamp(unixSeconds: number): string {
+  return new Date(unixSeconds * 1000).toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
+}
 
 const TRAITS = [
   {
@@ -35,6 +48,7 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
   if (!character) notFound();
 
   const pages = getNotes(characterId);
+  const log = getLogEntries(characterId);
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
@@ -75,6 +89,57 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
           Hintergrund speichern
         </Button>
       </form>
+
+      {/* Das Logbuch zuerst: es wächst mit jeder Sitzung und ist das, was
+          man tatsächlich nachliest. Die Seiten darunter schreibt man
+          seltener und liest sie noch seltener. */}
+      <div className="pt-2">
+        <SectionLabel
+          right={
+            log.length > 0 ? (
+              <span className="text-xs text-faint">
+                {log.length} {log.length === 1 ? "Eintrag" : "Einträge"}
+              </span>
+            ) : null
+          }
+        >
+          Logbuch
+        </SectionLabel>
+
+        {log.length === 0 ? (
+          <p className="text-sm text-faint">
+            Noch nichts festgehalten. Auf der Charakterseite steht dafür ein
+            Feld — ein Satz, Eingabetaste, fertig.
+          </p>
+        ) : (
+          <Panel className="space-y-2.5">
+            {log.map((entry) => (
+              <div key={entry.id} className="flex gap-3">
+                <time className="w-24 shrink-0 text-xs text-faint tabular-nums">
+                  {formatStamp(entry.createdAt)}
+                </time>
+                <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
+                  {entry.body}
+                </p>
+                <form
+                  action={async () => {
+                    "use server";
+                    await removeNoteAction(characterId, entry.id);
+                  }}
+                >
+                  <button
+                    type="submit"
+                    aria-label="Eintrag löschen"
+                    className="px-1 text-faint transition-colors hover:text-ember"
+                  >
+                    ✕
+                  </button>
+                </form>
+              </div>
+            ))}
+          </Panel>
+        )}
+      </div>
 
       <div className="pt-2">
         <SectionLabel

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { asc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db, sqlite } from "@/db";
 import {
@@ -435,11 +435,44 @@ export function getInventory(characterId: number) {
     .all();
 }
 
+/** Die ausformulierten Seiten — das, was man überarbeitet. */
 export function getNotes(characterId: number) {
   return db
     .select()
     .from(notes)
-    .where(eq(notes.characterId, characterId))
+    .where(and(eq(notes.characterId, characterId), eq(notes.kind, "page")))
     .orderBy(asc(notes.updatedAt))
+    .all();
+}
+
+/**
+ * Das Logbuch: was passiert ist, neueste zuerst.
+ *
+ * Getrennt von den Seiten, weil es einen anderen Lebenslauf hat — ein
+ * Eintrag wird hingeworfen und nie wieder angefasst, eine Seite wächst.
+ */
+export function getLogEntries(characterId: number, limit?: number) {
+  const query = db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.characterId, characterId), eq(notes.kind, "log")))
+    .orderBy(desc(notes.createdAt), desc(notes.id));
+
+  return limit ? query.limit(limit).all() : query.all();
+}
+
+/**
+ * Was gerade gilt: Fluch, Pakt, Segen, die Vergiftung über drei Tage.
+ *
+ * Das sind keine 5e-Conditions — die haben Regeltext und einen Katalog.
+ * Diese hier stehen in keinem Buch, und sie müssen sichtbar sein statt
+ * auffindbar. Deshalb landen sie auf der Charakterseite, nicht im Archiv.
+ */
+export function getPins(characterId: number) {
+  return db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.characterId, characterId), eq(notes.kind, "pin")))
+    .orderBy(asc(notes.createdAt), asc(notes.id))
     .all();
 }

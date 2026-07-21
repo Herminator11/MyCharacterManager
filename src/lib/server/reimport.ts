@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db, sqlite } from "@/db";
 import {
@@ -310,7 +310,9 @@ function addNewNotes(characterId: number, draft: ImportedCharacter) {
     db
       .select({ title: notes.title })
       .from(notes)
-      .where(eq(notes.characterId, characterId))
+      // Nur Seiten vergleichen: Logbuch und Vermerke haben eigene Titel-
+      // konventionen und dürfen einen Import nie blockieren.
+      .where(and(eq(notes.characterId, characterId), eq(notes.kind, "page")))
       .all()
       .map((row) => row.title.toLowerCase()),
   );
