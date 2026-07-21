@@ -1,0 +1,1 @@
+ALTER TABLE `characters` ADD `portrait_file` text DEFAULT '' NOT NULL;

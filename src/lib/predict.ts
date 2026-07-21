@@ -1,0 +1,204 @@
+import type { LiveMutation, LiveState } from "./live-types";
+import { applyHpDelta, setHp } from "./rules/hp";
+
+/**
+ * Sagt vorher, wie der Live-Zustand nach einer Aktion aussehen wird.
+ *
+ * Läuft im Browser, damit ein Tipper sofort sichtbar wird, statt erst nach
+ * der Serverantwort. Der Server bleibt die Wahrheit — seine Antwort ersetzt
+ * die Vorhersage wenige Millisekunden später. Die Vorhersage darf also
+ * daneben liegen, ohne dass Daten kaputtgehen; sie soll nur nicht flackern.
+ *
+ * Die kniffligen Regeln (temporäre HP, Death Saves) teilt sie sich mit dem
+ * Server über `rules/hp`.
+ */
+export function predict(state: LiveState, mutation: LiveMutation): LiveState {
+  switch (mutation.type) {
+    case "hp.delta":
+      return withHp(state, applyHpDelta(state, state.hpMax, mutation.amount));
+
+    case "hp.set":
+      return withHp(state, setHp(state, state.hpMax, mutation.value));
+
+    case "hp.temp":
+      return { ...state, hpTemp: Math.max(0, Math.round(mutation.value)) };
+
+    case "death.set":
+      return {
+        ...state,
+        deathSaveSuccesses: clamp(mutation.successes, 0, 3),
+        deathSaveFailures: clamp(mutation.failures, 0, 3),
+      };
+
+    case "inspiration.set":
+      return { ...state, inspiration: mutation.value };
+
+    case "hitdice.set":
+      return {
+        ...state,
+        hitDice: state.hitDice.map((entry) =>
+          entry.classId === mutation.classId
+            ? { ...entry, used: clamp(mutation.used, 0, entry.total) }
+            : entry,
+        ),
+      };
+
+    case "slot.set":
+      return mapSlot(state, mutation.poolId, mutation.level, (slot) => ({
+        ...slot,
+        used: clamp(mutation.used, 0, slot.total),
+      }));
+
+    case "resource.set":
+      return {
+        ...state,
+        resources: state.resources.map((resource) =>
+          resource.id === mutation.resourceId
+            ? {
+                ...resource,
+                current: clamp(mutation.current, 0, resource.max),
+              }
+            : resource,
+        ),
+      };
+
+    case "condition.set":
+      return {
+        ...state,
+        conditions: mutation.active
+          ? Array.from(new Set([...state.conditions, mutation.key]))
+          : state.conditions.filter((key) => key !== mutation.key),
+      };
+
+    case "concentration.set":
+      return {
+        ...state,
+        concentration: {
+          spellId: mutation.spellId,
+          label: mutation.label,
+          castAtLevel: mutation.castAtLevel,
+        },
+      };
+
+    case "concentration.clear":
+      return { ...state, concentration: null };
+
+    case "cast": {
+      let next = state;
+
+      if (mutation.poolId !== null && mutation.level > 0) {
+        const slot = findSlot(state, mutation.poolId, mutation.level);
+        // Kein freier Slot: der Server lehnt ab, also auch hier nichts tun.
+        if (!slot || slot.used >= slot.total) return state;
+
+        next = mapSlot(next, mutation.poolId, mutation.level, (s) => ({
+          ...s,
+          used: s.used + 1,
+        }));
+      }
+
+      if (mutation.concentration) {
+        next = {
+          ...next,
+          concentration: {
+            spellId: mutation.spellId,
+            label: mutation.spellName,
+            castAtLevel: mutation.level,
+          },
+        };
+      }
+
+      return next;
+    }
+
+    case "rest.short":
+      return rest(state, "short");
+
+    case "rest.long":
+      return rest(state, "long");
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Hilfsfunktionen
+ * ------------------------------------------------------------------ */
+
+function withHp(
+  state: LiveState,
+  change: { hpCurrent: number; hpTemp: number; clearDeathSaves: boolean },
+): LiveState {
+  return {
+    ...state,
+    hpCurrent: change.hpCurrent,
+    hpTemp: change.hpTemp,
+    ...(change.clearDeathSaves
+      ? { deathSaveSuccesses: 0, deathSaveFailures: 0 }
+      : {}),
+  };
+}
+
+function findSlot(state: LiveState, poolId: number, level: number) {
+  return state.pools
+    .find((pool) => pool.id === poolId)
+    ?.slots.find((slot) => slot.level === level);
+}
+
+function mapSlot(
+  state: LiveState,
+  poolId: number,
+  level: number,
+  update: (slot: LiveState["pools"][number]["slots"][number]) => LiveState["pools"][number]["slots"][number],
+): LiveState {
+  return {
+    ...state,
+    pools: state.pools.map((pool) =>
+      pool.id === poolId
+        ? {
+            ...pool,
+            slots: pool.slots.map((slot) =>
+              slot.level === level ? update(slot) : slot,
+            ),
+          }
+        : pool,
+    ),
+  };
+}
+
+/** Spiegelt `rest()` aus dem Server-Modul. */
+function rest(state: LiveState, kind: "short" | "long"): LiveState {
+  const recovers = (recovery: string) =>
+    kind === "long" ? recovery === "short" || recovery === "long" : recovery === "short";
+
+  const next: LiveState = {
+    ...state,
+    pools: state.pools.map((pool) =>
+      recovers(pool.recovery)
+        ? { ...pool, slots: pool.slots.map((slot) => ({ ...slot, used: 0 })) }
+        : pool,
+    ),
+    resources: state.resources.map((resource) =>
+      recovers(resource.recovery)
+        ? { ...resource, current: resource.max }
+        : resource,
+    ),
+  };
+
+  if (kind === "short") return next;
+
+  return {
+    ...next,
+    hpCurrent: next.hpMax,
+    hpTemp: 0,
+    deathSaveSuccesses: 0,
+    deathSaveFailures: 0,
+    concentration: null,
+    hitDice: next.hitDice.map((entry) => ({
+      ...entry,
+      used: Math.max(0, entry.used - Math.max(1, Math.floor(entry.total / 2))),
+    })),
+  };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(Math.round(value), min), max);
+}

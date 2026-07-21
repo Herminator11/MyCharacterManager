@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Drei Zauberplatz-Sockel: zwei frei, einer verbraucht. Dasselbe
+       Bildzeichen wie im Dashboard, damit das Icon die App benennt. -->
+  <rect width="512" height="512" rx="112" fill="#0e1113"/>
+  <rect x="96"  y="176" width="104" height="104" rx="16" fill="#4fb8a0"/>
+  <rect x="216" y="176" width="104" height="104" rx="16" fill="#4fb8a0"/>
+  <rect x="336" y="176" width="104" height="104" rx="16" fill="#080b0d"/>
+  <rect x="96"  y="312" width="344" height="24" rx="12" fill="#262d33"/>
+</svg>

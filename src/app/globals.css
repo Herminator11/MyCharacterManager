@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/* ==================================================================
+ * Design-Tokens — "Instrumententafel"
+ *
+ * Die App wird einhändig am Spieltisch bei schlechtem Licht bedient.
+ * Deshalb: matte, kühle Graphit-Flächen, genau ein ruhiger Signalton
+ * (Patina) für "verfügbar", ein warmer (Ember) für HP und Gefahr.
+ * ================================================================== */
+
+@theme {
+  --color-ink: #0e1113;
+  --color-panel: #171b1f;
+  --color-panel-2: #1e242a;
+  --color-edge: #262d33;
+  --color-edge-bright: #38424a;
+
+  --color-patina: #4fb8a0;
+  --color-patina-dim: #2f6d5f;
+  --color-patina-deep: #14312b;
+
+  --color-ember: #e2603f;
+  --color-ember-dim: #8a3826;
+  --color-ember-deep: #34160f;
+
+  --color-brass: #c9a227;
+
+  --color-fg: #e6ecef;
+  --color-mute: #8b99a3;
+  --color-faint: #5c6970;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --radius-socket: 3px;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-ink);
+  /* Kein Bounce-Scroll am Handy — verrutscht sonst mitten im Kampf. */
+  overscroll-behavior-y: none;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  /* Zahlen sind hier der Inhalt. Tabellenziffern verhindern, dass die
+     HP-Anzeige springt, wenn sie von 39 auf 8 wechselt. */
+  font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Zahlenfelder: Spinner weg, die trifft man am Handy nur versehentlich. */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================================================================
+ * Utilities
+ * ================================================================== */
+
+@utility label {
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+
+/* Sichtbarer Fokus, der auf dunklem Grund auch wirklich auffällt. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-patina);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* ==================================================================
+ * Signature: die Slot-Rail
+ *
+ * Ein Zauberplatz ist ein Sockel, kein Häkchen. Gefüllt = plastisch
+ * herausstehend, verbraucht = versenktes dunkles Loch. Der Unterschied
+ * muss quer über den Tisch lesbar sein, nicht nur aus 30 cm.
+ * ================================================================== */
+
+.socket {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-socket);
+  transition:
+    background-color 120ms ease-out,
+    box-shadow 120ms ease-out,
+    transform 80ms ease-out;
+}
+
+.socket-full {
+  background: var(--color-patina);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 -2px 3px rgb(0 0 0 / 0.3),
+    0 0 10px -2px var(--color-patina);
+}
+
+.socket-spent {
+  background: #0a0d0f;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 0.9),
+    inset 0 -1px 0 rgb(255 255 255 / 0.05);
+}
+
+.socket-ember.socket-full {
+  background: var(--color-ember);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -2px 3px rgb(0 0 0 / 0.3),
+    0 0 10px -2px var(--color-ember);
+}
+
+.socket-brass.socket-full {
+  background: var(--color-brass);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 -2px 3px rgb(0 0 0 / 0.3),
+    0 0 10px -2px var(--color-brass);
+}
+
+button.socket:active {
+  transform: scale(0.88);
+}
+
+/* Runde Sockel für Death Saves — bewusst andere Form als Zauberplätze,
+   damit man die beiden im Eifer des Gefechts nie verwechselt. */
+.socket-round {
+  border-radius: 9999px;
+}

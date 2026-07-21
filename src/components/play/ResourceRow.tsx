@@ -1,0 +1,89 @@
+"use client";
+
+import { Button, cx } from "@/components/ui";
+import type { LiveResource } from "@/lib/live-types";
+
+const RECOVERY_LABEL: Record<string, string> = {
+  short: "kurze Rast",
+  long: "lange Rast",
+  none: "nicht automatisch",
+};
+
+/**
+ * Eine Klassenressource.
+ *
+ * Wenige Ladungen werden zu antippbaren Sockeln, viele zu einem Zähler mit
+ * Plus/Minus — 15 Ki-Punkte als Sockelreihe wären am Handy unbedienbar.
+ */
+export function ResourceRow({
+  resource,
+  onChange,
+}: {
+  resource: LiveResource;
+  onChange: (current: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 py-2">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{resource.name}</p>
+        <p className="truncate text-xs text-faint">
+          {resource.note ? `${resource.note} · ` : ""}
+          {RECOVERY_LABEL[resource.recovery] ?? resource.recovery}
+        </p>
+      </div>
+
+      {resource.display === "pips" && resource.max <= 8 ? (
+        <div className="flex gap-1.5">
+          {Array.from({ length: resource.max }, (_, index) => {
+            const filled = index < resource.current;
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() =>
+                  onChange(filled ? resource.current - 1 : index + 1)
+                }
+                aria-label={`${resource.name} ${index + 1}`}
+                className={cx(
+                  "socket socket-brass",
+                  filled ? "socket-full" : "socket-spent",
+                )}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            className="w-11 px-0"
+            onClick={() => onChange(resource.current - 1)}
+            disabled={resource.current <= 0}
+            aria-label={`${resource.name} verringern`}
+          >
+            −
+          </Button>
+          <span className="w-14 text-center text-sm">
+            <span
+              className={
+                resource.current > 0 ? "font-semibold text-brass" : "text-faint"
+              }
+            >
+              {resource.current}
+            </span>
+            <span className="text-faint">/{resource.max}</span>
+          </span>
+          <Button
+            size="sm"
+            className="w-11 px-0"
+            onClick={() => onChange(resource.current + 1)}
+            disabled={resource.current >= resource.max}
+            aria-label={`${resource.name} erhöhen`}
+          >
+            +
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
