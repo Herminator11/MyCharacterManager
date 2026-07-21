@@ -14,7 +14,7 @@ import {
   formatModifier,
 } from "@/lib/rules/derive";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
-import { getAttacks, getSheet } from "@/lib/server/characters";
+import { getAttacks, getInventory, getSheet } from "@/lib/server/characters";
 
 import { addAttackAction, removeAttackAction } from "./actions";
 
@@ -28,6 +28,8 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
   if (!sheet) notFound();
 
   const list = getAttacks(characterId);
+  const equipped = getInventory(characterId).filter((item) => item.equipped);
+  const attuned = equipped.filter((item) => item.attuned).length;
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
@@ -120,6 +122,50 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
           </ul>
         </Panel>
       )}
+
+      {/*
+        Was du trägst und was es bewirkt — hier, nicht nur im Gepäck.
+        Aufgeschriebenes nützt nichts, wenn es einen Reiter entfernt liegt,
+        während der Kampf läuft.
+      */}
+      {equipped.length > 0 ? (
+        <Panel>
+          <SectionLabel
+            right={
+              attuned > 0 ? (
+                <span className="text-xs text-brass">
+                  {attuned} eingestimmt
+                </span>
+              ) : null
+            }
+          >
+            Angelegt
+          </SectionLabel>
+
+          <ul className="divide-y divide-edge">
+            {equipped.map((item) => (
+              <li key={item.id} className="py-2">
+                <p className="text-sm font-medium">
+                  {item.name}
+                  {item.qty > 1 ? (
+                    <span className="text-faint"> ×{item.qty}</span>
+                  ) : null}
+                  {item.attuned ? (
+                    <span className="ml-2 text-xs font-normal text-brass">
+                      eingestimmt
+                    </span>
+                  ) : null}
+                </p>
+                {item.description ? (
+                  <p className="mt-0.5 text-sm whitespace-pre-line text-mute">
+                    {item.description}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
 
       <Panel>
         <SectionLabel>Angriff hinzufügen</SectionLabel>

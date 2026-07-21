@@ -150,6 +150,25 @@ Warlock ist davon ausgenommen. Ein einzelner Halbcaster benutzt dagegen
 weiter seine eigene Tabelle. `src/lib/rules/multiclass.test.ts` hält beide
 Fälle fest.
 
+### Am Tisch
+
+**Der Zug.** Ganz oben stehen Aktion, Bonusaktion, Reaktion und Bewegung.
+Antippen verbraucht, „Zug beenden“ setzt zurück. Wirkst du einen Zauber,
+hakt sich der passende Slot selbst ab — die Wirkzeit steht im Zauber. In
+der Zauberliste filterst du danach: *was geht als Bonusaktion noch?*
+
+**Festhalten.** Ein Feld auf der Charakterseite, Eingabetaste, fertig. Das
+Datum kommt von selbst, das volle Logbuch steht unter Notizen.
+
+**Aktuell gilt für dich.** Fluch, Pakt, Segen — alles, was über die Sitzung
+hinaus wirkt und in keinem Regelbuch steht. Es bleibt oben sichtbar, bis du
+es beendest; dann wandert es ins Logbuch statt gelöscht zu werden.
+
+**Gepäck.** Getrennt nach *am Körper* und *im Rucksack*. Was du angelegt
+hast, erscheint mit seinem Wirkungstext auch unter Angriffen — dort, wo du
+im Kampf hinschaust. Gegenstände mit Einstimmung bekommen einen Zähler
+(drei sind das Limit; die App zählt, sperrt aber nicht).
+
 ### Was die App nicht tut
 
 Sie würfelt nicht. Auf einer kurzen Rast gibst du Trefferwürfel aus, indem

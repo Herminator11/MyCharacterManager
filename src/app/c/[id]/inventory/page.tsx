@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
+import { ItemList } from "@/components/inventory/ItemList";
 import {
   Button,
-  cx,
   EmptyState,
   Field,
   inputClass,
@@ -15,8 +15,10 @@ import { getCharacter, getInventory } from "@/lib/server/characters";
 import {
   addItemAction,
   removeItemAction,
+  saveItemDescriptionAction,
   savePurseAction,
   setItemQtyAction,
+  toggleAttunedAction,
   toggleEquippedAction,
 } from "./actions";
 
@@ -38,7 +40,6 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
   if (!character) notFound();
 
   const items = getInventory(characterId);
-  const carried = items.reduce((sum, item) => sum + item.weight * item.qty, 0);
   const purseGold = copperToGold(totalCopper(character));
 
   return (
@@ -90,110 +91,31 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
           Trag unten ein, was du mit dir herumschleppst.
         </EmptyState>
       ) : (
-        <Panel>
-          <SectionLabel
-            right={
-              <span className="text-xs text-mute">
-                {carried.toLocaleString("de-DE", {
-                  maximumFractionDigits: 1,
-                })}{" "}
-                lb
-              </span>
-            }
-          >
-            Gepäck
-          </SectionLabel>
-
-          <ul className="divide-y divide-edge">
-            {items.map((item) => (
-              <li key={item.id} className="py-2">
-                <div className="flex items-center gap-2">
-                  <form
-                    action={async () => {
-                      "use server";
-                      await toggleEquippedAction(
-                        characterId,
-                        item.id,
-                        !item.equipped,
-                      );
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      aria-pressed={item.equipped}
-                      aria-label={`${item.name} anlegen`}
-                      title={item.equipped ? "Angelegt" : "Nicht angelegt"}
-                      className={cx(
-                        "size-3 shrink-0 rounded-full border transition-colors",
-                        item.equipped
-                          ? "border-patina bg-patina"
-                          : "border-edge-bright",
-                      )}
-                    />
-                  </form>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{item.name}</p>
-                    <p className="truncate text-xs text-faint">
-                      {[
-                        item.weight > 0 ? `${item.weight} lb` : "",
-                        item.valueCp > 0
-                          ? `${copperToGold(item.valueCp)} gp`
-                          : "",
-                        item.description,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ") || "—"}
-                    </p>
-                  </div>
-
-                  <form
-                    action={async (formData: FormData) => {
-                      "use server";
-                      await setItemQtyAction(
-                        characterId,
-                        item.id,
-                        Number(formData.get("qty")),
-                      );
-                    }}
-                    className="shrink-0"
-                  >
-                    <input
-                      name="qty"
-                      type="number"
-                      min={0}
-                      defaultValue={item.qty}
-                      aria-label={`Menge ${item.name}`}
-                      className="min-h-11 w-16 rounded-md border border-edge bg-ink px-1 text-center focus:border-patina focus:outline-none"
-                    />
-                    <button type="submit" className="sr-only">
-                      Menge speichern
-                    </button>
-                  </form>
-
-                  <form
-                    action={async () => {
-                      "use server";
-                      await removeItemAction(characterId, item.id);
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      aria-label={`${item.name} entfernen`}
-                      className="min-h-11 px-1 text-faint transition-colors hover:text-ember"
-                    >
-                      ✕
-                    </button>
-                  </form>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-2 text-xs text-faint">
-            Menge auf 0 setzen entfernt den Eintrag. Der Punkt links schaltet
-            „angelegt“ um.
-          </p>
-        </Panel>
+        <ItemList
+          items={items}
+          actions={{
+            toggleEquipped: async (itemId: number, equipped: boolean) => {
+              "use server";
+              await toggleEquippedAction(characterId, itemId, equipped);
+            },
+            toggleAttuned: async (itemId: number, attuned: boolean) => {
+              "use server";
+              await toggleAttunedAction(characterId, itemId, attuned);
+            },
+            saveDescription: async (itemId: number, description: string) => {
+              "use server";
+              await saveItemDescriptionAction(characterId, itemId, description);
+            },
+            setQty: async (itemId: number, qty: number) => {
+              "use server";
+              await setItemQtyAction(characterId, itemId, qty);
+            },
+            remove: async (itemId: number) => {
+              "use server";
+              await removeItemAction(characterId, itemId);
+            },
+          }}
+        />
       )}
 
       <Panel>
@@ -250,22 +172,36 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
             </Field>
           </div>
 
-          <Field label="Beschreibung">
-            <input
+          <Field
+            label="Wirkung"
+            hint="Auch Hausregeln und Abwandlungen gehören hierher — später jederzeit änderbar."
+          >
+            <textarea
               name="description"
+              rows={2}
               placeholder="Optional"
-              className={inputClass}
+              className="w-full rounded-md border border-edge bg-ink px-3 py-2.5 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
             />
           </Field>
 
-          <label className="flex items-center gap-2 text-sm text-mute">
-            <input
-              type="checkbox"
-              name="equipped"
-              className="size-4 accent-[var(--color-patina)]"
-            />
-            Angelegt
-          </label>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <label className="flex items-center gap-2 text-sm text-mute">
+              <input
+                type="checkbox"
+                name="equipped"
+                className="size-4 accent-[var(--color-patina)]"
+              />
+              Angelegt
+            </label>
+            <label className="flex items-center gap-2 text-sm text-mute">
+              <input
+                type="checkbox"
+                name="requiresAttunement"
+                className="size-4 accent-[var(--color-brass)]"
+              />
+              Braucht Einstimmung
+            </label>
+          </div>
 
           <Button type="submit" variant="solid" className="w-full">
             Hinzufügen

@@ -6,6 +6,15 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { characters, inventoryItems } from "@/db/schema";
 
+/**
+ * Gepäck und Kampfseite zusammen auffrischen: was du anlegst, steht auch
+ * unter „Angriffe“, damit die Wirkung dort sichtbar ist, wo sie zählt.
+ */
+function refresh(characterId: number) {
+  revalidatePath(`/c/${characterId}/inventory`);
+  revalidatePath(`/c/${characterId}/combat`);
+}
+
 export async function addItemAction(characterId: number, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) throw new Error("Der Gegenstand braucht einen Namen.");
@@ -19,12 +28,13 @@ export async function addItemAction(characterId: number, formData: FormData) {
       // Eingabe in Gold, gespeichert in Kupfer — hält Summen ganzzahlig.
       valueCp: Math.round(Math.max(0, Number(formData.get("valueGp") ?? 0)) * 100),
       equipped: formData.get("equipped") === "on",
+      requiresAttunement: formData.get("requiresAttunement") === "on",
       description: String(formData.get("description") ?? "").trim(),
       sortOrder: Date.now(),
     })
     .run();
 
-  revalidatePath(`/c/${characterId}/inventory`);
+  refresh(characterId);
 }
 
 export async function setItemQtyAction(
@@ -40,7 +50,7 @@ export async function setItemQtyAction(
       .where(eq(inventoryItems.id, itemId))
       .run();
   }
-  revalidatePath(`/c/${characterId}/inventory`);
+  refresh(characterId);
 }
 
 export async function toggleEquippedAction(
@@ -52,12 +62,44 @@ export async function toggleEquippedAction(
     .set({ equipped })
     .where(eq(inventoryItems.id, itemId))
     .run();
-  revalidatePath(`/c/${characterId}/inventory`);
+  refresh(characterId);
+}
+
+/**
+ * Einstimmung umschalten.
+ *
+ * Drei gleichzeitig sind das Limit — die App zeigt den Stand an, sperrt
+ * aber nicht: es gibt Klassenmerkmale, die mehr erlauben, und ein DM, der
+ * eine Ausnahme macht, hat immer recht.
+ */
+export async function toggleAttunedAction(
+  characterId: number,
+  itemId: number,
+  attuned: boolean,
+) {
+  db.update(inventoryItems)
+    .set({ attuned })
+    .where(eq(inventoryItems.id, itemId))
+    .run();
+  refresh(characterId);
+}
+
+/** Wirkungstext ändern — für Homebrew und angepasste Standardgegenstände. */
+export async function saveItemDescriptionAction(
+  characterId: number,
+  itemId: number,
+  description: string,
+) {
+  db.update(inventoryItems)
+    .set({ description: description.trim() })
+    .where(eq(inventoryItems.id, itemId))
+    .run();
+  refresh(characterId);
 }
 
 export async function removeItemAction(characterId: number, itemId: number) {
   db.delete(inventoryItems).where(eq(inventoryItems.id, itemId)).run();
-  revalidatePath(`/c/${characterId}/inventory`);
+  refresh(characterId);
 }
 
 export async function savePurseAction(characterId: number, formData: FormData) {
