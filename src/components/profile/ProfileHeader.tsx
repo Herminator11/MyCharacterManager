@@ -102,6 +102,13 @@ export function ProfileHeader({
         </dl>
       </div>
 
+      {/* Neben dem Namen statt in der Ecke: Inspiration ist kein
+          Kampfwert wie AC oder Speed, den man nachschlägt, sondern ein
+          Zustand, an den man sich erinnern lassen muss — ein eigener Platz
+          in der Kopfzeile tut das, ohne mit den Instrumenten rechts zu
+          verschmelzen. */}
+      <InspirationToggle className="self-center" />
+
       {/* Anker für die klebende Leiste: solange dieser Block sichtbar
           ist, hält sie ihre Zahlen zurück. */}
       <div id={PROFILE_ANCHOR_ID} className="flex shrink-0 gap-2">
@@ -112,13 +119,11 @@ export function ProfileHeader({
         />
       </div>
 
-      {/* Zwei Ecken statt einer Reihe: Inspiration oben, Vermerk unten,
-          beide unauffällig am rechten Rand. Weder das eine noch das andere
-          ist ein Kampfwert wie AC oder Speed — sie sollen da sein, ohne mit
-          den Instrumenten um Aufmerksamkeit zu konkurrieren. Das `pr-14`
-          oben am Panel hält diese Ecke frei, damit die Instrumentenreihe
-          nicht darunter verschwindet. */}
-      <InspirationToggle className="absolute top-3 right-3" />
+      {/* Der Vermerk hat die Ecke jetzt für sich allein: eine Randnotiz,
+          kein Kampfwert wie AC oder Speed — sie soll da sein, ohne mit den
+          Instrumenten um Aufmerksamkeit zu konkurrieren. Das `pr-14` oben
+          am Panel hält die Ecke frei, damit die Instrumentenreihe nicht
+          darunter verschwindet. */}
       <PinButton count={pinCount} add={addPin} />
     </Panel>
   );

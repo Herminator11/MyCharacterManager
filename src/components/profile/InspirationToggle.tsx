@@ -10,11 +10,10 @@ import { useLive } from "@/lib/live-context";
  * Stern markiert auf der Startseite Favoriten, der Blitz steht neben der
  * Initiative. Drei ähnliche Zacken nebeneinander wären zum Verwechseln.
  *
- * Steht oben rechts in der Ecke des Profilkopfs statt in der
- * Instrumentenreihe, aus demselben Grund wie der Vermerk unten rechts:
+ * Steht neben dem Namen statt in der Instrumentenreihe rechts:
  * Inspiration ist kein Kampfwert wie AC oder Speed, den man nachschlägt —
- * es ist ein Zustand, an den man sich erinnern lassen muss. Eine eigene
- * Ecke tut das, ohne um Aufmerksamkeit mit den Instrumenten zu
+ * es ist ein Zustand, an den man sich erinnern lassen muss. Ein eigener
+ * Platz tut das, ohne um Aufmerksamkeit mit den Instrumenten zu
  * konkurrieren, die man am Tisch tatsächlich vorliest.
  */
 export function InspirationToggle({ className }: { className?: string }) {

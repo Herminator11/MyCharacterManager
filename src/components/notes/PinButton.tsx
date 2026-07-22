@@ -6,12 +6,12 @@ import { NoteIcon } from "@/components/icons";
 import { Button, cx, inputClass } from "@/components/ui";
 
 /**
- * „Aktuell gilt für dich" — anlegen, wo man es anlegen will: unten in der Ecke.
+ * „Aktuell gilt für dich" — anlegen, wo man es anlegen will: oben in der Ecke.
  *
  * Ein Vermerk ist eine Randnotiz, kein Kampfwert wie AC oder Speed — er
  * stand früher als gleichrangige Kachel neben ihnen und konkurrierte damit
  * um Aufmerksamkeit, die er nicht braucht. Jetzt sitzt er klein und
- * unauffällig unten rechts im Profilkopf: da, wo die Hand hinfindet, wenn
+ * unauffällig oben rechts im Profilkopf: da, wo die Hand hinfindet, wenn
  * der Gedanke da ist, ohne dass er beim schnellen Blick auf die Werte
  * mitgezählt wird.
  *
@@ -49,7 +49,7 @@ export function PinButton({
   }, [open]);
 
   return (
-    <div ref={box} className="absolute right-3 bottom-3">
+    <div ref={box} className="absolute top-3 right-3">
       <button
         type="button"
         onClick={() => setOpen(!open)}
