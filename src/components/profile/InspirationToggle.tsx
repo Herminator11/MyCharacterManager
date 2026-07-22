@@ -10,11 +10,14 @@ import { useLive } from "@/lib/live-context";
  * Stern markiert auf der Startseite Favoriten, der Blitz steht neben der
  * Initiative. Drei ähnliche Zacken nebeneinander wären zum Verwechseln.
  *
- * Steht oben beim Charakter statt unten im Kampfblock, weil man
- * Inspiration nicht sucht, sondern sich an sie erinnern lassen muss —
- * genau deshalb verfällt sie am Tisch so oft ungenutzt.
+ * Steht oben rechts in der Ecke des Profilkopfs statt in der
+ * Instrumentenreihe, aus demselben Grund wie der Vermerk unten rechts:
+ * Inspiration ist kein Kampfwert wie AC oder Speed, den man nachschlägt —
+ * es ist ein Zustand, an den man sich erinnern lassen muss. Eine eigene
+ * Ecke tut das, ohne um Aufmerksamkeit mit den Instrumenten zu
+ * konkurrieren, die man am Tisch tatsächlich vorliest.
  */
-export function InspirationToggle() {
+export function InspirationToggle({ className }: { className?: string }) {
   const { state, send } = useLive();
   const on = state.inspiration;
 
@@ -27,23 +30,15 @@ export function InspirationToggle() {
         on ? "Inspiration ausgeben" : "Inspiration erhalten"
       }
       title={on ? "Inspiration vorhanden — antippen zum Ausgeben" : "Keine Inspiration"}
-      className="flex w-[4.5rem] shrink-0 flex-col items-center"
+      className={cx(
+        "flex size-7 items-center justify-center rounded-full border transition-colors",
+        on
+          ? "border-brass/60 bg-brass/10 text-brass"
+          : "border-edge/0 text-faint hover:border-edge-bright hover:text-mute",
+        className,
+      )}
     >
-      <span
-        className={cx(
-          "flex h-[3.75rem] w-full items-center justify-center rounded-lg border transition-colors",
-          on
-            ? "border-brass bg-brass/10 text-brass"
-            : "border-edge bg-panel-2 text-faint hover:border-edge-bright hover:text-mute",
-        )}
-      >
-        <FlameIcon lit={on} />
-      </span>
-      <span
-        className={cx("label mt-1 text-[0.5625rem]", on && "text-brass")}
-      >
-        Inspiration
-      </span>
+      <FlameIcon lit={on} />
     </button>
   );
 }
@@ -55,7 +50,7 @@ export function InspirationToggle() {
  */
 function FlameIcon({ lit }: { lit: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden className="size-6">
+    <svg viewBox="0 0 24 24" aria-hidden className="size-4">
       <path
         d="M12 2.5c3.4 3 5.5 5.6 5.5 8.9a5.5 5.5 0 1 1-11 0c0-1.7.7-3.2 1.9-4.6.3 1 .9 1.8 1.7 2.2.5-2.6.9-4.6 1.9-6.5z"
         fill={lit ? "var(--color-brass)" : "none"}

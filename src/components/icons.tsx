@@ -132,11 +132,16 @@ export function BurstIcon({ className }: IconProps) {
   );
 }
 
-/** Heilung. Das Plus ist so eindeutig, dass jede Verzierung schadet. */
+/**
+ * Heilung. Ein massives Plus statt eines dünnen Kreuzstrichs — dasselbe
+ * Zeichen wie auf dem Sanitätskasten, gefüllt statt umrissen, damit es
+ * neben dem ebenso gefüllten `BurstIcon` für Schaden nicht schwächer
+ * wirkt als sein Gegenstück.
+ */
 export function PlusIcon({ className }: IconProps) {
   return (
-    <Icon className={className} strokeWidth={2.4}>
-      <path d="M12 5v14M5 12h14" />
+    <Icon className={className} fill="currentColor" strokeWidth={0}>
+      <path d="M9 4h6v5h5v6h-5v5H9v-5H4V9h5z" />
     </Icon>
   );
 }

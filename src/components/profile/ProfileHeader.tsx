@@ -44,7 +44,7 @@ export function ProfileHeader({
   ].filter(Boolean);
 
   return (
-    <Panel className="relative flex flex-wrap items-start gap-4">
+    <Panel className="relative flex flex-wrap items-start gap-4 pr-14">
       <Portrait
         characterId={character.id}
         name={character.name}
@@ -110,12 +110,15 @@ export function ProfileHeader({
           initiative={formatModifier(sheet.initiative)}
           speed={character.speed}
         />
-        <InspirationToggle />
       </div>
 
-      {/* Unauffällig in der Ecke statt in der Instrumentenreihe: ein
-          Vermerk ist eine Randnotiz, kein Kampfwert — er soll da sein,
-          ohne mit AC und Speed um Aufmerksamkeit zu konkurrieren. */}
+      {/* Zwei Ecken statt einer Reihe: Inspiration oben, Vermerk unten,
+          beide unauffällig am rechten Rand. Weder das eine noch das andere
+          ist ein Kampfwert wie AC oder Speed — sie sollen da sein, ohne mit
+          den Instrumenten um Aufmerksamkeit zu konkurrieren. Das `pr-14`
+          oben am Panel hält diese Ecke frei, damit die Instrumentenreihe
+          nicht darunter verschwindet. */}
+      <InspirationToggle className="absolute top-3 right-3" />
       <PinButton count={pinCount} add={addPin} />
     </Panel>
   );
