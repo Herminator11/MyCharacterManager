@@ -1,3 +1,4 @@
+import { ClassIcon } from "@/components/icons";
 import { PinButton } from "@/components/notes/PinButton";
 import { PROFILE_ANCHOR_ID } from "@/components/StickyStats";
 import { CombatStats } from "@/components/profile/CombatStats";
@@ -62,15 +63,21 @@ export function ProfileHeader({
           <p className="mt-0.5 truncate text-sm text-patina">
             {/* Subklasse in Klammern hinter dem Level: sie beantwortet die
                 Frage „was für ein Warlock", und die stellt am Tisch jeder
-                zuerst. Fehlt sie, fehlt nur die Klammer. */}
+                zuerst. Fehlt sie, fehlt nur die Klammer. Das Icon davor
+                ist reine Wiedererkennung — der Text bleibt die Quelle der
+                Wahrheit, unbekannte Klassen bekommen einfach keins. */}
             {sheet.classes.length > 0
-              ? sheet.classes
-                  .map(
-                    (c) =>
-                      `${classLabel(c.classKey)} ${c.level}` +
-                      (c.subclass ? ` (${c.subclass})` : ""),
-                  )
-                  .join(" / ")
+              ? sheet.classes.map((c, i) => (
+                  <span key={`${c.classKey}-${i}`}>
+                    {i > 0 ? " / " : ""}
+                    <ClassIcon
+                      classKey={c.classKey}
+                      className="mr-1 inline-block size-3.5 align-text-bottom text-patina/70"
+                    />
+                    {classLabel(c.classKey)} {c.level}
+                    {c.subclass ? ` (${c.subclass})` : ""}
+                  </span>
+                ))
               : "Ohne Klasse"}
           </p>
           {subtitle.length > 0 ? (
