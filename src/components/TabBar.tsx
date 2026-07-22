@@ -10,7 +10,7 @@ import { cx } from "./ui";
  * das Handy einhändig am Spieltisch hält.
  */
 const TABS = [
-  { segment: "", label: "Kampf" },
+  { segment: "", label: "Übersicht" },
   { segment: "spells", label: "Zauber" },
   { segment: "combat", label: "Angriffe" },
   { segment: "inventory", label: "Gepäck" },

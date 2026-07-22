@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
@@ -7,9 +8,7 @@ import { useLive } from "@/lib/live-context";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 
 import { HpBlock } from "./HpBlock";
-import { ResourceRow } from "./ResourceRow";
-import { SlotRail } from "./SlotRail";
-import { TurnBar } from "./TurnBar";
+import { PoolsPanel, ResourcesPanel } from "./panels";
 
 export type ConditionOption = { key: string; name: string; description: string };
 
@@ -29,60 +28,21 @@ export function Dashboard({
     <div className="space-y-3">
       <ConcentrationBanner state={state} onClear={() => send({ type: "concentration.clear" })} />
 
-      <TurnBar state={state} send={send} />
+      {/* Die Zugleiste lebt im Kampfmodus — hier führt nur der Weg hinein.
+          Zwischen den Kämpfen braucht niemand Aktion und Bonusaktion. */}
+      <Link
+        href={`/c/${state.characterId}/battle`}
+        className="flex min-h-14 items-center justify-between gap-4 rounded-lg border border-ember-dim bg-ember-deep/40 px-4 text-ember transition-colors hover:border-ember"
+      >
+        <span className="font-semibold tracking-tight">Roll Initiative…</span>
+        <span aria-hidden>→</span>
+      </Link>
 
       <HpBlock state={state} send={send} />
 
-      {state.pools.length > 0 ? (
-        <Panel>
-          <div className="space-y-5">
-            {state.pools.map((pool) => (
-              <div key={pool.id}>
-                <SectionLabel
-                  right={
-                    <span className="text-[0.6875rem] text-faint">
-                      {pool.recovery === "short" ? "kurze Rast" : "lange Rast"}
-                    </span>
-                  }
-                >
-                  {pool.name}
-                </SectionLabel>
-                <div className="space-y-2">
-                  {pool.slots.map((slot) => (
-                    <SlotRail
-                      key={slot.level}
-                      level={slot.level}
-                      total={slot.total}
-                      used={slot.used}
-                      tone={pool.recovery === "short" ? "ember" : "patina"}
-                      onChange={(used) =>
-                        send({ type: "slot.set", poolId: pool.id, level: slot.level, used })
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      ) : null}
+      <PoolsPanel state={state} send={send} />
 
-      {state.resources.length > 0 ? (
-        <Panel>
-          <SectionLabel>Ressourcen</SectionLabel>
-          <div className="divide-y divide-edge">
-            {state.resources.map((resource) => (
-              <ResourceRow
-                key={resource.id}
-                resource={resource}
-                onChange={(current) =>
-                  send({ type: "resource.set", resourceId: resource.id, current })
-                }
-              />
-            ))}
-          </div>
-        </Panel>
-      ) : null}
+      <ResourcesPanel state={state} send={send} />
 
       {/* Inspiration saß hier früher mit drin. Sie steht jetzt oben im
           Profilkopf — man sucht sie nicht, man muss an sie erinnert
@@ -243,7 +203,7 @@ function HitDiceRow({
  * bekommt sie ein eigenes, auffälliges Band ganz oben — mitsamt der
  * Erinnerung, was bei Schaden zu würfeln ist.
  */
-function ConcentrationBanner({
+export function ConcentrationBanner({
   state,
   onClear,
 }: {

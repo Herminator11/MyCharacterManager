@@ -32,11 +32,13 @@ export function SpellList({
   initial,
   spells,
   onTogglePrepared,
+  onToggleFavorite,
   onRemove,
 }: {
   initial: LiveState;
   spells: SpellEntry[];
   onTogglePrepared: (spellId: number, prepared: boolean) => void;
+  onToggleFavorite: (spellId: number, favorite: boolean) => void;
   onRemove: (spellId: number) => void;
 }) {
   const { state, send } = useLiveState(initial);
@@ -231,6 +233,32 @@ export function SpellList({
             <ul className="divide-y divide-edge">
               {entries.map((spell) => (
                 <li key={spell.id} className="flex items-center gap-2 py-1.5">
+                  {/* Der Stern kürt die Handvoll Zauber, die im Kampfmodus
+                      als eigene Knöpfe bereitliegen. */}
+                  <button
+                    type="button"
+                    onClick={() => onToggleFavorite(spell.id, !spell.favorite)}
+                    aria-pressed={spell.favorite}
+                    aria-label={
+                      spell.favorite
+                        ? `${spell.name} aus den Favoriten nehmen`
+                        : `${spell.name} favorisieren`
+                    }
+                    className="flex min-h-11 w-8 shrink-0 items-center justify-center text-faint transition-colors hover:text-brass"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden className="size-4">
+                      <path
+                        d="M12 3.5 14.6 9l6 .8-4.4 4.2 1.1 6-5.3-2.9L6.7 20l1.1-6L3.4 9.8 9.4 9z"
+                        fill={spell.favorite ? "var(--color-brass)" : "none"}
+                        stroke={
+                          spell.favorite ? "var(--color-brass)" : "currentColor"
+                        }
+                        strokeWidth="1.6"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => setCasting(spell)}

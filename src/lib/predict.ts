@@ -2,12 +2,11 @@ import type { LiveMutation, LiveState } from "./live-types";
 import { isSlotCost } from "./rules/actions";
 import { applyHpDelta, setHp } from "./rules/hp";
 
-/** Ein unverbrauchter Zug — `speed` bleibt, das ist keine Zugvariable. */
+/** Ein unverbrauchter Zug. */
 const FRESH_TURN = {
   action: false,
   bonus: false,
   reaction: false,
-  movementUsed: 0,
 } as const;
 
 /**
@@ -71,17 +70,8 @@ export function predict(state: LiveState, mutation: LiveMutation): LiveState {
     case "turn.set":
       return { ...state, turn: { ...state.turn, [mutation.slot]: mutation.used } };
 
-    case "turn.move":
-      return {
-        ...state,
-        turn: {
-          ...state.turn,
-          movementUsed: clamp(mutation.used, 0, state.turn.speed),
-        },
-      };
-
     case "turn.end":
-      return { ...state, turn: { ...state.turn, ...FRESH_TURN } };
+      return { ...state, turn: { ...FRESH_TURN } };
 
     case "slot.set":
       return mapSlot(state, mutation.poolId, mutation.level, (slot) => ({
@@ -215,7 +205,7 @@ function rest(state: LiveState, kind: "short" | "long"): LiveState {
 
   const next: LiveState = {
     ...state,
-    turn: { ...state.turn, ...FRESH_TURN },
+    turn: { ...FRESH_TURN },
     pools: state.pools.map((pool) =>
       recovers(pool.recovery)
         ? { ...pool, slots: pool.slots.map((slot) => ({ ...slot, used: 0 })) }

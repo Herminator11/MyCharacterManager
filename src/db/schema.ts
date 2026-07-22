@@ -105,7 +105,10 @@ export const characters = sqliteTable("characters", {
    * Aktionsökonomie des laufenden Zuges.
    *
    * Die App zählt mit, sie entscheidet nicht: sie weiß nicht, was am Tisch
-   * gerade passiert. "Zug beenden" setzt alle vier zurück.
+   * gerade passiert. "Zug beenden" setzt alle drei zurück.
+   *
+   * Bewegung wird bewusst nicht mitgezählt: Fuß für Fuß nachzutippen, was
+   * die Figur auf der Battlemap läuft, ist mehr Buchhaltung als Hilfe.
    */
   actionUsed: integer("action_used", { mode: "boolean" })
     .notNull()
@@ -116,8 +119,6 @@ export const characters = sqliteTable("characters", {
   reactionUsed: integer("reaction_used", { mode: "boolean" })
     .notNull()
     .default(false),
-  /** Schon gegangene Fuß im laufenden Zug. */
-  movementUsed: integer("movement_used").notNull().default(0),
 
   // Abgeleitete Werte — null bedeutet "automatisch berechnen"
   hpMaxOverride: integer("hp_max_override"),

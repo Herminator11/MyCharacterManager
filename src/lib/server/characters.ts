@@ -262,8 +262,6 @@ export function getLiveState(characterId: number): LiveState | null {
       action: character.actionUsed,
       bonus: character.bonusActionUsed,
       reaction: character.reactionUsed,
-      movementUsed: character.movementUsed,
-      speed: character.speed,
     },
     hitDice: classes.map((c) => ({
       classId: c.id,

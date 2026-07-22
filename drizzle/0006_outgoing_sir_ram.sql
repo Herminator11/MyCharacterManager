@@ -1,0 +1,1 @@
+ALTER TABLE `characters` DROP COLUMN `movement_used`;

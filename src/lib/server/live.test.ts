@@ -320,14 +320,12 @@ describe("Rast", () => {
 });
 
 describe("Zug", () => {
-  it("startet mit allen vier Konten frei", () => {
-    expect(live().turn).toMatchObject({
+  it("startet mit allen drei Konten frei", () => {
+    expect(live().turn).toEqual({
       action: false,
       bonus: false,
       reaction: false,
-      movementUsed: 0,
     });
-    expect(live().turn.speed).toBeGreaterThan(0);
   });
 
   it("verbraucht und gibt einzelne Konten zurück", () => {
@@ -340,20 +338,14 @@ describe("Zug", () => {
     ).toBe(false);
   });
 
-  it("begrenzt die Bewegung auf die eigene Bewegungsrate", () => {
-    const state = send({ type: "turn.move", used: 9999 });
-    expect(state.turn.movementUsed).toBe(state.turn.speed);
-  });
-
   it("setzt bei „Zug beenden“ alles zurück", () => {
     send({ type: "turn.set", slot: "action", used: true });
     send({ type: "turn.set", slot: "reaction", used: true });
-    send({ type: "turn.move", used: 15 });
 
-    expect(send({ type: "turn.end" }).turn).toMatchObject({
+    expect(send({ type: "turn.end" }).turn).toEqual({
       action: false,
+      bonus: false,
       reaction: false,
-      movementUsed: 0,
     });
   });
 

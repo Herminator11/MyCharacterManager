@@ -125,25 +125,12 @@ function apply(characterId: number, mutation: LiveMutation) {
       spendSlot(characterId, mutation.slot, mutation.used);
       return;
 
-    case "turn.move": {
-      const live = getLiveState(characterId);
-      if (!live) return;
-      db.update(characters)
-        // Über die eigene Bewegungsrate hinaus geht nichts — Dashen zählt
-        // als Aktion und verdoppelt sie, das trägt man dort ein.
-        .set({ movementUsed: clamp(mutation.used, 0, live.turn.speed) })
-        .where(eq(characters.id, characterId))
-        .run();
-      return;
-    }
-
     case "turn.end":
       db.update(characters)
         .set({
           actionUsed: false,
           bonusActionUsed: false,
           reactionUsed: false,
-          movementUsed: 0,
         })
         .where(eq(characters.id, characterId))
         .run();
@@ -377,7 +364,6 @@ function rest(characterId: number, kind: "short" | "long") {
       actionUsed: false,
       bonusActionUsed: false,
       reactionUsed: false,
-      movementUsed: 0,
     })
     .where(eq(characters.id, characterId))
     .run();

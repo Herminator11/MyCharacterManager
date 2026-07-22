@@ -6,6 +6,7 @@ import {
   addSpellToCharacter,
   createCustomSpell,
   removeSpellFromCharacter,
+  setFavorite,
   setPrepared,
 } from "@/lib/server/spells";
 
@@ -26,6 +27,21 @@ export async function setPreparedAction(
 ) {
   setPrepared(characterId, spellId, prepared);
   revalidatePath(`/c/${characterId}/spells`);
+}
+
+/**
+ * Favoriten sind die Handvoll Zauber, die man wirklich wirft. Sie bekommen
+ * im Kampfmodus eigene Knöpfe — deshalb wird hier auch die Battle-Seite
+ * mit aufgefrischt.
+ */
+export async function setSpellFavoriteAction(
+  characterId: number,
+  spellId: number,
+  favorite: boolean,
+) {
+  setFavorite(characterId, spellId, favorite);
+  revalidatePath(`/c/${characterId}/spells`);
+  revalidatePath(`/c/${characterId}/battle`);
 }
 
 export async function createCustomSpellAction(

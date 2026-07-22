@@ -13,6 +13,7 @@ import {
   createCustomSpellAction,
   removeSpellAction,
   setPreparedAction,
+  setSpellFavoriteAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +63,7 @@ export default async function SpellsPage({ params }: PageProps<"/c/[id]">) {
         add: addSpellAction,
         remove: removeSpellAction,
         setPrepared: setPreparedAction,
+        setFavorite: setSpellFavoriteAction,
       }}
     />
   );

@@ -166,10 +166,18 @@ Fälle fest.
 
 ### Am Tisch
 
-**Der Zug.** Ganz oben stehen Aktion, Bonusaktion, Reaktion und Bewegung.
-Antippen verbraucht, „Zug beenden“ setzt zurück. Wirkst du einen Zauber,
-hakt sich der passende Slot selbst ab — die Wirkzeit steht im Zauber. In
-der Zauberliste filterst du danach: *was geht als Bonusaktion noch?*
+**Der Kampfmodus.** „Roll Initiative…“ auf der Übersicht öffnet die Seite,
+die während einer Begegnung offen bleibt: oben der Zug — Aktion,
+Bonusaktion, Reaktion; antippen verbraucht, „Zug beenden“ setzt zurück —
+darunter deine favorisierten Zauber als Knöpfe. Die Marke am Knopf sagt,
+was er kostet (Kreis = Aktion, Dreieck = Bonusaktion, Raute = Reaktion);
+ist das Konto weg oder kein Zauberplatz mehr frei, wird der Knopf blass,
+bleibt aber tippbar — die App zeigt an, sie verbietet nicht. Wirkst du
+einen Zauber, hakt sich das passende Konto von selbst ab.
+
+Favoriten kürst du mit dem Stern auf der Zauberseite. Bewegung zählt die
+App bewusst nicht mit — Fuß für Fuß nachzutippen wäre Buchhaltung, und
+die Battlemap zeigt es ohnehin.
 
 **Inspiration** ist die Flamme oben neben AC, Initiative und Speed. Sie
 brennt oder sie brennt nicht; antippen schaltet um. Sie steht dort, weil

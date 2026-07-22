@@ -35,6 +35,11 @@ export function SpellsScreen({
       spellId: number,
       prepared: boolean,
     ) => Promise<void>;
+    setFavorite: (
+      characterId: number,
+      spellId: number,
+      favorite: boolean,
+    ) => Promise<void>;
   };
 }) {
   const [, startTransition] = useTransition();
@@ -47,6 +52,11 @@ export function SpellsScreen({
         onTogglePrepared={(spellId, prepared) =>
           startTransition(() =>
             actions.setPrepared(characterId, spellId, prepared),
+          )
+        }
+        onToggleFavorite={(spellId, favorite) =>
+          startTransition(() =>
+            actions.setFavorite(characterId, spellId, favorite),
           )
         }
         onRemove={(spellId) =>

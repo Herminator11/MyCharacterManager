@@ -42,14 +42,14 @@ export type LiveResource = {
   note: string;
 };
 
-/** Die vier Konten eines Zuges. `movementUsed` in Fuß. */
+/**
+ * Die drei Konten eines Zuges. Bewegung fehlt mit Absicht: sie Fuß für
+ * Fuß nachzutippen wäre Buchhaltung, keine Hilfe.
+ */
 export type LiveTurn = {
   action: boolean;
   bonus: boolean;
   reaction: boolean;
-  movementUsed: number;
-  /** Bewegungsrate aus dem Bogen — der Nenner der Anzeige. */
-  speed: number;
 };
 
 export type LiveConcentration = {
@@ -101,7 +101,6 @@ export type LiveMutation =
    */
   | { type: "hitdice.spend"; classId: number; roll: number }
   | { type: "turn.set"; slot: ActionSlot; used: boolean }
-  | { type: "turn.move"; used: number }
   | { type: "turn.end" }
   | { type: "slot.set"; poolId: number; level: number; used: number }
   | { type: "resource.set"; resourceId: number; current: number }
