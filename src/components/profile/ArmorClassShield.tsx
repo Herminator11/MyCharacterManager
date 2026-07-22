@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 
-import { PenIcon } from "@/components/icons";
 import { cx } from "@/components/ui";
 
 /**
@@ -102,7 +101,12 @@ export function ArmorClassShield({
         </button>
       )}
 
-      <dt className="label mt-1 flex items-center gap-1 text-[0.5625rem]">
+      {/* Kein Stift am Schild: das Schild ist die Form, die man aus zwei
+          Metern findet, und ein zweites Zeichen daneben nimmt ihr genau
+          das. Dass die Zahl tippbar ist, verrät der Rahmen, der beim
+          Darüberfahren aufhellt — und wer sie einmal geändert hat, weiß
+          es ohnehin. */}
+      <dt className="label mt-1 text-[0.5625rem]">
         {editing ? (
           // Sagt in dem Moment, in dem die Frage aufkommt, was ein leeres
           // Feld bedeutet — statt in einem Hilfetext, den niemand liest.
@@ -110,10 +114,7 @@ export function ArmorClassShield({
             leer = auto
           </span>
         ) : (
-          <>
-            AC
-            <PenIcon className="size-2.5 text-faint transition-colors group-hover:text-patina" />
-          </>
+          "AC"
         )}
       </dt>
     </div>
