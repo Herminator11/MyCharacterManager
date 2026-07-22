@@ -10,16 +10,12 @@ export async function saveBackgroundAction(
   characterId: number,
   formData: FormData,
 ) {
-  const text = (key: string) => String(formData.get(key) ?? "").trim();
-
+  // Nur was das Formular tatsächlich zeigt: Persönlichkeitsmerkmale,
+  // Ideale, Bindungen und Makel stehen nicht mehr darin und dürfen hier
+  // nicht mitgeschrieben werden — sonst leerte jedes Speichern die Werte,
+  // die der Import aus dem Bogen geholt hat.
   db.update(characters)
-    .set({
-      personality: text("personality"),
-      ideals: text("ideals"),
-      bonds: text("bonds"),
-      flaws: text("flaws"),
-      backstory: text("backstory"),
-    })
+    .set({ backstory: String(formData.get("backstory") ?? "").trim() })
     .where(eq(characters.id, characterId))
     .run();
 

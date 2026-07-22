@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { Button, Field, inputClass, Panel, SectionLabel } from "@/components/ui";
+import { Button, inputClass, Panel, SectionLabel } from "@/components/ui";
 import {
   getCharacter,
   getLogEntries,
@@ -29,17 +29,6 @@ function formatStamp(unixSeconds: number): string {
   });
 }
 
-const TRAITS = [
-  {
-    key: "personality",
-    label: "Persönlichkeitsmerkmale",
-    placeholder: "Wie tritt dein Charakter auf?",
-  },
-  { key: "ideals", label: "Ideale", placeholder: "Woran glaubt er?" },
-  { key: "bonds", label: "Bindungen", placeholder: "Woran hängt sein Herz?" },
-  { key: "flaws", label: "Makel", placeholder: "Was bringt ihn zu Fall?" },
-] as const;
-
 export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
   const characterId = Number(id);
@@ -59,21 +48,6 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
         }}
         className="space-y-3"
       >
-        <Panel className="space-y-3">
-          <SectionLabel>Charakterzüge</SectionLabel>
-          {TRAITS.map((trait) => (
-            <Field key={trait.key} label={trait.label}>
-              <textarea
-                name={trait.key}
-                rows={2}
-                defaultValue={character[trait.key]}
-                placeholder={trait.placeholder}
-                className={textareaClass}
-              />
-            </Field>
-          ))}
-        </Panel>
-
         <Panel>
           <SectionLabel>Vorgeschichte</SectionLabel>
           <textarea
