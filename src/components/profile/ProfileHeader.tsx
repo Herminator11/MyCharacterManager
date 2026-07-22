@@ -1,4 +1,5 @@
 import { CombatStats } from "@/components/profile/CombatStats";
+import { InspirationToggle } from "@/components/profile/InspirationToggle";
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
@@ -82,11 +83,14 @@ export function ProfileHeader({
         </dl>
       </div>
 
-      <CombatStats
-        armorClass={sheet.armorClass}
-        initiative={formatModifier(sheet.initiative)}
-        speed={character.speed}
-      />
+      <div className="flex shrink-0 gap-2">
+        <CombatStats
+          armorClass={sheet.armorClass}
+          initiative={formatModifier(sheet.initiative)}
+          speed={character.speed}
+        />
+        <InspirationToggle />
+      </div>
     </Panel>
   );
 }

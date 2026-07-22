@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
+import { useLive } from "@/lib/live-context";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
-import { useLiveState } from "@/lib/useLiveState";
 
 import { HpBlock } from "./HpBlock";
 import { ResourceRow } from "./ResourceRow";
@@ -14,16 +14,16 @@ import { TurnBar } from "./TurnBar";
 export type ConditionOption = { key: string; name: string; description: string };
 
 export function Dashboard({
-  initial,
   conditions,
   classLabels,
 }: {
-  initial: LiveState;
   conditions: ConditionOption[];
   /** classKey → Anzeigename, für die Hit-Dice-Zeilen. */
   classLabels: Record<string, string>;
 }) {
-  const { state, send, connected } = useLiveState(initial);
+  // Der Live-Zustand gehört der Seite, nicht diesem Block — oben im
+  // Profilkopf hängt die Inspiration an derselben Verbindung.
+  const { state, send, connected } = useLive();
 
   return (
     <div className="space-y-3">
@@ -84,8 +84,11 @@ export function Dashboard({
         </Panel>
       ) : null}
 
+      {/* Inspiration saß hier früher mit drin. Sie steht jetzt oben im
+          Profilkopf — man sucht sie nicht, man muss an sie erinnert
+          werden, sonst verfällt sie ungenutzt. */}
       <Panel>
-        <SectionLabel>Hit Dice &amp; Inspiration</SectionLabel>
+        <SectionLabel>Hit Dice</SectionLabel>
         <div className="divide-y divide-edge">
           {state.hitDice.map((entry) => (
             <HitDiceRow
@@ -97,18 +100,6 @@ export function Dashboard({
             />
           ))}
 
-          <div className="flex items-center gap-3 py-2">
-            <p className="flex-1 text-sm font-medium">Inspiration</p>
-            <button
-              type="button"
-              onClick={() => send({ type: "inspiration.set", value: !state.inspiration })}
-              aria-pressed={state.inspiration}
-              className={cx(
-                "socket socket-brass socket-round",
-                state.inspiration ? "socket-full" : "socket-spent",
-              )}
-            />
-          </div>
         </div>
       </Panel>
 

@@ -171,6 +171,11 @@ Antippen verbraucht, „Zug beenden“ setzt zurück. Wirkst du einen Zauber,
 hakt sich der passende Slot selbst ab — die Wirkzeit steht im Zauber. In
 der Zauberliste filterst du danach: *was geht als Bonusaktion noch?*
 
+**Inspiration** ist die Flamme oben neben AC, Initiative und Speed. Sie
+brennt oder sie brennt nicht; antippen schaltet um. Sie steht dort, weil
+man Inspiration nicht sucht — man muss an sie erinnert werden, sonst
+verfällt sie ungenutzt.
+
 **Festhalten.** Ein Feld auf der Charakterseite, Eingabetaste, fertig. Das
 Datum kommt von selbst, das volle Logbuch steht unter Notizen.
 
