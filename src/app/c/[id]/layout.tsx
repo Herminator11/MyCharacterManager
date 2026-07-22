@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { HomeLink } from "@/components/Brand";
+import { StickyStats } from "@/components/StickyStats";
 import { TabBar } from "@/components/TabBar";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
@@ -43,15 +44,21 @@ export default async function CharacterLayout({
               </p>
             </div>
 
-            <dl className="flex shrink-0 gap-3.5 text-center">
-              <MiniStat label="AC" value={sheet.armorClass} />
-              <MiniStat
-                label="Init"
-                value={formatModifier(sheet.initiative)}
-              />
-              <MiniStat label="Speed" value={sheet.character.speed} />
-              <MiniStat label="PP" value={sheet.passivePerception} />
-            </dl>
+            {/* Auf der Übersicht stehen dieselben Zahlen groß im
+                Profilkopf. Sie erscheinen hier erst, wenn der aus dem Bild
+                gescrollt ist — zweimal dasselbe kostet Aufmerksamkeit und
+                fügt nichts hinzu. */}
+            <StickyStats>
+              <dl className="flex shrink-0 gap-3.5 text-center">
+                <MiniStat label="AC" value={sheet.armorClass} />
+                <MiniStat
+                  label="Init"
+                  value={formatModifier(sheet.initiative)}
+                />
+                <MiniStat label="Speed" value={sheet.character.speed} />
+                <MiniStat label="PP" value={sheet.passivePerception} />
+              </dl>
+            </StickyStats>
           </div>
         </div>
       </header>

@@ -1,0 +1,1 @@
+ALTER TABLE `characters` ADD `stabilized` integer DEFAULT false NOT NULL;

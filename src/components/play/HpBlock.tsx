@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { BurstIcon, HeartIcon, PlusIcon, SkullIcon } from "@/components/icons";
 import { Button, cx } from "@/components/ui";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
+import { deathStatus, type DeathStatus } from "@/lib/rules/hp";
 
 /**
  * Trefferpunkte — der meistbenutzte Block der ganzen App.
@@ -24,6 +25,7 @@ export function HpBlock({
 
   const ratio = state.hpMax > 0 ? state.hpCurrent / state.hpMax : 0;
   const down = state.hpCurrent === 0;
+  const status = deathStatus(state);
   const tone = down ? "text-ember" : ratio <= 0.5 ? "text-brass" : "text-patina";
 
   const applyTyped = (sign: 1 | -1) => {
@@ -94,7 +96,9 @@ export function HpBlock({
         </Button>
       </div>
 
-      {down ? <DeathSaves state={state} send={send} /> : null}
+      {status !== "alive" ? (
+        <DeathSaves status={status} state={state} send={send} />
+      ) : null}
     </section>
   );
 }
@@ -162,10 +166,82 @@ function TempHp({
 }
 
 /**
- * Death Saves erscheinen nur bei 0 HP — bewusst rund, damit man sie im
- * Eifer des Gefechts nie mit den eckigen Zauberplätzen verwechselt.
+ * Was bei 0 Trefferpunkten passiert.
+ *
+ * Drei Zustände statt einem, weil die Regeln drei kennen: Man würfelt,
+ * man ist stabil, oder man ist tot. Die App zählt die Würfe nicht selbst —
+ * sie merkt sich, was du eingetragen hast, und sagt, was daraus folgt.
+ * Das ist genau die Stelle, an der man am Tisch durcheinanderkommt:
+ * mitten in der Panik zählt niemand mit, wie viele Häkchen schon stehen.
  */
 function DeathSaves({
+  status,
+  state,
+  send,
+}: {
+  status: DeathStatus;
+  state: LiveState;
+  send: (mutation: LiveMutation) => void;
+}) {
+  if (status === "dead") {
+    return (
+      <div className="mt-4 rounded-md border border-ember bg-ember-deep px-3.5 py-3">
+        <p className="flex items-center gap-2 text-sm font-semibold text-ember">
+          <SkullIcon className="size-4" />
+          Tot — drei Fehlschläge
+        </p>
+        <p className="mt-1.5 text-xs text-mute">
+          Von hier führt kein Wurf mehr zurück, nur noch Revivify, Raise Dead
+          oder ein Wunsch. Jede Heilung über 0 HP hebt das hier auf.
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            send({ type: "death.set", successes: 0, failures: 2 })
+          }
+          className="mt-2 min-h-11 text-xs text-faint transition-colors hover:text-patina"
+        >
+          Einen Fehlschlag zurücknehmen
+        </button>
+      </div>
+    );
+  }
+
+  if (status === "stable") {
+    return (
+      <div className="mt-4 rounded-md border border-patina-dim bg-patina-deep px-3.5 py-3">
+        <p className="text-sm font-semibold text-patina">
+          Stabil — keine Würfe mehr
+        </p>
+        <p className="mt-1.5 text-xs text-mute">
+          Bewusstlos bei 0 HP, aber außer Gefahr. Nach 1W4 Stunden wachst du
+          mit 1 HP auf; Schaden wirft dich zurück ins Sterben.
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            send({ type: "death.set", successes: 2, failures: 0 })
+          }
+          className="mt-2 min-h-11 text-xs text-faint transition-colors hover:text-patina"
+        >
+          Doch nicht stabil
+        </button>
+      </div>
+    );
+  }
+
+  return <DyingSaves state={state} send={send} />;
+}
+
+/**
+ * Drei Erfolge stabilisieren, drei Fehlschläge töten — beides passiert
+ * beim Antippen des dritten Kreises, ohne Rückfrage. Ein Zwischenschritt
+ * wäre hier falsch: der Wurf ist längst gefallen, die App trägt nur ein.
+ *
+ * Bewusst rund, damit man sie im Eifer des Gefechts nie mit den eckigen
+ * Zauberplätzen verwechselt.
+ */
+function DyingSaves({
   state,
   send,
 }: {

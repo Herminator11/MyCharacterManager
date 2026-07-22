@@ -23,7 +23,11 @@ const FRESH_TURN = {
 export function predict(state: LiveState, mutation: LiveMutation): LiveState {
   switch (mutation.type) {
     case "hp.delta":
-      return withHp(state, applyHpDelta(state, state.hpMax, mutation.amount));
+      return withHp(
+        state,
+        applyHpDelta(state, state.hpMax, mutation.amount),
+        mutation.amount < 0,
+      );
 
     case "hp.set":
       return withHp(state, setHp(state, state.hpMax, mutation.value));
@@ -31,12 +35,16 @@ export function predict(state: LiveState, mutation: LiveMutation): LiveState {
     case "hp.temp":
       return { ...state, hpTemp: Math.max(0, Math.round(mutation.value)) };
 
-    case "death.set":
+    case "death.set": {
+      const successes = clamp(mutation.successes, 0, 3);
+      const stable = successes >= 3;
       return {
         ...state,
-        deathSaveSuccesses: clamp(mutation.successes, 0, 3),
-        deathSaveFailures: clamp(mutation.failures, 0, 3),
+        deathSaveSuccesses: stable ? 0 : successes,
+        deathSaveFailures: stable ? 0 : clamp(mutation.failures, 0, 3),
+        stabilized: stable,
       };
+    }
 
     case "inspiration.set":
       return { ...state, inspiration: mutation.value };
@@ -174,14 +182,22 @@ export function predict(state: LiveState, mutation: LiveMutation): LiveState {
 function withHp(
   state: LiveState,
   change: { hpCurrent: number; hpTemp: number; clearDeathSaves: boolean },
+  damage = false,
 ): LiveState {
+  // Spiegelt `changeHp` im Server: Schaden bei 0 HP beendet die
+  // Stabilisierung, Heilung über 0 setzt alles zurück.
+  const tookDamage =
+    damage || change.hpCurrent < state.hpCurrent || change.hpTemp < state.hpTemp;
+
   return {
     ...state,
     hpCurrent: change.hpCurrent,
     hpTemp: change.hpTemp,
     ...(change.clearDeathSaves
-      ? { deathSaveSuccesses: 0, deathSaveFailures: 0 }
-      : {}),
+      ? { deathSaveSuccesses: 0, deathSaveFailures: 0, stabilized: false }
+      : tookDamage
+        ? { stabilized: false }
+        : {}),
   };
 }
 

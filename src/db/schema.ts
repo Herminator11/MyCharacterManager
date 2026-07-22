@@ -110,6 +110,14 @@ export const characters = sqliteTable("characters", {
   hpTemp: integer("hp_temp").notNull().default(0),
   deathSaveSuccesses: integer("death_save_successes").notNull().default(0),
   deathSaveFailures: integer("death_save_failures").notNull().default(0),
+  /**
+   * Stabilisiert bei 0 HP — bewusstlos, aber es wird nicht mehr gewürfelt.
+   *
+   * Eigene Spalte, weil das Stabilisieren die Erfolge und Fehlschläge
+   * löscht: aus drei gesetzten Häkchen ist der Zustand danach nicht mehr
+   * ablesbar. Schaden hebt ihn auf, Heilung über 0 ebenso.
+   */
+  stabilized: integer("stabilized", { mode: "boolean" }).notNull().default(false),
   inspiration: integer("inspiration", { mode: "boolean" })
     .notNull()
     .default(false),

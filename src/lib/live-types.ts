@@ -75,6 +75,8 @@ export type LiveState = {
   hpMax: number;
   deathSaveSuccesses: number;
   deathSaveFailures: number;
+  /** Stabilisiert bei 0 HP — siehe `rules/hp.deathStatus`. */
+  stabilized: boolean;
   inspiration: boolean;
   hitDice: LiveHitDice[];
   /** CON-Modifikator — geht in jeden ausgegebenen Trefferwürfel ein. */

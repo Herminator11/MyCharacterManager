@@ -16,6 +16,7 @@ const BASE: LiveState = {
   hpMax: 40,
   deathSaveSuccesses: 0,
   deathSaveFailures: 0,
+  stabilized: false,
   inspiration: false,
   hitDice: [{ classId: 1, classKey: "warlock", hitDie: 8, total: 5, used: 0 }],
   conModifier: 2,

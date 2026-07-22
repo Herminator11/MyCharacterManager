@@ -268,6 +268,7 @@ export function getLiveState(characterId: number): LiveState | null {
     hpMax: resolveMaxHp(character, classes),
     deathSaveSuccesses: character.deathSaveSuccesses,
     deathSaveFailures: character.deathSaveFailures,
+    stabilized: character.stabilized,
     inspiration: character.inspiration,
     conModifier: abilityModifier(character.con),
     turn: {

@@ -57,6 +57,13 @@
       "when": 1784709589734,
       "tag": "0007_reflective_barracuda",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1784727745450,
+      "tag": "0008_silky_carnage",
+      "breakpoints": true
     }
   ]
 }

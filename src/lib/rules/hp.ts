@@ -18,6 +18,32 @@ export type HpChange = HpState & {
 };
 
 /**
+ * Der Zustand bei 0 Trefferpunkten.
+ *
+ * `dying`  — jede Runde ein Todesrettungswurf.
+ * `stable` — drei Erfolge: bewusstlos, aber es wird nicht mehr gewürfelt.
+ * `dead`   — drei Fehlschläge.
+ *
+ * Warum `stabilized` eigens gespeichert wird und nicht aus drei Erfolgen
+ * abgelesen: Wer stabilisiert, dessen Erfolge und Fehlschläge werden
+ * gelöscht — so steht es in den Regeln, und beim nächsten Absinken auf 0
+ * fängt man bei null an. Ohne eigenes Feld wäre „stabil“ nach dem Löschen
+ * nicht mehr von „sterbend“ zu unterscheiden.
+ */
+export type DeathStatus = "alive" | "dying" | "stable" | "dead";
+
+export function deathStatus(state: {
+  hpCurrent: number;
+  deathSaveFailures: number;
+  stabilized: boolean;
+}): DeathStatus {
+  if (state.hpCurrent > 0) return "alive";
+  if (state.deathSaveFailures >= 3) return "dead";
+  if (state.stabilized) return "stable";
+  return "dying";
+}
+
+/**
  * Wendet Schaden (negativ) oder Heilung (positiv) an.
  *
  * Schaden zehrt zuerst die temporären Trefferpunkte auf, Heilung nie —

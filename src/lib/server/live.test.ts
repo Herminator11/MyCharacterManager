@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { characterClasses, characters, notes, spellPoolSlots } from "@/db/schema";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { getClass } from "@/lib/rules/classes";
+import { deathStatus } from "@/lib/rules/hp";
 
 import {
   createCharacter,
@@ -136,9 +137,63 @@ describe("HP", () => {
 
   it("begrenzt Death Saves auf drei", () => {
     send({ type: "hp.set", value: 0 });
-    const state = send({ type: "death.set", successes: 9, failures: 9 });
-    expect(state.deathSaveSuccesses).toBe(3);
+    const state = send({ type: "death.set", successes: 2, failures: 9 });
+    expect(state.deathSaveSuccesses).toBe(2);
     expect(state.deathSaveFailures).toBe(3);
+  });
+});
+
+describe("Stabil und tot", () => {
+  beforeEach(() => {
+    send({ type: "hp.set", value: 0 });
+  });
+
+  it("stabilisiert bei drei Erfolgen und löscht die Häkchen", () => {
+    const state = send({ type: "death.set", successes: 3, failures: 2 });
+
+    expect(state.stabilized).toBe(true);
+    // Gelöscht, weil beim nächsten Absinken auf 0 wieder bei null
+    // angefangen wird — der Zustand allein trägt die Information.
+    expect(state.deathSaveSuccesses).toBe(0);
+    expect(state.deathSaveFailures).toBe(0);
+    expect(deathStatus(state)).toBe("stable");
+  });
+
+  it("nennt drei Fehlschläge tot", () => {
+    const state = send({ type: "death.set", successes: 1, failures: 3 });
+
+    expect(deathStatus(state)).toBe("dead");
+    expect(state.stabilized).toBe(false);
+  });
+
+  it("beendet die Stabilisierung, sobald Schaden ankommt", () => {
+    send({ type: "death.set", successes: 3, failures: 0 });
+    expect(live().stabilized).toBe(true);
+
+    // HP bleiben bei 0 — es geht nur wieder ums Sterben.
+    const state = send({ type: "hp.delta", amount: -4 });
+    expect(state.hpCurrent).toBe(0);
+    expect(state.stabilized).toBe(false);
+    expect(deathStatus(state)).toBe("dying");
+  });
+
+  it("holt einen Toten mit Heilung zurück", () => {
+    send({ type: "death.set", successes: 0, failures: 3 });
+    expect(deathStatus(live())).toBe("dead");
+
+    // Revivify: ein Trefferpunkt reicht, und alles ist zurückgesetzt.
+    const state = send({ type: "hp.delta", amount: 1 });
+    expect(deathStatus(state)).toBe("alive");
+    expect(state.deathSaveFailures).toBe(0);
+    expect(state.stabilized).toBe(false);
+  });
+
+  it("lässt eine lange Rast niemanden stabil zurück", () => {
+    send({ type: "death.set", successes: 3, failures: 0 });
+    const state = send({ type: "rest.long" });
+
+    expect(state.hpCurrent).toBe(state.hpMax);
+    expect(deathStatus(state)).toBe("alive");
   });
 });
 

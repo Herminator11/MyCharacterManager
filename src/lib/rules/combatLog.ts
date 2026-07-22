@@ -158,6 +158,25 @@ export function describeMutation(
       };
 
     case "death.set": {
+      // Die beiden Ausgänge stehen für sich: sie beenden die Würfelei und
+      // sind das, was man hinterher im Log sucht.
+      if (after.stabilized && !before.stabilized) {
+        return {
+          kind: "heal",
+          text: "Stabilisiert",
+          detail: "keine Würfe mehr, weiter bei 0 HP",
+          amount: 0,
+        };
+      }
+      if (after.deathSaveFailures >= 3 && before.deathSaveFailures < 3) {
+        return {
+          kind: "damage",
+          text: "Gestorben",
+          detail: "drei Fehlschläge",
+          amount: 0,
+        };
+      }
+
       if (
         after.deathSaveSuccesses === before.deathSaveSuccesses &&
         after.deathSaveFailures === before.deathSaveFailures

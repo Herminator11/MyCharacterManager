@@ -1,4 +1,5 @@
 import { PinButton } from "@/components/notes/PinButton";
+import { PROFILE_ANCHOR_ID } from "@/components/StickyStats";
 import { CombatStats } from "@/components/profile/CombatStats";
 import { InspirationToggle } from "@/components/profile/InspirationToggle";
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
@@ -92,7 +93,9 @@ export function ProfileHeader({
         </dl>
       </div>
 
-      <div className="flex shrink-0 gap-2">
+      {/* Anker für die klebende Leiste: solange dieser Block sichtbar
+          ist, hält sie ihre Zahlen zurück. */}
+      <div id={PROFILE_ANCHOR_ID} className="flex shrink-0 gap-2">
         <CombatStats
           armorClass={sheet.armorClass}
           acOverride={character.acOverride}

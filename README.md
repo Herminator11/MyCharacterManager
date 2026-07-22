@@ -187,6 +187,11 @@ beieinander.
 
 ### Am Tisch
 
+**Die klebende Leiste** zeigt AC, Initiative, Speed und Passive Perception
+erst, wenn der Profilkopf aus dem Bild gescrollt ist — auf der Übersicht
+stünden sie sonst zweimal auf demselben Schirm. Auf allen anderen Reitern
+gibt es keinen Profilkopf, dort stehen sie durchgehend.
+
 **Der Kampfmodus.** „Roll Initiative…“ auf der Übersicht öffnet die Seite,
 die während einer Begegnung offen bleibt: oben der Zug — Aktion,
 Bonusaktion, Reaktion; antippen verbraucht, „Zug beenden“ setzt zurück —
@@ -224,6 +229,15 @@ Oben links steht der W20 und führt zur Charakterliste. Er sitzt auf jeder
 Seite an derselben Stelle, weil man einen Ausweg nicht sucht, sondern
 erwartet. Innerhalb eines Charakters navigiert die Leiste am unteren Rand —
 dort, wo der Daumen liegt.
+
+**Bei 0 Trefferpunkten** kennt die App die drei Zustände der Regeln.
+Sterbend heißt: Erfolge und Fehlschläge antippen. Der dritte Erfolg
+**stabilisiert** — bewusstlos bei 0 HP, aber keine Würfe mehr, und die
+Häkchen werden gelöscht, weil beim nächsten Absinken wieder bei null
+angefangen wird. Der dritte Fehlschlag heißt **tot**; von dort führt nur
+noch Revivify, Raise Dead oder ein Wunsch zurück. Schaden auf einen
+Stabilisierten wirft ihn zurück ins Sterben, jede Heilung über 0 HP setzt
+alles zurück. Beide Ausgänge stehen als eigene Zeile im Kampflog.
 
 **Inspiration** ist die Flamme oben neben AC, Initiative und Speed. Sie
 brennt oder sie brennt nicht; antippen schaltet um. Sie steht dort, weil

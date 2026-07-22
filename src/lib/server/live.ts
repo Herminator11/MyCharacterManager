@@ -55,8 +55,13 @@ export function applyMutation(
 function apply(characterId: number, mutation: LiveMutation) {
   switch (mutation.type) {
     case "hp.delta":
-      changeHp(characterId, (state, hpMax) =>
-        applyHpDelta(state, hpMax, mutation.amount),
+      changeHp(
+        characterId,
+        (state, hpMax) => applyHpDelta(state, hpMax, mutation.amount),
+        // Ausdrücklich mitgegeben, weil man es dem Ergebnis nicht ansieht:
+        // Schaden auf jemanden, der schon bei 0 liegt, ändert keine Zahl —
+        // hebt aber die Stabilisierung auf.
+        mutation.amount < 0,
       );
       return;
 
@@ -73,15 +78,26 @@ function apply(characterId: number, mutation: LiveMutation) {
         .run();
       return;
 
-    case "death.set":
+    case "death.set": {
+      const successes = clamp(mutation.successes, 0, 3);
+      const failures = clamp(mutation.failures, 0, 3);
+
+      // Drei Erfolge stabilisieren: die Häkchen werden gelöscht, weil beim
+      // nächsten Absinken auf 0 wieder bei null angefangen wird. Nur der
+      // Zustand bleibt — ohne ihn wäre "stabil" hinterher nicht mehr von
+      // "sterbend" zu unterscheiden.
+      const stable = successes >= 3;
+
       db.update(characters)
         .set({
-          deathSaveSuccesses: clamp(mutation.successes, 0, 3),
-          deathSaveFailures: clamp(mutation.failures, 0, 3),
+          deathSaveSuccesses: stable ? 0 : successes,
+          deathSaveFailures: stable ? 0 : failures,
+          stabilized: stable,
         })
         .where(eq(characters.id, characterId))
         .run();
       return;
+    }
 
     case "inspiration.set":
       db.update(characters)
@@ -369,6 +385,7 @@ function endBattle(characterId: number) {
 function changeHp(
   characterId: number,
   change: (state: HpState, hpMax: number) => HpChange,
+  damage = false,
 ) {
   const live = getLiveState(characterId);
   if (!live) return;
@@ -378,13 +395,21 @@ function changeHp(
     live.hpMax,
   );
 
+  // Schaden bei 0 HP hebt die Stabilisierung auf — wer getroffen wird,
+  // liegt wieder im Sterben. Heilung über 0 wischt ohnehin alles weg,
+  // Wiederbelebung eingeschlossen.
+  const tookDamage =
+    damage || result.hpCurrent < live.hpCurrent || result.hpTemp < live.hpTemp;
+
   db.update(characters)
     .set({
       hpCurrent: result.hpCurrent,
       hpTemp: result.hpTemp,
       ...(result.clearDeathSaves
-        ? { deathSaveSuccesses: 0, deathSaveFailures: 0 }
-        : {}),
+        ? { deathSaveSuccesses: 0, deathSaveFailures: 0, stabilized: false }
+        : tookDamage
+          ? { stabilized: false }
+          : {}),
     })
     .where(eq(characters.id, characterId))
     .run();
