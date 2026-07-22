@@ -53,7 +53,7 @@ Alltagsweg und bleibt frei von Knöpfen.
 
 Der Stern links hebt einen Charakter nach oben zu den **Favoriten**; liegt
 er in einem Ordner, steht das in seiner Zeile, damit nichts verschwunden
-wirkt. **Bearbeiten** oben rechts blendet Umbenennen, Ordner und Löschen
+wirkt. **Edit** oben rechts blendet Umbenennen, Ordner und Löschen
 ein — und legt neue Ordner an (flach, eine Ebene, meist eine Kampagne).
 
 Löschen gibt es **nur hier** und nur mit Rückfrage, die den Namen nennt.
@@ -89,7 +89,7 @@ wird als eigener Eintrag angelegt statt verworfen.
 ### Nur ein Wert geändert? Dann kein neuer Bogen
 
 Für eine reine Attributsverbesserung lohnt der Umweg über Aurora nicht.
-Auf der Charakterseite steht über den Attributen **Werte ändern** — sechs
+Auf der Charakterseite steht über den Attributen **Edit** — sechs
 Felder, speichern, fertig. Rettungswürfe, Fertigkeiten, Zauber-DC und das
 HP-Maximum rechnen sich mit.
 

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { AbilityColumn, type AbilityEntry } from "@/components/sheet/AbilityColumn";
-import { Button, Panel, SectionLabel } from "@/components/ui";
+import { Button, EditToggle, Panel, SectionLabel } from "@/components/ui";
 import { abilityModifier, formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
 
@@ -32,14 +32,10 @@ export function AbilityPanel({
     <Panel>
       <SectionLabel
         right={
+          // Hieß einmal "Werte ändern". Dasselbe Versprechen wie auf der
+          // Startseite verdient dasselbe Wort — und denselben Stift.
           editing ? null : (
-            <button
-              type="button"
-              onClick={() => setEditing(true)}
-              className="text-[0.6875rem] text-faint transition-colors hover:text-patina"
-            >
-              Werte ändern
-            </button>
+            <EditToggle editing={false} onClick={() => setEditing(true)} />
           )
         }
       >

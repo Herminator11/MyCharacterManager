@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
-import { Button, cx, EmptyState, inputClass, Ratio } from "@/components/ui";
+import {
+  Button,
+  cx,
+  EditToggle,
+  EmptyState,
+  inputClass,
+  Ratio,
+} from "@/components/ui";
 
 export type LibraryCharacter = {
   id: number;
@@ -70,14 +77,7 @@ export function CharacterLibrary({
           {characters.length}{" "}
           {characters.length === 1 ? "Charakter" : "Charaktere"}
         </h2>
-        <button
-          type="button"
-          onClick={() => setEditing(!editing)}
-          aria-pressed={editing}
-          className="text-xs text-faint transition-colors hover:text-patina"
-        >
-          {editing ? "Fertig" : "Bearbeiten"}
-        </button>
+        <EditToggle editing={editing} onClick={() => setEditing(!editing)} />
       </div>
 
       <div className="mt-3 space-y-5">

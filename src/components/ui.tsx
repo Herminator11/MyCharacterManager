@@ -40,6 +40,65 @@ export function SectionLabel({
 }
 
 /**
+ * Der Stift — überall dort, wo aus Ablesen Ändern wird.
+ *
+ * Zeichnet sich mit `currentColor`, damit er den Zustand des Knopfes
+ * mitmacht, statt eine zweite Farbe in die Zeile zu bringen.
+ */
+export function PenIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      aria-hidden
+      className={cx("size-3.5 shrink-0", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* Spitze unten links, Feder oben rechts — die Richtung, in der eine
+          rechtshändige Hand schreibt. */}
+      <path d="M11.2 1.9 14.1 4.8 5.4 13.5 2 14l.5-3.4z" />
+      <path d="M9.6 3.5 12.5 6.4" />
+    </svg>
+  );
+}
+
+/**
+ * Der Umschalter in den Bearbeiten-Modus.
+ *
+ * Heißt überall gleich und trägt überall denselben Stift: „Edit“ ist an
+ * genug Stellen dasselbe Versprechen, dass es sich lohnt, es nicht jedes
+ * Mal neu zu formulieren. Im aktiven Zustand steht dort „Fertig“ — ohne
+ * Stift, denn dann ist nichts mehr zu öffnen.
+ */
+export function EditToggle({
+  editing,
+  onClick,
+  className,
+}: {
+  editing: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={editing}
+      className={cx(
+        "inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina",
+        className,
+      )}
+    >
+      {editing ? null : <PenIcon />}
+      {editing ? "Fertig" : "Edit"}
+    </button>
+  );
+}
+
+/**
  * Verbraucht von Vorrat — Zauberplätze, Ressourcen, Trefferwürfel.
  *
  * Der Schrägstrich bekommt Luft nach beiden Seiten und bleibt matt: er
