@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BrandMark } from "@/components/Brand";
 import { CharacterLibrary } from "@/components/library/CharacterLibrary";
 import { Button, Field, inputClass, Panel } from "@/components/ui";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
@@ -24,11 +25,16 @@ export default function Page() {
 
   return (
     <main className="mx-auto max-w-2xl px-5 pb-16 pt-10">
-      <header>
-        <p className="label">D&amp;D 5e</p>
-        <h1 className="mt-1.5 text-[2rem] leading-none font-semibold tracking-tight">
-          Charaktere
-        </h1>
+      {/* Hier ist die Marke kein Weg, sondern ein Absender: die Startseite
+          ist schon das Ziel, auf das sie überall sonst zeigt. */}
+      <header className="flex items-center gap-3">
+        <BrandMark className="size-9 text-patina" />
+        <div>
+          <p className="label">D&amp;D 5e</p>
+          <h1 className="mt-1 text-[2rem] leading-none font-semibold tracking-tight">
+            Charaktere
+          </h1>
+        </div>
       </header>
 
       <CharacterLibrary

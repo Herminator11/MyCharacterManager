@@ -193,7 +193,16 @@ Zugkonten — stehen ebenfalls nicht drin.
 
 Beim Kampfende wandert eine Zeile ins Logbuch („Kampf: 3 Runden · 14 Schaden
 genommen · 9 HP geheilt · 4 Zauber gewirkt“), das Log selbst bleibt bis zum
-nächsten „Roll Initiative…“ stehen.
+nächsten „Roll Initiative…“ stehen. Der Kampf beginnt nur auf ausdrückliches
+Tippen, nie dadurch, dass die Seite geladen wird — sonst löschte jeder Blick
+zurück ins Log genau das, wofür man gekommen ist.
+
+### Der Weg zurück
+
+Oben links steht der W20 und führt zur Charakterliste. Er sitzt auf jeder
+Seite an derselben Stelle, weil man einen Ausweg nicht sucht, sondern
+erwartet. Innerhalb eines Charakters navigiert die Leiste am unteren Rand —
+dort, wo der Daumen liegt.
 
 **Inspiration** ist die Flamme oben neben AC, Initiative und Speed. Sie
 brennt oder sie brennt nicht; antippen schaltet um. Sie steht dort, weil

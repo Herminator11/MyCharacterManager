@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { HomeLink } from "@/components/Brand";
 import { TabBar } from "@/components/TabBar";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
@@ -26,8 +27,10 @@ export default async function CharacterLayout({
           sichtbar — sie scrollt bewusst nicht weg. */}
       <header className="sticky top-0 z-20 border-b border-edge bg-ink/95 backdrop-blur">
         <div className="mx-auto max-w-5xl px-4 py-2.5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
+          <div className="flex items-center gap-3">
+            <HomeLink />
+
+            <div className="min-w-0 flex-1">
               <Link
                 href={`/c/${id}/sheet`}
                 className="block truncate text-base leading-tight font-semibold tracking-tight hover:text-patina"

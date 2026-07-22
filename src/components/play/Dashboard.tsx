@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
@@ -32,22 +33,7 @@ export function Dashboard({
           Zwischen den Kämpfen braucht niemand Aktion und Bonusaktion.
           Läuft schon ein Kampf, sagt der Knopf das: sonst tippt man
           zwischen zwei Reitern hin und her und verliert die Runde. */}
-      <Link
-        href={`/c/${state.characterId}/battle`}
-        className="flex min-h-14 items-center justify-between gap-4 rounded-lg border border-ember-dim bg-ember-deep/40 px-4 text-ember transition-colors hover:border-ember"
-      >
-        <span className="font-semibold tracking-tight">
-          {state.round > 0 ? `Zurück in den Kampf` : "Roll Initiative…"}
-        </span>
-        <span className="flex items-center gap-3">
-          {state.round > 0 ? (
-            <span className="text-sm font-normal text-mute">
-              Runde {state.round}
-            </span>
-          ) : null}
-          <span aria-hidden>→</span>
-        </span>
-      </Link>
+      <RollInitiative state={state} send={send} />
 
       <HpBlock state={state} send={send} />
 
@@ -93,6 +79,65 @@ export function Dashboard({
         </p>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * Der Eingang in den Kampf.
+ *
+ * Der Kampf beginnt hier, mit dem Tipper — nicht dadurch, dass die
+ * Kampfseite geladen wird. Sonst würde jeder Blick zurück ins Log des
+ * letzten Kampfes einen neuen anfangen und genau das löschen, wofür man
+ * gekommen ist.
+ *
+ * Läuft schon einer, führt derselbe Knopf nur noch hin und nennt die
+ * Runde: zwischen zwei Reitern hin und her zu tippen darf den Stand nicht
+ * kosten.
+ */
+function RollInitiative({
+  state,
+  send,
+}: {
+  state: LiveState;
+  send: (mutation: LiveMutation) => Promise<void>;
+}) {
+  const router = useRouter();
+  const running = state.round > 0;
+  const href = `/c/${state.characterId}/battle`;
+
+  const className =
+    "flex min-h-14 w-full items-center justify-between gap-4 rounded-lg border border-ember-dim bg-ember-deep/40 px-4 text-ember transition-colors hover:border-ember";
+
+  if (running) {
+    return (
+      <Link href={href} className={className}>
+        <span className="font-semibold tracking-tight">
+          Zurück in den Kampf
+        </span>
+        <span className="flex items-center gap-3">
+          <span className="text-sm font-normal text-mute">
+            Runde {state.round}
+          </span>
+          <span aria-hidden>→</span>
+        </span>
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={className}
+      // Erst buchen, dann wechseln: die Kampfseite wird auf dem Server
+      // gerendert und käme sonst noch ohne laufende Begegnung an.
+      onClick={async () => {
+        await send({ type: "battle.start" });
+        router.push(href);
+      }}
+    >
+      <span className="font-semibold tracking-tight">Roll Initiative…</span>
+      <span aria-hidden>→</span>
+    </button>
   );
 }
 

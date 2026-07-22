@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BrandMark } from "@/components/Brand";
 import { ImportScreen } from "@/components/import/ImportScreen";
 import { className as classLabel } from "@/lib/rules/classes";
 import { listCharacters } from "@/lib/server/characters";
@@ -26,8 +27,14 @@ export default function ImportPage() {
   return (
     <main className="mx-auto max-w-3xl px-5 pb-16 pt-10">
       <header className="mb-6">
-        <Link href="/" className="label transition-colors hover:text-patina">
-          ← Charaktere
+        {/* Der Weg zurück trägt hier den Text mit: der Import ist eine
+            Sackgasse, aus der man mit einem halb fertigen Bogen im Kopf
+            herauskommen will — ein Zeichen allein wäre zu leise. */}
+        <Link
+          href="/"
+          className="label inline-flex items-center gap-2 transition-colors hover:text-patina"
+        >
+          <BrandMark className="size-5" />← Charaktere
         </Link>
         <h1 className="mt-2 text-[2rem] leading-none font-semibold tracking-tight">
           Bogen importieren

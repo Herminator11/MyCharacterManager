@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
 import { cx, Panel, SectionLabel } from "@/components/ui";
@@ -32,17 +33,6 @@ export function BattleMode({ favorites }: { favorites: CastableSpell[] }) {
   const { state, send, connected } = useLive();
   const [casting, setCasting] = useState<CastableSpell | null>(null);
   const router = useRouter();
-  const started = useRef(false);
-
-  // Wer diese Seite öffnet, ist im Kampf — mehr Bestätigung braucht es
-  // nicht. Der Kampf beginnt erst hier und nicht schon beim Tippen auf der
-  // Übersicht, damit auch ein Direktaufruf (Lesezeichen, Neuladen) sauber
-  // eine Begegnung eröffnet. Läuft schon eine, bleibt sie unangetastet.
-  useEffect(() => {
-    if (started.current || state.round > 0) return;
-    started.current = true;
-    send({ type: "battle.start" });
-  }, [state.round, send]);
 
   // Erst das Kampfende buchen, dann wechseln: die Übersicht wird auf dem
   // Server gerendert und zeigte sonst noch den laufenden Kampf.
@@ -62,14 +52,38 @@ export function BattleMode({ favorites }: { favorites: CastableSpell[] }) {
             </span>
           ) : null}
         </h1>
+        {state.round > 0 ? (
+          <button
+            type="button"
+            onClick={finish}
+            className="text-sm text-faint transition-colors hover:text-patina"
+          >
+            Kampf beenden
+          </button>
+        ) : (
+          <Link
+            href={`/c/${state.characterId}`}
+            className="text-sm text-faint transition-colors hover:text-patina"
+          >
+            Zur Übersicht
+          </Link>
+        )}
+      </div>
+
+      {/* Diese Seite bleibt auch nach dem Kampf begehbar — man sieht das
+          Log noch einmal durch. Ein neuer Kampf beginnt deshalb nur auf
+          ausdrückliches Tippen; sonst löschte jeder Blick zurück genau
+          das, wofür man gekommen ist. */}
+      {state.round === 0 ? (
         <button
           type="button"
-          onClick={finish}
-          className="text-sm text-faint transition-colors hover:text-patina"
+          onClick={() => send({ type: "battle.start" })}
+          className="flex min-h-14 w-full items-center justify-between gap-4 rounded-lg border border-ember-dim bg-ember-deep/40 px-4 text-ember transition-colors hover:border-ember"
         >
-          Kampf beenden
+          <span className="font-semibold tracking-tight">Roll Initiative…</span>
+          <span className="text-sm font-normal text-mute">Log auf null</span>
         </button>
-      </div>
+      ) : null}
 
       <ConcentrationBanner
         state={state}
