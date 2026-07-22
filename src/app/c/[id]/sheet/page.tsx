@@ -9,6 +9,7 @@ import {
   SectionLabel,
 } from "@/components/ui";
 import { deleteCharacterAction } from "@/app/actions";
+import { ABILITIES } from "@/db/schema";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
@@ -333,20 +334,49 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         >
           Fertigkeiten
         </SectionLabel>
-        <div className="grid gap-0.5 sm:grid-cols-2">
-          {sheet.skills.map((skill) => (
-            <ProficiencyToggle
-              key={skill.key}
-              label={skill.name}
-              sublabel={`${skill.de} · ${ABILITY_LABELS[skill.ability].name}`}
-              bonus={skill.bonus}
-              level={skill.level}
-              onChange={async (level) => {
-                "use server";
-                await setProficiencyAction(characterId, "skill", skill.key, level);
-              }}
-            />
-          ))}
+        {/* Nach Attribut gruppiert wie auf der Übersicht und auf jedem
+            gedruckten Bogen — nicht alphabetisch. Wer eine Fertigkeit
+            sucht, weiß meist, woran sie hängt. CON hat keine und fällt
+            dadurch von selbst heraus. */}
+        {/* Spalten statt Grid: die Gruppen sind verschieden lang, und ein
+            Grid ließe unter STR mit seiner einen Fertigkeit ein Loch. Der
+            Spaltenfluss verteilt 18 Zeilen von selbst gleichmäßig. */}
+        <div className="gap-x-6 sm:columns-2">
+          {ABILITIES.map((ability) => {
+            const group = sheet.skills.filter((s) => s.ability === ability);
+            if (group.length === 0) return null;
+
+            return (
+              <div key={ability} className="mb-4 break-inside-avoid">
+                <h3 className="label mb-1">
+                  {ABILITY_LABELS[ability].name}
+                  <span className="ml-2 font-normal tracking-normal normal-case">
+                    {ABILITY_LABELS[ability].de}
+                  </span>
+                </h3>
+                <div className="grid gap-0.5">
+                  {group.map((skill) => (
+                    <ProficiencyToggle
+                      key={skill.key}
+                      label={skill.name}
+                      sublabel={skill.de}
+                      bonus={skill.bonus}
+                      level={skill.level}
+                      onChange={async (level) => {
+                        "use server";
+                        await setProficiencyAction(
+                          characterId,
+                          "skill",
+                          skill.key,
+                          level,
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </Panel>
 
