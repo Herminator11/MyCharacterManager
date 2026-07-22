@@ -36,6 +36,14 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
   const sheet = getSheet(characterId);
   if (!initial || !sheet) notFound();
 
+  // Einmal geladen, zweimal gebraucht: der Zähler am Zettel im Profilkopf
+  // und die Liste darunter zeigen dieselben Vermerke.
+  const pins = getPins(characterId).map((pin) => ({
+    id: pin.id,
+    title: pin.title,
+    body: pin.body,
+  }));
+
   const abilities = sheet.abilities.map((ability) => ({
     key: ability.key,
     score: ability.score,
@@ -60,6 +68,11 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
       <div className="space-y-3">
         <ProfileHeader
           sheet={sheet}
+          pinCount={pins.length}
+          addPin={async (formData: FormData) => {
+            "use server";
+            await addPinAction(characterId, formData);
+          }}
           uploadPortrait={async (formData: FormData) => {
             "use server";
             return uploadPortraitAction(characterId, formData);
@@ -71,15 +84,7 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
         />
 
         <PinnedNotes
-          pins={getPins(characterId).map((pin) => ({
-            id: pin.id,
-            title: pin.title,
-            body: pin.body,
-          }))}
-          add={async (formData: FormData) => {
-            "use server";
-            await addPinAction(characterId, formData);
-          }}
+          pins={pins}
           resolve={async (noteId: number) => {
             "use server";
             await resolvePinAction(characterId, noteId);

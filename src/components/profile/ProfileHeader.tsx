@@ -1,3 +1,4 @@
+import { PinButton } from "@/components/notes/PinButton";
 import { CombatStats } from "@/components/profile/CombatStats";
 import { InspirationToggle } from "@/components/profile/InspirationToggle";
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
@@ -19,10 +20,14 @@ export function ProfileHeader({
   sheet,
   uploadPortrait,
   saveArmorClass,
+  pinCount,
+  addPin,
 }: {
   sheet: NonNullable<SheetView>;
   uploadPortrait: (formData: FormData) => Promise<{ error?: string } | void>;
   saveArmorClass: (value: number | null) => Promise<void>;
+  pinCount: number;
+  addPin: (formData: FormData) => Promise<void>;
 }) {
   const { character } = sheet;
 
@@ -41,7 +46,9 @@ export function ProfileHeader({
         upload={uploadPortrait}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
+      {/* Mindestbreite, damit die Instrumente rechts lieber in eine eigene
+          Zeile rutschen, als Namen und Kennzahlen zusammenzuquetschen. */}
+      <div className="flex min-w-[15rem] flex-1 flex-col justify-between gap-3">
         <div className="min-w-0">
           <h1 className="truncate text-2xl leading-tight font-semibold tracking-tight">
             {character.name}
@@ -94,6 +101,7 @@ export function ProfileHeader({
           speed={character.speed}
         />
         <InspirationToggle />
+        <PinButton count={pinCount} add={addPin} />
       </div>
     </Panel>
   );

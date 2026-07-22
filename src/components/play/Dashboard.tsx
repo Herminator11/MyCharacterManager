@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { D20Icon } from "@/components/icons";
 import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
 import { useLive } from "@/lib/live-context";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
@@ -111,7 +112,8 @@ function RollInitiative({
   if (running) {
     return (
       <Link href={href} className={className}>
-        <span className="font-semibold tracking-tight">
+        <span className="flex items-center gap-2.5 font-semibold tracking-tight">
+          <D20Icon className="size-5" />
           Zurück in den Kampf
         </span>
         <span className="flex items-center gap-3">
@@ -135,7 +137,10 @@ function RollInitiative({
         router.push(href);
       }}
     >
-      <span className="font-semibold tracking-tight">Roll Initiative…</span>
+      <span className="flex items-center gap-2.5 font-semibold tracking-tight">
+        <D20Icon className="size-5" />
+        Roll Initiative…
+      </span>
       <span aria-hidden>→</span>
     </button>
   );

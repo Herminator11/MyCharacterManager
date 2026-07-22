@@ -1,5 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
+import { PenIcon } from "./icons";
+
 /** Zusammenfügen von Klassen — kürzer als jedes Mal filter/join zu schreiben. */
 export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
@@ -36,32 +38,6 @@ export function SectionLabel({
       <h2 className="label">{children}</h2>
       {right}
     </div>
-  );
-}
-
-/**
- * Der Stift — überall dort, wo aus Ablesen Ändern wird.
- *
- * Zeichnet sich mit `currentColor`, damit er den Zustand des Knopfes
- * mitmacht, statt eine zweite Farbe in die Zeile zu bringen.
- */
-export function PenIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      aria-hidden
-      className={cx("size-3.5 shrink-0", className)}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {/* Spitze unten links, Feder oben rechts — die Richtung, in der eine
-          rechtshändige Hand schreibt. */}
-      <path d="M11.2 1.9 14.1 4.8 5.4 13.5 2 14l.5-3.4z" />
-      <path d="M9.6 3.5 12.5 6.4" />
-    </svg>
   );
 }
 

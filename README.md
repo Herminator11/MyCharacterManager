@@ -218,8 +218,10 @@ verfällt sie ungenutzt.
 Datum kommt von selbst, das volle Logbuch steht unter Notizen.
 
 **Aktuell gilt für dich.** Fluch, Pakt, Segen — alles, was über die Sitzung
-hinaus wirkt und in keinem Regelbuch steht. Es bleibt oben sichtbar, bis du
-es beendest; dann wandert es ins Logbuch statt gelöscht zu werden.
+hinaus wirkt und in keinem Regelbuch steht. Angelegt wird es am Zettel im
+Profilkopf, neben AC und Inspiration: ein Vermerk entsteht in demselben
+Moment, in dem man dorthin schaut. Er bleibt darunter sichtbar, bis du ihn
+beendest; dann wandert er ins Logbuch statt gelöscht zu werden.
 
 **Gepäck.** Getrennt nach *am Körper* und *im Rucksack*. Was du angelegt
 hast, erscheint mit seinem Wirkungstext auch unter Angriffen — dort, wo du

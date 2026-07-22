@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { D20Icon } from "./icons";
 import { cx } from "./ui";
 
 /**
@@ -13,23 +14,7 @@ import { cx } from "./ui";
  * Icon-Schrift und kein CDN.
  */
 export function BrandMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden
-      className={cx("size-6 shrink-0", className)}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinejoin="round"
-    >
-      {/* Außenkante des Würfels … */}
-      <path d="M12 1.8 L20.8 6.9 V17.1 L12 22.2 L3.2 17.1 V6.9 Z" />
-      {/* … und die obenliegende Fläche, auf der die Zahl stünde. */}
-      <path d="M12 6.4 L17.6 16 H6.4 Z" />
-      <path d="M12 6.4 V1.8 M17.6 16 L20.8 17.1 M6.4 16 L3.2 17.1" />
-    </svg>
-  );
+  return <D20Icon className={cx("size-6", className)} />;
 }
 
 /**

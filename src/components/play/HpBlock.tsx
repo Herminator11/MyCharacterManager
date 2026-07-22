@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { BurstIcon, HeartIcon, PlusIcon } from "@/components/icons";
 import { Button, cx } from "@/components/ui";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 
@@ -23,6 +24,7 @@ export function HpBlock({
 
   const ratio = state.hpMax > 0 ? state.hpCurrent / state.hpMax : 0;
   const down = state.hpCurrent === 0;
+  const tone = down ? "text-ember" : ratio <= 0.5 ? "text-brass" : "text-patina";
 
   const applyTyped = (sign: 1 | -1) => {
     const value = Number(amount);
@@ -35,7 +37,12 @@ export function HpBlock({
     <section className="rounded-lg border border-edge bg-panel px-4 py-4">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="label">Trefferpunkte</p>
+          {/* Das Herz nimmt die Farbe des Standes an — wer nur hinschaut,
+              sieht schon an ihm, wie es steht. */}
+          <p className="label flex items-center gap-1.5">
+            <HeartIcon className={tone} />
+            Trefferpunkte
+          </p>
           <p className="mt-1 flex items-baseline gap-1.5">
             <span
               className={cx(
@@ -77,10 +84,12 @@ export function HpBlock({
           aria-label="Betrag für Schaden oder Heilung"
           className="min-w-0 min-h-12 rounded-md border border-edge bg-ink px-2 text-center text-lg font-semibold text-fg placeholder:text-base placeholder:font-normal placeholder:text-faint focus:border-patina focus:outline-none"
         />
-        <Button variant="danger" className="px-2" onClick={() => applyTyped(-1)}>
+        <Button variant="danger" className="gap-1.5 px-2" onClick={() => applyTyped(-1)}>
+          <BurstIcon />
           Schaden
         </Button>
-        <Button variant="heal" className="px-2" onClick={() => applyTyped(1)}>
+        <Button variant="heal" className="gap-1.5 px-2" onClick={() => applyTyped(1)}>
+          <PlusIcon />
           Heilung
         </Button>
       </div>

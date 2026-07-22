@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 
-import { cx, PenIcon } from "@/components/ui";
+import { PenIcon } from "@/components/icons";
+import { cx } from "@/components/ui";
 
 /**
  * Die Rüstungsklasse — ablesbar wie bisher, änderbar per Tipp.

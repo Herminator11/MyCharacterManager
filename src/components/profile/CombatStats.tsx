@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { ShoeIcon } from "@/components/icons";
+
 import { ArmorClassShield } from "./ArmorClassShield";
 
 /**
@@ -35,7 +37,7 @@ export function CombatStats({
         save={saveArmorClass}
       />
       <Plate label="Initiative" value={initiative} icon={<BoltIcon />} />
-      <Plate label="Speed" value={speed} unit="ft" icon={<StrideIcon />} />
+      <Plate label="Speed" value={speed} unit="ft" icon={<ShoeIcon />} />
     </dl>
   );
 }
@@ -82,28 +84,6 @@ function BoltIcon() {
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-/**
- * Pfeil mit zwei Schleiflinien. Ein Stiefel wäre naheliegender, aber auf
- * 14 Pixeln wird aus jeder Stiefelsilhouette ein Fleck — die Bewegungsspur
- * liest sich auch klein noch als "vorwärts".
- */
-function StrideIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden
-      className="size-3.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    >
-      <path d="M9 12 h11 M15 7 l5 5 -5 5" strokeLinejoin="round" />
-      <path d="M2 8 h3 M2 16 h3" opacity="0.55" />
     </svg>
   );
 }
