@@ -93,6 +93,11 @@ Auf der Charakterseite steht über den Attributen **Edit** — sechs
 Felder, speichern, fertig. Rettungswürfe, Fertigkeiten, Zauber-DC und das
 HP-Maximum rechnen sich mit.
 
+Dasselbe gilt für die **Rüstungsklasse**: ein Tipp auf die Zahl im Schild,
+neuer Wert, fertig — das Schild bleibt dabei stehen. Ein leeres Feld heißt
+„wieder berechnen“, also zurück auf den Wert aus Rüstung und DEX. Damit ist
+auch ein Shield of Faith für drei Runden kein Formularbesuch.
+
 Der volle Re-Import bleibt für alles, was mehr als Zahlen verschiebt: neue
 Klassenstufen, neue Zauber, neue Angriffe.
 

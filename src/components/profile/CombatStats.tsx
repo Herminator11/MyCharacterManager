@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { ArmorClassShield } from "./ArmorClassShield";
+
 /**
  * Rüstungsklasse, Initiative und Bewegungsrate als Instrumente.
  *
@@ -13,46 +15,28 @@ import type { ReactNode } from "react";
  */
 export function CombatStats({
   armorClass,
+  acOverride,
+  saveArmorClass,
   initiative,
   speed,
 }: {
   armorClass: number;
+  acOverride: number | null;
+  saveArmorClass: (value: number | null) => Promise<void>;
   /** Schon als "+2" formatiert. */
   initiative: string;
   speed: number;
 }) {
   return (
     <dl className="flex shrink-0 gap-2">
-      <Shield value={armorClass} />
+      <ArmorClassShield
+        value={armorClass}
+        override={acOverride}
+        save={saveArmorClass}
+      />
       <Plate label="Initiative" value={initiative} icon={<BoltIcon />} />
       <Plate label="Speed" value={speed} unit="ft" icon={<StrideIcon />} />
     </dl>
-  );
-}
-
-function Shield({ value }: { value: number }) {
-  return (
-    <div className="relative flex w-[4.5rem] shrink-0 flex-col items-center">
-      <svg
-        viewBox="0 0 44 50"
-        aria-hidden
-        className="h-[3.75rem] w-auto text-patina-dim"
-      >
-        <path
-          d="M22 2 L41 8.5 V25 C41 37 32.5 44.5 22 48 C11.5 44.5 3 37 3 25 V8.5 Z"
-          fill="var(--color-panel-2)"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-      </svg>
-
-      {/* Über dem Schild statt darin, damit die Zahl nie an der schrägen
-          Flanke klebt. -mt rückt sie in die breite obere Hälfte. */}
-      <dd className="absolute top-[0.95rem] text-[1.375rem] leading-none font-semibold tabular-nums">
-        {value}
-      </dd>
-      <dt className="label mt-1 text-[0.5625rem]">AC</dt>
-    </div>
   );
 }
 

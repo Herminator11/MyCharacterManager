@@ -20,7 +20,10 @@ import {
   addPinAction,
   resolvePinAction,
 } from "./notes/actions";
-import { saveAbilityScoresAction } from "./sheet/actions";
+import {
+  saveAbilityScoresAction,
+  saveArmorClassAction,
+} from "./sheet/actions";
 import { uploadPortraitAction } from "./portrait-actions";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +63,10 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
           uploadPortrait={async (formData: FormData) => {
             "use server";
             return uploadPortraitAction(characterId, formData);
+          }}
+          saveArmorClass={async (value: number | null) => {
+            "use server";
+            await saveArmorClassAction(characterId, value);
           }}
         />
 

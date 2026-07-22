@@ -54,6 +54,28 @@ export async function saveBasicsAction(
 }
 
 /**
+ * Nur die Rüstungsklasse — direkt am Schild im Profilkopf.
+ *
+ * `null` heißt „wieder berechnen“, genau wie das leere Feld im Bogen. Die
+ * AC ändert sich mitten im Abenteuer (neue Rüstung, Shield of Faith, ein
+ * Ring), und dafür den ganzen Bogen zu öffnen ist ein Umweg.
+ */
+export async function saveArmorClassAction(
+  characterId: number,
+  value: number | null,
+) {
+  db.update(characters)
+    .set({
+      acOverride:
+        value === null ? null : Math.min(Math.max(Math.round(value), 0), 99),
+    })
+    .where(eq(characters.id, characterId))
+    .run();
+
+  refresh(characterId);
+}
+
+/**
  * Nur die sechs Attributswerte — für den Schnellzugriff auf der Übersicht.
  *
  * Getrennt von `saveBasicsAction`, weil die über das ganze Formular geht und

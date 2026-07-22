@@ -18,9 +18,11 @@ import type { SheetView } from "@/lib/server/characters";
 export function ProfileHeader({
   sheet,
   uploadPortrait,
+  saveArmorClass,
 }: {
   sheet: NonNullable<SheetView>;
   uploadPortrait: (formData: FormData) => Promise<{ error?: string } | void>;
+  saveArmorClass: (value: number | null) => Promise<void>;
 }) {
   const { character } = sheet;
 
@@ -86,6 +88,8 @@ export function ProfileHeader({
       <div className="flex shrink-0 gap-2">
         <CombatStats
           armorClass={sheet.armorClass}
+          acOverride={character.acOverride}
+          saveArmorClass={saveArmorClass}
           initiative={formatModifier(sheet.initiative)}
           speed={character.speed}
         />
