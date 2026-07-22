@@ -83,25 +83,27 @@ export function D20Icon({ className }: IconProps) {
 }
 
 /**
- * Ein Schuh in Fahrt.
+ * Ein Laufschuh im Sprint.
  *
  * Als Fläche gezeichnet, nicht als Umriss. Der erste Versuch war ein
  * Umriss mit Schnürung und Sohle — bei 14 px wurde daraus ein Wölkchen.
  * Eine geschlossene Silhouette übersteht jede Verkleinerung, weil sie
- * keine Innenkanten hat, die zusammenlaufen können.
+ * keine Innenkanten hat, die zusammenlaufen können. Die hohe Fersenkappe
+ * und die angehobene Sohlenspitze vorne sind die beiden Kanten, an denen
+ * das Auge „Schuh, kein Fleck" erkennt.
  *
- * Die drei Fahrtlinien davor tragen das Tempo. Sie sind derselbe Griff,
- * den vorher der Pfeil benutzt hat — nur jetzt an einem Schuh.
+ * Die drei Fahrtlinien dahinter tragen das Tempo. Sie sind derselbe
+ * Griff, den vorher der Pfeil benutzt hat — nur jetzt an einem Schuh.
  */
 export function ShoeIcon({ className }: IconProps) {
   return (
     <Icon className={join("size-[1.15rem]", className)} strokeWidth={1.6}>
       <path
-        d="M6.6 9.2h3.4l2.7 3.4 5.2 1.6c2.2.7 3.4 1.7 3.4 3v1.6H6.6z"
+        d="M5 8.6c0-.9.7-1.6 1.6-1.6.9 0 1.8.5 2.3 1.3l1.3 2 6.8 2c2 .6 3.3 2.4 3.3 4.5v.2c0 .6-.5 1-1 1H5.9c-.5 0-.9-.4-.9-.9z"
         fill="currentColor"
         stroke="none"
       />
-      <path d="M1.2 10h3.4M1.2 14.2h2.6M1.2 18.4h3.2" opacity="0.7" />
+      <path d="M1 10.4h3.2M1 14.4h2.4M1 18.2h3" opacity="0.7" />
     </Icon>
   );
 }
@@ -197,20 +199,28 @@ export function SwordIcon({ className }: IconProps) {
 }
 
 /**
- * Der Kampf: zwei Klingen, die sich kreuzen.
+ * Der Kampf: zwei einfache Schwerter, gekreuzt.
  *
- * Steht auf „Roll Initiative…“ statt des W20 — der gehört der Marke oben
- * links, und zweimal dasselbe Zeichen auf einer Seite liest sich als
- * Versehen.
+ * Steht auf dem Einstieg in den Kampfmodus statt des W20 — der gehört der
+ * Marke oben links, und zweimal dasselbe Zeichen auf einer Seite liest
+ * sich als Versehen. Dasselbe Schwert wie `SwordIcon` — Klinge,
+ * Parierstange, Knauf —, zweimal um die Mitte gedreht statt aus
+ * losgelösten Strichen neu erfunden: so bleibt bei 20 px erkennbar, dass
+ * es Schwerter sind und keine Blitze.
  */
 export function CrossedSwordsIcon({ className }: IconProps) {
+  const blade = (
+    <>
+      <path d="M12 2 14.3 6.4V13.2H9.7V6.4z" />
+      <path d="M6.5 14.2h11M12 14.2v5.4" />
+      <path d="M12 19.6a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8z" />
+    </>
+  );
+
   return (
-    <Icon className={className} strokeWidth={1.7}>
-      {/* Klinge von links unten nach rechts oben, mit Spitze … */}
-      <path d="M14.6 9.4 20.8 3.2M17.6 3.2h3.2v3.2M3.2 20.8l3.4-3.4M6.6 14.2l3.2 3.2" />
-      {/* … und die Gegenklinge. */}
-      <path d="M9.4 9.4 3.2 3.2M6.4 3.2H3.2v3.2M20.8 20.8l-3.4-3.4M17.4 14.2l-3.2 3.2" />
-      <path d="M9.4 9.4 14.6 14.6M14.6 9.4 9.4 14.6" />
+    <Icon className={className} strokeWidth={1.5}>
+      <g transform="rotate(48 12 12)">{blade}</g>
+      <g transform="rotate(-48 12 12)">{blade}</g>
     </Icon>
   );
 }

@@ -44,7 +44,7 @@ export function ProfileHeader({
   ].filter(Boolean);
 
   return (
-    <Panel className="flex flex-wrap items-start gap-4">
+    <Panel className="relative flex flex-wrap items-start gap-4">
       <Portrait
         characterId={character.id}
         name={character.name}
@@ -72,9 +72,6 @@ export function ProfileHeader({
                   )
                   .join(" / ")
               : "Ohne Klasse"}
-            {sheet.classes.length > 1 ? (
-              <span className="text-faint"> · Gesamtlevel {sheet.level}</span>
-            ) : null}
           </p>
           {subtitle.length > 0 ? (
             <p className="mt-0.5 truncate text-xs text-faint">
@@ -114,8 +111,12 @@ export function ProfileHeader({
           speed={character.speed}
         />
         <InspirationToggle />
-        <PinButton count={pinCount} add={addPin} />
       </div>
+
+      {/* Unauffällig in der Ecke statt in der Instrumentenreihe: ein
+          Vermerk ist eine Randnotiz, kein Kampfwert — er soll da sein,
+          ohne mit AC und Speed um Aufmerksamkeit zu konkurrieren. */}
+      <PinButton count={pinCount} add={addPin} />
     </Panel>
   );
 }

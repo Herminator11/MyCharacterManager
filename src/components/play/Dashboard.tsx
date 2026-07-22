@@ -145,7 +145,7 @@ function RollInitiative({
     >
       <span className="flex items-center gap-2.5 font-semibold tracking-tight">
         <CrossedSwordsIcon className="size-5" />
-        Roll Initiative…
+        Combat Mode
       </span>
       <span aria-hidden>→</span>
     </button>

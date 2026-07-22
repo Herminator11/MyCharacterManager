@@ -6,16 +6,17 @@ import { NoteIcon } from "@/components/icons";
 import { Button, cx, inputClass } from "@/components/ui";
 
 /**
- * „Aktuell gilt für dich" — anlegen, wo man es anlegen will: oben.
+ * „Aktuell gilt für dich" — anlegen, wo man es anlegen will: unten in der Ecke.
  *
- * Der Zettel steht neben AC, Speed und Inspiration, weil ein Vermerk in
- * demselben Moment entsteht wie ein Blick auf diese Werte: der DM sagt
- * etwas, das ab jetzt gilt, und die Hand ist schon oben am Bildschirm.
- * Vorher lag der Weg dorthin in einem aufklappbaren Block weiter unten —
- * drei Tipper von dem Punkt entfernt, an dem der Gedanke da war.
+ * Ein Vermerk ist eine Randnotiz, kein Kampfwert wie AC oder Speed — er
+ * stand früher als gleichrangige Kachel neben ihnen und konkurrierte damit
+ * um Aufmerksamkeit, die er nicht braucht. Jetzt sitzt er klein und
+ * unauffällig unten rechts im Profilkopf: da, wo die Hand hinfindet, wenn
+ * der Gedanke da ist, ohne dass er beim schnellen Blick auf die Werte
+ * mitgezählt wird.
  *
  * Der Zähler an der Ecke sagt, dass etwas gilt, ohne dass die Vermerke
- * selbst hier oben Platz kosten; gelesen werden sie im Kasten darunter.
+ * selbst hier Platz kosten; gelesen werden sie im Kasten darunter.
  */
 export function PinButton({
   count,
@@ -48,33 +49,26 @@ export function PinButton({
   }, [open]);
 
   return (
-    <div ref={box} className="relative">
+    <div ref={box} className="absolute right-3 bottom-3">
       <button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-label="Vermerk anlegen"
         title="Vermerk anlegen — was ab jetzt für dich gilt"
-        className="flex w-[4.5rem] shrink-0 flex-col items-center"
+        className={cx(
+          "relative flex size-7 items-center justify-center rounded-full border transition-colors",
+          open || count > 0
+            ? "border-brass/60 bg-brass/10 text-brass"
+            : "border-edge/0 text-faint hover:border-edge-bright hover:text-mute",
+        )}
       >
-        <span
-          className={cx(
-            "relative flex h-[3.75rem] w-full items-center justify-center rounded-lg border transition-colors",
-            open || count > 0
-              ? "border-brass bg-brass/10 text-brass"
-              : "border-edge bg-panel-2 text-faint hover:border-edge-bright hover:text-mute",
-          )}
-        >
-          <NoteIcon />
-          {count > 0 ? (
-            <span className="absolute top-1.5 right-1.5 text-[0.625rem] leading-none font-semibold tabular-nums">
-              {count}
-            </span>
-          ) : null}
-        </span>
-        <span className={cx("label mt-1 text-[0.5625rem]", count > 0 && "text-brass")}>
-          Vermerk
-        </span>
+        <NoteIcon className="size-4" />
+        {count > 0 ? (
+          <span className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
+            {count}
+          </span>
+        ) : null}
       </button>
 
       {open ? (
