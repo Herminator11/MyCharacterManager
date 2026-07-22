@@ -29,13 +29,24 @@ export function Dashboard({
       <ConcentrationBanner state={state} onClear={() => send({ type: "concentration.clear" })} />
 
       {/* Die Zugleiste lebt im Kampfmodus — hier führt nur der Weg hinein.
-          Zwischen den Kämpfen braucht niemand Aktion und Bonusaktion. */}
+          Zwischen den Kämpfen braucht niemand Aktion und Bonusaktion.
+          Läuft schon ein Kampf, sagt der Knopf das: sonst tippt man
+          zwischen zwei Reitern hin und her und verliert die Runde. */}
       <Link
         href={`/c/${state.characterId}/battle`}
         className="flex min-h-14 items-center justify-between gap-4 rounded-lg border border-ember-dim bg-ember-deep/40 px-4 text-ember transition-colors hover:border-ember"
       >
-        <span className="font-semibold tracking-tight">Roll Initiative…</span>
-        <span aria-hidden>→</span>
+        <span className="font-semibold tracking-tight">
+          {state.round > 0 ? `Zurück in den Kampf` : "Roll Initiative…"}
+        </span>
+        <span className="flex items-center gap-3">
+          {state.round > 0 ? (
+            <span className="text-sm font-normal text-mute">
+              Runde {state.round}
+            </span>
+          ) : null}
+          <span aria-hidden>→</span>
+        </span>
       </Link>
 
       <HpBlock state={state} send={send} />

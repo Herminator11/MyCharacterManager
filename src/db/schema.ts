@@ -36,6 +36,19 @@ export type SpellSource = "srd" | "custom" | "imported";
 /** Wozu ein Notizeintrag da ist — siehe Kommentar an der Spalte `kind`. */
 export type NoteKind = "page" | "log" | "pin";
 
+/**
+ * Art eines Kampflog-Eintrags — steuert nur die Farbe in der Anzeige.
+ * Der Text steht fertig formuliert daneben.
+ */
+export type CombatLogKind =
+  | "damage"
+  | "heal"
+  | "cast"
+  | "resource"
+  | "condition"
+  | "rest"
+  | "state";
+
 export const ABILITIES = ["str", "dex", "con", "int", "wis", "cha"] as const;
 export type Ability = (typeof ABILITIES)[number];
 
@@ -119,6 +132,15 @@ export const characters = sqliteTable("characters", {
   reactionUsed: integer("reaction_used", { mode: "boolean" })
     .notNull()
     .default(false),
+
+  /**
+   * Laufende Runde des Kampfes — 0 heißt „kein Kampf“.
+   *
+   * Es ist die eigene Runde, nicht die der Gruppe: „Zug beenden“ zählt
+   * hoch. Die App sieht nur diesen einen Charakter, und aus seiner Sicht
+   * ist genau das die Runde.
+   */
+  encounterRound: integer("encounter_round").notNull().default(0),
 
   // Abgeleitete Werte — null bedeutet "automatisch berechnen"
   hpMaxOverride: integer("hp_max_override"),
@@ -381,6 +403,37 @@ export const attacks = sqliteTable(
   (t) => [index("idx_attack_character").on(t.characterId)],
 );
 
+/**
+ * Das Kampflog: was in diesem Kampf passiert ist.
+ *
+ * Wird nicht getippt, sondern fällt ab — jede Live-Änderung während eines
+ * laufenden Kampfes schreibt hier eine Zeile mit. Deshalb steht der Text
+ * fertig formuliert in der Zeile statt als Verweis auf Zauber oder
+ * Ressource: was im Log steht, soll auch dann noch stimmen, wenn der
+ * Zauber später aus der Liste fliegt oder umbenannt wird.
+ *
+ * Lebt nur bis zum nächsten „Roll Initiative…“ — es ist ein Mitschrieb für
+ * die laufende Begegnung, kein Archiv. Was bleiben soll, steht im Logbuch
+ * unter Notizen; die Zusammenfassung landet beim Kampfende von selbst dort.
+ */
+export const combatLog = sqliteTable(
+  "combat_log",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    characterId: integer("character_id")
+      .notNull()
+      .references(() => characters.id, { onDelete: "cascade" }),
+    round: integer("round").notNull().default(1),
+    kind: text("kind").$type<CombatLogKind>().notNull(),
+    text: text("text").notNull(),
+    detail: text("detail").notNull().default(""),
+    /** Schaden bzw. geheilte HP — für die Zusammenfassung am Kampfende. */
+    amount: integer("amount").notNull().default(0),
+    at: integer("at").notNull().default(now),
+  },
+  (t) => [index("idx_combatlog_character").on(t.characterId)],
+);
+
 /* ------------------------------------------------------------------ *
  * Ausrüstung
  * ------------------------------------------------------------------ */
@@ -574,3 +627,4 @@ export type Attack = typeof attacks.$inferSelect;
 export type InventoryItem = typeof inventoryItems.$inferSelect;
 export type SrdCondition = typeof srdConditions.$inferSelect;
 export type Note = typeof notes.$inferSelect;
+export type CombatLogRow = typeof combatLog.$inferSelect;

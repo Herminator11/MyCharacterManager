@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
 import { cx, Panel, SectionLabel } from "@/components/ui";
@@ -12,6 +12,7 @@ import {
   type ActionCost,
 } from "@/lib/rules/actions";
 
+import { CombatLog } from "./CombatLog";
 import { ConcentrationBanner } from "./Dashboard";
 import { HpBlock } from "./HpBlock";
 import { PoolsPanel, ResourcesPanel } from "./panels";
@@ -30,19 +31,44 @@ import { TurnBar } from "./TurnBar";
 export function BattleMode({ favorites }: { favorites: CastableSpell[] }) {
   const { state, send, connected } = useLive();
   const [casting, setCasting] = useState<CastableSpell | null>(null);
+  const router = useRouter();
+  const started = useRef(false);
+
+  // Wer diese Seite öffnet, ist im Kampf — mehr Bestätigung braucht es
+  // nicht. Der Kampf beginnt erst hier und nicht schon beim Tippen auf der
+  // Übersicht, damit auch ein Direktaufruf (Lesezeichen, Neuladen) sauber
+  // eine Begegnung eröffnet. Läuft schon eine, bleibt sie unangetastet.
+  useEffect(() => {
+    if (started.current || state.round > 0) return;
+    started.current = true;
+    send({ type: "battle.start" });
+  }, [state.round, send]);
+
+  // Erst das Kampfende buchen, dann wechseln: die Übersicht wird auf dem
+  // Server gerendert und zeigte sonst noch den laufenden Kampf.
+  const finish = async () => {
+    await send({ type: "battle.end" });
+    router.push(`/c/${state.characterId}`);
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl leading-tight font-semibold tracking-tight text-ember">
           Kampf
+          {state.round > 0 ? (
+            <span className="ml-2 text-base font-normal text-mute">
+              Runde {state.round}
+            </span>
+          ) : null}
         </h1>
-        <Link
-          href={`/c/${state.characterId}`}
+        <button
+          type="button"
+          onClick={finish}
           className="text-sm text-faint transition-colors hover:text-patina"
         >
           Kampf beenden
-        </Link>
+        </button>
       </div>
 
       <ConcentrationBanner
@@ -63,6 +89,8 @@ export function BattleMode({ favorites }: { favorites: CastableSpell[] }) {
       <PoolsPanel state={state} send={send} />
 
       <ResourcesPanel state={state} send={send} />
+
+      <CombatLog state={state} />
 
       {!connected ? (
         <p className="pt-2 text-center text-xs text-brass">

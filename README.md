@@ -179,6 +179,22 @@ Favoriten kürst du mit dem Stern auf der Zauberseite. Bewegung zählt die
 App bewusst nicht mit — Fuß für Fuß nachzutippen wäre Buchhaltung, und
 die Battlemap zeigt es ohnehin.
 
+**Das Kampflog** steht unten und schreibt sich selbst: Schaden mit dem Weg
+der HP (und wie viel die temporären geschluckt haben), Heilung, gewirkte
+Zauber mit Grad, Pool und Kosten, Trefferwürfel, Ressourcen, Conditions.
+Niemand führt mitten im Kampf Protokoll — also fällt es aus dem ab, was du
+ohnehin eintippst. „Zug beenden“ zählt die Runde hoch und gliedert das Log
+danach.
+
+Getippt wird nichts, und mitgeschrieben nur zwischen „Roll Initiative…“ und
+„Kampf beenden“: außerhalb einer Begegnung ist eine HP-Änderung Buchhaltung,
+kein Ereignis. Bloße Korrekturen am Zähler — einzelne Zauberplätze, die drei
+Zugkonten — stehen ebenfalls nicht drin.
+
+Beim Kampfende wandert eine Zeile ins Logbuch („Kampf: 3 Runden · 14 Schaden
+genommen · 9 HP geheilt · 4 Zauber gewirkt“), das Log selbst bleibt bis zum
+nächsten „Roll Initiative…“ stehen.
+
 **Inspiration** ist die Flamme oben neben AC, Initiative und Speed. Sie
 brennt oder sie brennt nicht; antippen schaltet um. Sie steht dort, weil
 man Inspiration nicht sucht — man muss an sie erinnert werden, sonst

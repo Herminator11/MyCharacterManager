@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "@/db";
-import { characterClasses, characters, spellPoolSlots } from "@/db/schema";
+import { characterClasses, characters, notes, spellPoolSlots } from "@/db/schema";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { getClass } from "@/lib/rules/classes";
 
@@ -530,5 +530,89 @@ describe("Aufräumen", () => {
 
     const remaining = db.select().from(spellPoolSlots).all();
     expect(remaining.filter((s) => poolIds.includes(s.poolId))).toHaveLength(0);
+  });
+});
+
+describe("Kampflog", () => {
+  it("schreibt außerhalb eines Kampfes nichts mit", () => {
+    // HP zwischen zwei Begegnungen zu korrigieren ist Buchhaltung, kein
+    // Ereignis — sonst wäre das Log beim nächsten Kampf schon voll.
+    expect(send({ type: "hp.delta", amount: -5 }).log).toHaveLength(0);
+  });
+
+  it("hält ab Kampfbeginn fest, was passiert ist", () => {
+    send({ type: "battle.start" });
+    send({ type: "hp.delta", amount: -6 });
+
+    const state = send({ type: "condition.set", key: "poisoned", active: true });
+
+    expect(state.round).toBe(1);
+    // Jüngster Eintrag zuerst.
+    expect(state.log.map((entry) => entry.text)).toEqual([
+      "Poisoned",
+      "6 Schaden",
+    ]);
+    expect(state.log[1].detail).toContain("→");
+  });
+
+  it("zählt mit 'Zug beenden' die Runde hoch und ordnet Einträge zu", () => {
+    send({ type: "battle.start" });
+    send({ type: "hp.delta", amount: -3 });
+    send({ type: "turn.end" });
+    const state = send({ type: "hp.delta", amount: -4 });
+
+    expect(state.round).toBe(2);
+    expect(state.log.map((entry) => entry.round)).toEqual([2, 1]);
+  });
+
+  it("beginnt bei jedem neuen Kampf mit leerem Blatt", () => {
+    send({ type: "battle.start" });
+    send({ type: "hp.delta", amount: -3 });
+    send({ type: "battle.end" });
+
+    const state = send({ type: "battle.start" });
+    expect(state.log).toHaveLength(0);
+    expect(state.round).toBe(1);
+  });
+
+  it("hinterlässt am Kampfende eine Zeile im Logbuch", () => {
+    send({ type: "battle.start" });
+    send({ type: "hp.delta", amount: -6 });
+    send({ type: "hp.delta", amount: 4 });
+    send({ type: "turn.end" });
+    send({ type: "battle.end" });
+
+    const entries = db
+      .select()
+      .from(notes)
+      .where(eq(notes.characterId, id))
+      .all()
+      .filter((note) => note.kind === "log");
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].body).toBe(
+      "Kampf: 2 Runden · 6 Schaden genommen · 4 HP geheilt",
+    );
+  });
+
+  it("hinterlässt nichts, wenn der Kampf leer blieb", () => {
+    send({ type: "battle.start" });
+    const state = send({ type: "battle.end" });
+
+    expect(state.round).toBe(0);
+    expect(db.select().from(notes).where(eq(notes.characterId, id)).all()).toHaveLength(
+      0,
+    );
+  });
+
+  it("beendet den Kampf mit unverbrauchtem Zug", () => {
+    send({ type: "battle.start" });
+    send({ type: "turn.set", slot: "action", used: true });
+
+    expect(send({ type: "battle.end" }).turn).toEqual({
+      action: false,
+      bonus: false,
+      reaction: false,
+    });
   });
 });

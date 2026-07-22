@@ -71,7 +71,21 @@ export function predict(state: LiveState, mutation: LiveMutation): LiveState {
       return { ...state, turn: { ...state.turn, [mutation.slot]: mutation.used } };
 
     case "turn.end":
-      return { ...state, turn: { ...FRESH_TURN } };
+      return {
+        ...state,
+        turn: { ...FRESH_TURN },
+        round: state.round > 0 ? state.round + 1 : 0,
+      };
+
+    // Die Log-Zeilen selbst sagt der Browser bewusst nicht vorher: sie
+    // entstehen aus dem Vergleich zweier Serverzustände und wären hier nur
+    // geraten. Sie erscheinen mit der Serverantwort — Millisekunden später,
+    // und niemand tippt zweimal hintereinander auf dieselbe Zeile.
+    case "battle.start":
+      return { ...state, round: 1, turn: { ...FRESH_TURN }, log: [] };
+
+    case "battle.end":
+      return { ...state, round: 0, turn: { ...FRESH_TURN } };
 
     case "slot.set":
       return mapSlot(state, mutation.poolId, mutation.level, (slot) => ({

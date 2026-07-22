@@ -1,4 +1,4 @@
-import type { Recovery } from "@/db/schema";
+import type { CombatLogKind, Recovery } from "@/db/schema";
 import type { ActionCost, ActionSlot } from "@/lib/rules/actions";
 
 /**
@@ -52,6 +52,16 @@ export type LiveTurn = {
   reaction: boolean;
 };
 
+/** Eine Zeile im Kampflog, fertig formuliert vom Server. */
+export type LiveLogEntry = {
+  id: number;
+  at: number;
+  round: number;
+  kind: CombatLogKind;
+  text: string;
+  detail: string;
+};
+
 export type LiveConcentration = {
   spellId: number | null;
   label: string;
@@ -70,6 +80,10 @@ export type LiveState = {
   /** CON-Modifikator — geht in jeden ausgegebenen Trefferwürfel ein. */
   conModifier: number;
   turn: LiveTurn;
+  /** Laufende Runde; 0 heißt „kein Kampf“. */
+  round: number;
+  /** Das Kampflog, jüngster Eintrag zuerst. */
+  log: LiveLogEntry[];
   pools: LivePool[];
   resources: LiveResource[];
   /** Keys der aktiven Conditions. */
@@ -101,7 +115,15 @@ export type LiveMutation =
    */
   | { type: "hitdice.spend"; classId: number; roll: number }
   | { type: "turn.set"; slot: ActionSlot; used: boolean }
+  /** Zug beenden — zählt zugleich die Runde hoch, solange ein Kampf läuft. */
   | { type: "turn.end" }
+  /**
+   * Kampf beginnen bzw. beenden. Das Kampflog schreibt nur zwischen diesen
+   * beiden mit: außerhalb einer Begegnung ist eine HP-Änderung Buchhaltung,
+   * kein Ereignis.
+   */
+  | { type: "battle.start" }
+  | { type: "battle.end" }
   | { type: "slot.set"; poolId: number; level: number; used: number }
   | { type: "resource.set"; resourceId: number; current: number }
   | { type: "condition.set"; key: string; active: boolean }

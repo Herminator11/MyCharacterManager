@@ -7,7 +7,9 @@ import {
   activeConditions,
   characterClasses,
   characters,
+  combatLog,
   concentration,
+  notes,
   resources,
   spellPools,
   spellPoolSlots,
@@ -15,6 +17,7 @@ import {
 } from "@/db/schema";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { isSlotCost, type ActionSlot } from "@/lib/rules/actions";
+import { describeMutation, summarize } from "@/lib/rules/combatLog";
 import {
   applyHpDelta,
   setHp,
@@ -37,7 +40,11 @@ export function applyMutation(
   mutation: LiveMutation,
 ): LiveState | null {
   const run = sqlite.transaction(() => {
+    // Der Zustand davor ist die halbe Miete für das Kampflog: erst der
+    // Vergleich mit dem Zustand danach sagt, was wirklich passiert ist.
+    const before = getLiveState(characterId);
     apply(characterId, mutation);
+    if (before) record(characterId, mutation, before);
     touch(characterId);
   });
 
@@ -125,15 +132,42 @@ function apply(characterId: number, mutation: LiveMutation) {
       spendSlot(characterId, mutation.slot, mutation.used);
       return;
 
-    case "turn.end":
+    case "turn.end": {
+      const round = getEncounterRound(characterId);
       db.update(characters)
         .set({
+          actionUsed: false,
+          bonusActionUsed: false,
+          reactionUsed: false,
+          // Außerhalb eines Kampfes bleibt die 0 stehen: dann ist "Zug
+          // beenden" nur das Zurücksetzen der drei Konten.
+          ...(round > 0 ? { encounterRound: round + 1 } : {}),
+        })
+        .where(eq(characters.id, characterId))
+        .run();
+      return;
+    }
+
+    case "battle.start":
+      // Das Log gehört dem laufenden Kampf. Beim nächsten "Roll
+      // Initiative…" fängt es leer an — was bleiben soll, steht schon als
+      // Zusammenfassung im Logbuch.
+      db.delete(combatLog)
+        .where(eq(combatLog.characterId, characterId))
+        .run();
+      db.update(characters)
+        .set({
+          encounterRound: 1,
           actionUsed: false,
           bonusActionUsed: false,
           reactionUsed: false,
         })
         .where(eq(characters.id, characterId))
         .run();
+      return;
+
+    case "battle.end":
+      endBattle(characterId);
       return;
 
     case "slot.set":
@@ -246,6 +280,86 @@ function apply(characterId: number, mutation: LiveMutation) {
       rest(characterId, "long");
       return;
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * Kampflog
+ * ------------------------------------------------------------------ */
+
+function getEncounterRound(characterId: number): number {
+  return (
+    db
+      .select({ round: characters.encounterRound })
+      .from(characters)
+      .where(eq(characters.id, characterId))
+      .get()?.round ?? 0
+  );
+}
+
+/**
+ * Schreibt eine Zeile ins Kampflog — falls überhaupt etwas Erwähnenswertes
+ * passiert ist und ein Kampf läuft.
+ *
+ * Die Runde kommt aus dem Zustand *vor* der Änderung: sonst stünde alles,
+ * was mit "Zug beenden" zusammenfällt, schon in der nächsten Runde.
+ */
+function record(
+  characterId: number,
+  mutation: LiveMutation,
+  before: LiveState,
+) {
+  if (before.round === 0) return;
+
+  const after = getLiveState(characterId);
+  if (!after) return;
+
+  const line = describeMutation(mutation, before, after);
+  if (!line) return;
+
+  db.insert(combatLog)
+    .values({
+      characterId,
+      round: before.round,
+      kind: line.kind,
+      text: line.text,
+      detail: line.detail,
+      amount: line.amount,
+      at: Math.floor(Date.now() / 1000),
+    })
+    .run();
+}
+
+/**
+ * Kampf beenden.
+ *
+ * Das Log selbst bleibt stehen, damit man nach der Begegnung noch einmal
+ * hineinsehen kann. Was dauerhaft bleiben soll, wandert als eine Zeile ins
+ * Logbuch — dorthin, wo auch die von Hand notierten Ereignisse stehen.
+ */
+function endBattle(characterId: number) {
+  const rounds = getEncounterRound(characterId);
+  const lines = db
+    .select()
+    .from(combatLog)
+    .where(eq(combatLog.characterId, characterId))
+    .all();
+
+  const summary = summarize(Math.max(1, rounds), lines);
+  if (summary) {
+    db.insert(notes)
+      .values({ characterId, kind: "log", title: "", body: summary })
+      .run();
+  }
+
+  db.update(characters)
+    .set({
+      encounterRound: 0,
+      actionUsed: false,
+      bonusActionUsed: false,
+      reactionUsed: false,
+    })
+    .where(eq(characters.id, characterId))
+    .run();
 }
 
 /* ------------------------------------------------------------------ *

@@ -9,6 +9,7 @@ import {
   characterClasses,
   characters,
   characterSpells,
+  combatLog,
   concentration,
   inventoryItems,
   notes,
@@ -249,6 +250,17 @@ export function getLiveState(characterId: number): LiveState | null {
     .where(eq(concentration.characterId, characterId))
     .get();
 
+  // Jüngster Eintrag zuerst — so wird das Log auch gelesen. Die Obergrenze
+  // hält den Live-State klein; er geht bei jeder Änderung komplett über
+  // die Leitung.
+  const logRows = db
+    .select()
+    .from(combatLog)
+    .where(eq(combatLog.characterId, characterId))
+    .orderBy(desc(combatLog.id))
+    .limit(60)
+    .all();
+
   return {
     characterId,
     hpCurrent: character.hpCurrent,
@@ -263,6 +275,15 @@ export function getLiveState(characterId: number): LiveState | null {
       bonus: character.bonusActionUsed,
       reaction: character.reactionUsed,
     },
+    round: character.encounterRound,
+    log: logRows.map((row) => ({
+      id: row.id,
+      at: row.at,
+      round: row.round,
+      kind: row.kind,
+      text: row.text,
+      detail: row.detail,
+    })),
     hitDice: classes.map((c) => ({
       classId: c.id,
       classKey: c.classKey,

@@ -18,7 +18,13 @@ import { useLiveState } from "./useLiveState";
  */
 type Live = {
   state: LiveState;
-  send: (mutation: LiveMutation) => void;
+  /**
+   * Auflösung erst, wenn der Server geantwortet hat. Meist ignoriert man
+   * das — die Vorhersage hat die Anzeige längst umgestellt. Wer aber gleich
+   * danach die Seite wechselt, muss warten: sonst rendert der Server die
+   * neue Seite noch mit dem alten Stand.
+   */
+  send: (mutation: LiveMutation) => Promise<void>;
   connected: boolean;
 };
 
