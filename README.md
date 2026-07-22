@@ -195,11 +195,22 @@ gibt es keinen Profilkopf, dort stehen sie durchgehend.
 **Der Kampfmodus.** „Roll Initiative…“ auf der Übersicht öffnet die Seite,
 die während einer Begegnung offen bleibt: oben der Zug — Aktion,
 Bonusaktion, Reaktion; antippen verbraucht, „Zug beenden“ setzt zurück —
-darunter deine favorisierten Zauber als Knöpfe. Die Marke am Knopf sagt,
-was er kostet (Kreis = Aktion, Dreieck = Bonusaktion, Raute = Reaktion);
-ist das Konto weg oder kein Zauberplatz mehr frei, wird der Knopf blass,
-bleibt aber tippbar — die App zeigt an, sie verbietet nicht. Wirkst du
-einen Zauber, hakt sich das passende Konto von selbst ab.
+darunter deine favorisierten Zauber als Knöpfe.
+
+Die Formensprache stammt aus Baldur's Gate, weil sie dort funktioniert:
+**grüner Kreis** = Aktion, **oranges Dreieck** = Bonusaktion, dazu die
+messingfarbene **Raute** für die Reaktion, die BG3 selbst nicht eigens
+zeichnet. Volle Form heißt frei, Umriss heißt verbraucht. Dieselbe Marke
+sitzt am Zauberknopf und sagt, was ein Tipp kostet; ist das Konto weg oder
+kein Zauberplatz mehr frei, wird der Knopf blass, bleibt aber tippbar —
+die App zeigt an, sie verbietet nicht. Wirkst du einen Zauber, hakt sich
+das passende Konto von selbst ab.
+
+**Zauberplätze** sind hellblaue Quadrate mit römischer Ziffer, ebenfalls
+nach BG3: eine eigene Farbe, weil sie weder „verfügbar“ noch „Gefahr“
+bedeuten, sondern Magie. Ein Pool mit kurzer Rast (Pact Magic) bleibt warm
+— zwei Reihen blauer Quadrate mit derselben Ziffer wären im Kampf nicht
+auseinanderzuhalten, und genau das unterscheidet die Pools.
 
 Favoriten kürst du mit dem Stern auf der Zauberseite. Bewegung zählt die
 App bewusst nicht mit — Fuß für Fuß nachzutippen wäre Buchhaltung, und

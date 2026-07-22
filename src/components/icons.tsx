@@ -432,3 +432,42 @@ const CONDITION_PATHS: Record<string, React.ReactNode> = {
     </>
   ),
 };
+
+/* ------------------------------------------------------------------ *
+ * Aktionsökonomie
+ * ------------------------------------------------------------------ */
+
+/**
+ * Die drei Konten eines Zuges als Form: Kreis, Dreieck, Raute.
+ *
+ * Aus Baldur's Gate übernommen, weil es dort funktioniert: Der grüne
+ * Kreis ist die Aktion, das orange Dreieck die Bonusaktion. Die Farbe
+ * gehört zur Form dazu — grün heißt „das Große geht noch“, orange „nur
+ * noch das Kleine“. Die Reaktion hat in BG3 kein eigenes Zeichen; hier
+ * bekommt sie die Raute in Messing, weil sie zwischen den Zügen liegt
+ * und zu keinem der beiden gehört.
+ *
+ * `filled` unterscheidet frei von verbraucht: eine volle Form ist da,
+ * ein Umriss ist die Erinnerung daran, dass sie es einmal war.
+ */
+export function ActionShape({
+  kind,
+  filled = true,
+  className,
+}: IconProps & {
+  kind: "action" | "bonus" | "reaction";
+  filled?: boolean;
+}) {
+  const path =
+    kind === "action"
+      ? "M12 3.6a8.4 8.4 0 1 1 0 16.8 8.4 8.4 0 0 1 0-16.8z"
+      : kind === "bonus"
+        ? "M12 3.4 21.2 20.2H2.8z"
+        : "M12 2.8 21.2 12 12 21.2 2.8 12z";
+
+  return (
+    <Icon className={className} strokeWidth={filled ? 1.4 : 1.8}>
+      <path d={path} fill={filled ? "currentColor" : "none"} />
+    </Icon>
+  );
+}

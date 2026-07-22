@@ -9,26 +9,34 @@ import { cx, Ratio } from "@/components/ui";
  * sich beim Antippen, ein verbrauchter kommt beim Antippen zurück. Das ist
  * ein Tipper statt drei und deckt den häufigsten Fall am Tisch ab — den
  * geführten Weg über die Zauberliste gibt es trotzdem.
+ *
+ * Hellblaue Quadrate und römische Ziffern kommen aus Baldur's Gate: dort
+ * stehen die Slots als eigene Farbe neben den Aktionen, weil sie etwas
+ * anderes bedeuten als "verfügbar" oder "Gefahr" — nämlich Magie. Die
+ * Ziffer sitzt links, die Zahl der leuchtenden Quadrate sagt den Rest.
  */
+
+/** Grad 1 bis 9. Mehr gibt es in den Regeln nicht. */
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
 export function SlotRail({
   level,
   total,
   used,
   onChange,
-  tone = "patina",
+  tone = "arcane",
 }: {
   level: number;
   total: number;
   used: number;
   onChange: (used: number) => void;
-  tone?: "patina" | "ember";
+  tone?: "arcane" | "ember";
 }) {
   const free = total - used;
 
   return (
     <div className="flex items-center gap-3">
-      <span className="w-8 shrink-0 text-sm font-semibold text-mute">
-        {level}.
+      <span className="w-8 shrink-0 text-sm font-semibold tracking-wide text-mute">
+        {ROMAN[level - 1] ?? level}
       </span>
 
       <div className="flex flex-wrap gap-1.5">
@@ -49,7 +57,7 @@ export function SlotRail({
               }
               className={cx(
                 "socket",
-                tone === "ember" && "socket-ember",
+                tone === "ember" ? "socket-ember" : "socket-arcane",
                 isFree ? "socket-full" : "socket-spent",
               )}
             />

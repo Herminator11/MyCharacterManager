@@ -43,7 +43,10 @@ export function PoolsPanel({
                   level={slot.level}
                   total={slot.total}
                   used={slot.used}
-                  tone={pool.recovery === "short" ? "ember" : "patina"}
+                  // Pact Magic bleibt warm: zwei Reihen blauer Quadrate mit
+                  // derselben Ziffer wären im Kampf nicht auseinander-
+                  // zuhalten, und genau das unterscheidet die Pools.
+                  tone={pool.recovery === "short" ? "ember" : "arcane"}
                   onChange={(used) =>
                     send({ type: "slot.set", poolId: pool.id, level: slot.level, used })
                   }

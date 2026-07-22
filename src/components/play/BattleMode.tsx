@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
-import { CrossedSwordsIcon } from "@/components/icons";
+import { ActionShape, CrossedSwordsIcon } from "@/components/icons";
 import { cx, Panel, SectionLabel } from "@/components/ui";
 import { useLive } from "@/lib/live-context";
 import {
@@ -201,41 +201,41 @@ function FavoriteSpells({
 }
 
 /**
- * Die Kostenmarke: Kreis = Aktion, Dreieck = Bonusaktion, Raute =
- * Reaktion. Dieselbe Idee wie in Baldur's Gate — was ein Klick kostet,
- * steht als Form direkt am Knopf, ohne dass man liest.
+ * Die Kostenmarke am Zauberknopf — dieselben drei Formen wie in der
+ * Zugleiste darüber, in denselben Farben. Was ein Tipp kostet, steht als
+ * Form am Knopf, und man findet es eine Handbreit weiter oben wieder.
  */
 function CostBadge({ cost }: { cost: ActionCost }) {
-  if (cost === "action") {
+  if (cost === "long") {
     return (
-      <span
-        title="Aktion"
-        aria-label="kostet eine Aktion"
-        className="size-2.5 shrink-0 rounded-full bg-ember"
-      />
+      <span className="shrink-0 text-[0.625rem] text-faint" title="Dauert länger">
+        lang
+      </span>
     );
   }
-  if (cost === "bonus") {
-    return (
-      <span
-        title="Bonusaktion"
-        aria-label="kostet eine Bonusaktion"
-        className="size-0 shrink-0 border-x-[5px] border-b-[9px] border-x-transparent border-b-patina"
-      />
-    );
-  }
-  if (cost === "reaction") {
-    return (
-      <span
-        title="Reaktion"
-        aria-label="kostet die Reaktion"
-        className="size-2.5 shrink-0 rotate-45 bg-brass"
-      />
-    );
-  }
+
+  const tone =
+    cost === "action"
+      ? "text-patina"
+      : cost === "bonus"
+        ? "text-ember"
+        : "text-brass";
+
+  // Die Form selbst ist `aria-hidden`; der Name gehört an die Hülle,
+  // sonst liest ein Screenreader an dieser Stelle gar nichts vor.
   return (
-    <span className="shrink-0 text-[0.625rem] text-faint" title="Dauert länger">
-      lang
+    <span
+      title={COST_LABEL[cost]}
+      aria-label={`kostet ${COST_LABEL[cost]}`}
+      className={cx("shrink-0", tone)}
+    >
+      <ActionShape kind={cost} className="size-3" />
     </span>
   );
 }
+
+const COST_LABEL = {
+  action: "Aktion",
+  bonus: "Bonusaktion",
+  reaction: "Reaktion",
+} as const;
