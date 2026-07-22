@@ -256,6 +256,7 @@ function rest(state: LiveState, kind: "short" | "long"): LiveState {
     hpTemp: 0,
     deathSaveSuccesses: 0,
     deathSaveFailures: 0,
+    stabilized: false,
     concentration: null,
     hitDice: next.hitDice.map((entry) => ({
       ...entry,

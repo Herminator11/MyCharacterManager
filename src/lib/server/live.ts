@@ -554,6 +554,9 @@ function rest(characterId: number, kind: "short" | "long") {
         hpTemp: 0,
         deathSaveSuccesses: 0,
         deathSaveFailures: 0,
+        // Wer die Nacht durchschläft, wacht mit vollen HP auf — dann ist
+        // "stabilisiert" kein Zustand mehr, sondern ein Rest von gestern.
+        stabilized: false,
       })
       .where(eq(characters.id, characterId))
       .run();

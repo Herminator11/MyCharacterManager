@@ -194,6 +194,9 @@ describe("Stabil und tot", () => {
 
     expect(state.hpCurrent).toBe(state.hpMax);
     expect(deathStatus(state)).toBe("alive");
+    // Auch das Feld selbst, nicht nur der abgeleitete Zustand: bei vollen
+    // HP verdeckt `hpCurrent > 0` ein stehengebliebenes Flag.
+    expect(state.stabilized).toBe(false);
   });
 });
 
