@@ -169,6 +169,22 @@ Warlock ist davon ausgenommen. Ein einzelner Halbcaster benutzt dagegen
 weiter seine eigene Tabelle. `src/lib/rules/multiclass.test.ts` hält beide
 Fälle fest.
 
+### Zeichen
+
+Alle Icons liegen in `src/components/icons.tsx` — Inline-SVG, `currentColor`,
+ein gemeinsames 24er-Raster. Sie werden bei 14 bis 24 Pixeln gelesen, oft aus
+Armlänge neben einem Würfelbecher; was dabei zum Fleck zerfällt, ist kein
+Icon, sondern Dekoration. Der Schuh für Speed hat deshalb zwei Anläufe
+gebraucht, und die Klinge für Angriffe steht senkrecht, weil sie diagonal
+wie ein Pfeil aussah.
+
+Zwei Zeichen bedeuten dasselbe an zwei Orten und sind trotzdem nicht
+doppelt: der W20 ist die Marke oben links und führt nach Hause, die
+gekreuzten Klingen stehen für den Kampf. Die Conditions tragen ihr Zeichen
+neben dem Wort, nicht statt seiner — Paralyzed, Stunned und Incapacitated
+sind Abstufungen desselben Gedankens und wären als Form allein zu nah
+beieinander.
+
 ### Am Tisch
 
 **Der Kampfmodus.** „Roll Initiative…“ auf der Übersicht öffnet die Seite,

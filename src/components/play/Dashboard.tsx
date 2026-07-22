@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { D20Icon } from "@/components/icons";
+import {
+  CampfireIcon,
+  ConditionIcon,
+  CrossedSwordsIcon,
+  DieIcon,
+  MoonIcon,
+} from "@/components/icons";
 import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
 import { useLive } from "@/lib/live-context";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
@@ -113,7 +119,7 @@ function RollInitiative({
     return (
       <Link href={href} className={className}>
         <span className="flex items-center gap-2.5 font-semibold tracking-tight">
-          <D20Icon className="size-5" />
+          <CrossedSwordsIcon className="size-5" />
           Zurück in den Kampf
         </span>
         <span className="flex items-center gap-3">
@@ -138,7 +144,7 @@ function RollInitiative({
       }}
     >
       <span className="flex items-center gap-2.5 font-semibold tracking-tight">
-        <D20Icon className="size-5" />
+        <CrossedSwordsIcon className="size-5" />
         Roll Initiative…
       </span>
       <span aria-hidden>→</span>
@@ -202,6 +208,7 @@ function HitDiceRow({
           onClick={() => setOpen(!open)}
           aria-expanded={open}
         >
+          <DieIcon />
           Ausgeben
         </Button>
 
@@ -363,8 +370,15 @@ function Conditions({
               )}
             >
               {/* Nur der englische Regelbegriff auf dem Chip — die deutsche
-                  Entsprechung steht im Regeltext darunter. */}
-              {condition.name.split(" — ")[0]}
+                  Entsprechung steht im Regeltext darunter. Das Zeichen
+                  hilft beim Wiederfinden, es ersetzt das Wort nicht:
+                  Paralyzed, Stunned und Incapacitated sind Abstufungen
+                  desselben Gedankens und wären als Form allein zu nah
+                  beieinander. */}
+              <span className="flex items-center gap-1.5">
+                <ConditionIcon conditionKey={condition.key} />
+                {condition.name.split(" — ")[0]}
+              </span>
             </button>
           );
         })}
@@ -377,7 +391,8 @@ function Conditions({
               key={condition.key}
               className="rounded-md border border-edge bg-ink px-3 py-2"
             >
-              <summary className="cursor-pointer text-sm font-medium text-ember">
+              <summary className="flex cursor-pointer items-center gap-2 text-sm font-medium text-ember">
+                <ConditionIcon conditionKey={condition.key} className="size-4" />
                 {condition.name}
               </summary>
               <p className="mt-2 text-xs leading-relaxed whitespace-pre-line text-mute">
@@ -466,10 +481,14 @@ function RestControls({
 
   return (
     <div className="grid grid-cols-2 gap-2 pt-1">
+      {/* Zwei gleich aussehende Knöpfe, von denen der falsche den halben
+          Spielstand zurücksetzt — die Form ist hier kein Schmuck. */}
       <Button size="lg" onClick={() => setPending("short")}>
+        <CampfireIcon className="size-[1.15rem]" />
         Kurze Rast
       </Button>
       <Button size="lg" onClick={() => setPending("long")}>
+        <MoonIcon className="size-[1.15rem]" />
         Lange Rast
       </Button>
     </div>

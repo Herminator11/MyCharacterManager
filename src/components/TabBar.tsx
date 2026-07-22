@@ -3,6 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import {
+  BackpackIcon,
+  BookIcon,
+  BustIcon,
+  SheetIcon,
+  SparkIcon,
+  SwordIcon,
+} from "./icons";
 import { cx } from "./ui";
 
 /**
@@ -10,12 +18,12 @@ import { cx } from "./ui";
  * das Handy einhändig am Spieltisch hält.
  */
 const TABS = [
-  { segment: "", label: "Übersicht" },
-  { segment: "spells", label: "Zauber" },
-  { segment: "combat", label: "Angriffe" },
-  { segment: "inventory", label: "Gepäck" },
-  { segment: "sheet", label: "Bogen" },
-  { segment: "notes", label: "Notizen" },
+  { segment: "", label: "Übersicht", Icon: BustIcon },
+  { segment: "spells", label: "Zauber", Icon: SparkIcon },
+  { segment: "combat", label: "Angriffe", Icon: SwordIcon },
+  { segment: "inventory", label: "Gepäck", Icon: BackpackIcon },
+  { segment: "sheet", label: "Bogen", Icon: SheetIcon },
+  { segment: "notes", label: "Notizen", Icon: BookIcon },
 ] as const;
 
 export function TabBar({ characterId }: { characterId: number }) {
@@ -38,7 +46,7 @@ export function TabBar({ characterId }: { characterId: number }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cx(
-                  "flex min-h-14 flex-col items-center justify-center gap-1 text-[0.6875rem] font-semibold tracking-wide uppercase transition-colors",
+                  "flex min-h-14 flex-col items-center justify-center gap-0.5 py-1.5 text-[0.625rem] font-semibold tracking-wide uppercase transition-colors",
                   active ? "text-patina" : "text-faint hover:text-mute",
                 )}
               >
@@ -50,6 +58,11 @@ export function TabBar({ characterId }: { characterId: number }) {
                     active ? "bg-patina" : "bg-transparent",
                   )}
                 />
+                {/* Zeichen über dem Wort: die Leiste liegt unter dem
+                    Daumen und wird im Halbdunkel eher an der Form als am
+                    Wort wiedererkannt. Das Wort bleibt trotzdem stehen —
+                    sechs Formen auswendig zu lernen ist kein Fortschritt. */}
+                <tab.Icon className="size-[1.15rem]" />
                 {tab.label}
               </Link>
             </li>

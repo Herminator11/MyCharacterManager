@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { BurstIcon, HeartIcon, PlusIcon } from "@/components/icons";
+import { BurstIcon, HeartIcon, PlusIcon, SkullIcon } from "@/components/icons";
 import { Button, cx } from "@/components/ui";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 
@@ -202,7 +202,8 @@ function DeathSaves({
 
   return (
     <div className="mt-4 space-y-2.5 rounded-md border border-ember-dim bg-ember-deep/40 px-3.5 py-3">
-      <p className="text-sm font-semibold text-ember">
+      <p className="flex items-center gap-2 text-sm font-semibold text-ember">
+        <SkullIcon className="size-4" />
         Bewusstlos — Death Saves
       </p>
       {row("Erfolge", state.deathSaveSuccesses, "patina", (successes) =>

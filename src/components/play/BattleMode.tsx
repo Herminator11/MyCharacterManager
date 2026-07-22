@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
-import { D20Icon } from "@/components/icons";
+import { CrossedSwordsIcon } from "@/components/icons";
 import { cx, Panel, SectionLabel } from "@/components/ui";
 import { useLive } from "@/lib/live-context";
 import {
@@ -82,7 +82,7 @@ export function BattleMode({ favorites }: { favorites: CastableSpell[] }) {
           className="flex min-h-14 w-full items-center justify-between gap-4 rounded-lg border border-ember-dim bg-ember-deep/40 px-4 text-ember transition-colors hover:border-ember"
         >
           <span className="flex items-center gap-2.5 font-semibold tracking-tight">
-            <D20Icon className="size-5" />
+            <CrossedSwordsIcon className="size-5" />
             Roll Initiative…
           </span>
           <span className="text-sm font-normal text-mute">Log auf null</span>
