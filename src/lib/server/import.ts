@@ -18,6 +18,7 @@ import {
 import type { ImportedCharacter } from "@/lib/import/parseSheet";
 
 import { getLiveState, refreshDerived } from "./characters";
+import { findSpeciesByName } from "./species";
 
 /**
  * Legt aus einem bestätigten Entwurf einen Charakter an.
@@ -32,6 +33,11 @@ export function importCharacter(draft: ImportedCharacter): number {
       .values({
         name: draft.name,
         race: draft.race,
+        // Der Bogen nennt nur einen Text. Trifft er eine Spezies im Katalog,
+        // wird sie verknüpft — sonst bleibt es beim Text. Geraten wird
+        // nicht: eine falsche Spezies behauptete Boni, die der Charakter
+        // nie hatte, und die Werte auf dem Bogen sind bereits Endwerte.
+        speciesKey: findSpeciesByName(draft.race)?.key ?? "",
         background: draft.background,
         alignment: draft.alignment,
         xp: draft.xp,

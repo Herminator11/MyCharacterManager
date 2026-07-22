@@ -18,6 +18,7 @@ import { className as classLabel } from "@/lib/rules/classes";
 import { SKILLS } from "@/lib/rules/skills";
 
 import { getLiveState, getSheet, refreshDerived } from "./characters";
+import { findSpeciesByName } from "./species";
 import { linkSpellsFromCatalog } from "./import";
 
 /**
@@ -167,6 +168,7 @@ export function applyReimport(
       .set({
         name: draft.name,
         race: draft.race,
+        speciesKey: findSpeciesByName(draft.race)?.key ?? "",
         background: draft.background,
         alignment: draft.alignment,
         xp: draft.xp,

@@ -39,6 +39,7 @@ import { proficiencyBonus, totalLevel } from "@/lib/rules/multiclass";
 import { SKILLS } from "@/lib/rules/skills";
 import type { LiveState } from "@/lib/live-types";
 
+import { getSpecies } from "./species";
 import { pruneImportedSpells } from "./spells";
 import { syncDerived } from "./sync";
 
@@ -177,6 +178,10 @@ export function getSheet(characterId: number) {
     skills,
     level: totalLevel(classes),
     proficiencyBonus: prof,
+    // null, wenn nichts verknüpft ist oder die Verknüpfung ins Leere geht
+    // (gelöschte eigene Spezies). Die Anzeige fällt dann auf `character.race`
+    // zurück — den Text, der auf dem importierten Bogen stand.
+    species: getSpecies(character.speciesKey),
     hpMax: resolveMaxHp(character, classes),
     armorClass: character.acOverride ?? baseArmorClass(scores),
     initiative: character.initiativeOverride ?? initiative(scores),

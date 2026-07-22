@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { ProficiencyToggle } from "@/components/sheet/ProficiencyToggle";
+import { SpeciesPanel } from "@/components/species/SpeciesPanel";
 import {
   Button,
   Field,
@@ -12,16 +13,27 @@ import {
 import { ABILITIES } from "@/db/schema";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
+import { SUBCLASSES } from "@/lib/rules/progression.generated";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
 import { getSheet } from "@/lib/server/characters";
+import {
+  findSpeciesByName,
+  getSpecies,
+  listSpecies,
+} from "@/lib/server/species";
 
 import { uploadPortraitAction } from "../portrait-actions";
 import {
   addClassAction,
+  applySpeciesBonusesAction,
+  createSpeciesAction,
   removeClassAction,
+  revertSpeciesBonusesAction,
   saveBasicsAction,
   setClassLevelAction,
   setProficiencyAction,
+  setSpeciesAction,
+  setSubclassAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +59,7 @@ export const dynamic = "force-dynamic";
 /** Reihenfolge und Beschriftung der Sprungmarken — und der Abschnitte. */
 const SECTIONS = [
   { id: "bild", label: "Bild" },
+  { id: "spezies", label: "Spezies" },
   { id: "klassen", label: "Klassen" },
   { id: "grunddaten", label: "Grunddaten" },
   { id: "attribute", label: "Attribute" },
@@ -114,6 +127,43 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         </div>
       </Panel>
 
+      <SpeciesPanel
+        id="spezies"
+        options={listSpecies().map((s) => ({
+          key: s.key,
+          name: s.name,
+          parentKey: s.parentKey,
+          custom: s.key.startsWith("custom:"),
+        }))}
+        current={sheet.species}
+        scores={sheet.scores}
+        fallbackName={sheet.species ? "" : character.race}
+        suggestion={
+          sheet.species ? "" : (findSpeciesByName(character.race)?.name ?? "")
+        }
+        onSelect={async (key: string) => {
+          "use server";
+          await setSpeciesAction(characterId, key);
+        }}
+        applied={
+          Boolean(character.speciesKey) &&
+          character.speciesBonusesFrom === character.speciesKey
+        }
+        appliedFrom={getSpecies(character.speciesBonusesFrom)}
+        onApply={async () => {
+          "use server";
+          await applySpeciesBonusesAction(characterId);
+        }}
+        onRevert={async () => {
+          "use server";
+          await revertSpeciesBonusesAction(characterId);
+        }}
+        onCreate={async (formData: FormData) => {
+          "use server";
+          await createSpeciesAction(characterId, formData);
+        }}
+      />
+
       {/* Klassen vor allem anderen: sie bestimmen Zauberplätze, Ressourcen
           und Proficiency Bonus — also die Hälfte der Zahlen darunter. */}
       <Panel id="klassen" className="scroll-mt-24">
@@ -129,7 +179,8 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
 
         <ul className="divide-y divide-edge">
           {sheet.classes.map((entry) => (
-            <li key={entry.id} className="flex items-center gap-2 py-2">
+            <li key={entry.id} className="py-2">
+              <div className="flex items-center gap-2">
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium">
                   {classLabel(entry.classKey)}
@@ -177,6 +228,40 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                   </button>
                 </form>
               ) : null}
+              </div>
+
+              {/* Subklasse als Freitext mit Vorschlägen: das SRD führt genau
+                  eine je Klasse, am Tisch wird jede andere gespielt. Rein
+                  beschreibend — sie leitet weder Ressourcen noch Zauber ab. */}
+              <form
+                action={async (formData: FormData) => {
+                  "use server";
+                  await setSubclassAction(
+                    characterId,
+                    entry.id,
+                    String(formData.get("subclass") ?? ""),
+                  );
+                }}
+                className="mt-1.5"
+              >
+                <input
+                  name="subclass"
+                  defaultValue={entry.subclass}
+                  list={`subclasses-${entry.classKey}`}
+                  placeholder="Subklasse — Enter speichert"
+                  aria-label={`Subklasse ${classLabel(entry.classKey)}`}
+                  className="min-h-11 w-full rounded-md border border-edge bg-ink px-2.5 text-sm placeholder:text-faint focus:border-patina focus:outline-none"
+                />
+                <button type="submit" className="sr-only">
+                  Subklasse speichern
+                </button>
+              </form>
+
+              <datalist id={`subclasses-${entry.classKey}`}>
+                {(SUBCLASSES[entry.classKey] ?? []).map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
             </li>
           ))}
         </ul>

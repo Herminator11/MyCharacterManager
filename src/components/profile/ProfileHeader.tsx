@@ -34,7 +34,11 @@ export function ProfileHeader({
   const { character } = sheet;
 
   const subtitle = [
-    character.race,
+    // Der Katalogname gewinnt, wenn eine Spezies verknüpft ist: er ist der,
+    // unter dem auch die Traits darunter stehen. Ohne Verknüpfung bleibt der
+    // Text vom importierten Bogen — „Variant Human (Custom)" sagt mehr als
+    // gar nichts.
+    sheet.species?.name || character.race,
     character.background,
     character.alignment,
   ].filter(Boolean);
@@ -56,9 +60,16 @@ export function ProfileHeader({
             {character.name}
           </h1>
           <p className="mt-0.5 truncate text-sm text-patina">
+            {/* Subklasse in Klammern hinter dem Level: sie beantwortet die
+                Frage „was für ein Warlock", und die stellt am Tisch jeder
+                zuerst. Fehlt sie, fehlt nur die Klammer. */}
             {sheet.classes.length > 0
               ? sheet.classes
-                  .map((c) => `${classLabel(c.classKey)} ${c.level}`)
+                  .map(
+                    (c) =>
+                      `${classLabel(c.classKey)} ${c.level}` +
+                      (c.subclass ? ` (${c.subclass})` : ""),
+                  )
                   .join(" / ")
               : "Ohne Klasse"}
             {sheet.classes.length > 1 ? (

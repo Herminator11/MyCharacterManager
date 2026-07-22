@@ -37,6 +37,16 @@ export type SpellSource = "srd" | "custom" | "imported";
 export type NoteKind = "page" | "log" | "pin";
 
 /**
+ * Woher eine Spezies stammt.
+ *
+ * 'srd'    — aus dem Seed. Wird bei jedem `db:seed` aufgefrischt.
+ * 'custom' — von Hand angelegt, weil das SRD nur neun Spezies kennt.
+ *            Aasimar, Goliath und alles Selbstgebaute landen hier; der Seed
+ *            fasst sie nicht an.
+ */
+export type SpeciesSource = "srd" | "custom";
+
+/**
  * Art eines Kampflog-Eintrags — steuert nur die Farbe in der Anzeige.
  * Der Text steht fertig formuliert daneben.
  */
@@ -87,7 +97,34 @@ export const characters = sqliteTable("characters", {
   folderId: integer("folder_id").references(() => folders.id, {
     onDelete: "set null",
   }),
+  /**
+   * Was auf dem Bogen stand — roher Text aus dem PDF-Import.
+   *
+   * Bleibt neben `speciesKey` bestehen und ist der Rückfall, wenn die App
+   * den Text keiner Spezies zuordnen konnte („Variant Human (Custom)").
+   * Eine der beiden Angaben zu löschen hieße, entweder das Original oder
+   * die Verknüpfung zu verlieren.
+   */
   race: text("race").notNull().default(""),
+  /**
+   * Verknüpfung in den Spezies-Katalog. Bewusst ohne Fremdschlüssel —
+   * genau wie `character_classes.class_key`, das für Homebrew ebenfalls
+   * freier Text ist und beim Nachschlagen sauber ins Leere laufen darf.
+   */
+  speciesKey: text("species_key").notNull().default(""),
+  /**
+   * Für welche Spezies die Boni bereits in den Attributen stecken.
+   *
+   * Ohne diese Spalte wäre „Boni übernehmen" ein Knopf, den zweimal zu
+   * drücken den Charakter still zu stark macht — und man sähe es ihm
+   * hinterher nicht an. Steht hier derselbe Key wie in `species_key`,
+   * ist die Arbeit getan und der Knopf weicht dem Rückgängig.
+   *
+   * Die Zusage lautet: was hier steht, wurde von der App addiert und kann
+   * von ihr auch wieder abgezogen werden — egal, was zwischendurch von
+   * Hand geändert wurde.
+   */
+  speciesBonusesFrom: text("species_bonuses_from").notNull().default(""),
   background: text("background").notNull().default(""),
   alignment: text("alignment").notNull().default(""),
   xp: integer("xp").notNull().default(0),
@@ -477,6 +514,49 @@ export const inventoryItems = sqliteTable(
 );
 
 /* ------------------------------------------------------------------ *
+ * Spezies
+ * ------------------------------------------------------------------ */
+
+/**
+ * Spezies (im Regelwerk von 2014 „Rasse") als nachschlagbarer Katalog.
+ *
+ * Subrassen stehen als eigene, **fertig verrechnete** Zeilen darin: „Hill
+ * Dwarf" trägt CON +2 *und* WIS +1, Speed 25 und beide Trait-Listen.
+ * `parentKey` dient nur der Gruppierung im Auswahlfeld. Die Alternative —
+ * zwei Zeilen zur Laufzeit addieren — hätte jede Anzeige und jede Ableitung
+ * dieselbe Summe erneut bilden lassen, und eine davon hätte es irgendwann
+ * anders gemacht.
+ *
+ * Die Boni werden nirgends automatisch aufgerechnet; sie stehen hier, damit
+ * die App sie *zeigen* kann. Siehe `applySpeciesBonusesAction`.
+ */
+export const species = sqliteTable(
+  "species",
+  {
+    /** SRD-Index wie 'tiefling'; bei eigenen Spezies 'custom:aasimar'. */
+    key: text("key").primaryKey(),
+    name: text("name").notNull(),
+    source: text("source").$type<SpeciesSource>().notNull().default("srd"),
+    /** Leer bei Grundspezies, sonst der Key der Elternspezies. */
+    parentKey: text("parent_key").notNull().default(""),
+    speed: integer("speed").notNull().default(30),
+    size: text("size").notNull().default("Medium"),
+    /** JSON: { "cha": 2, "int": 1 } — nur die Attribute, die etwas bekommen. */
+    abilityBonuses: text("ability_bonuses").notNull().default("{}"),
+    /** JSON-Array [{ name, description }] — Merkzettel wie die Conditions. */
+    traits: text("traits").notNull().default("[]"),
+    /**
+     * Was das Regelwerk offen lässt: Half-Elf verteilt zwei Punkte frei,
+     * Dragonborn wählt seine Ahnenlinie. Als Text, nicht als Auswahl — die
+     * App entscheidet nicht, sie erinnert daran.
+     */
+    choiceNote: text("choice_note").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("idx_species_parent").on(t.parentKey)],
+);
+
+/* ------------------------------------------------------------------ *
  * Conditions
  * ------------------------------------------------------------------ */
 
@@ -634,5 +714,6 @@ export type CharacterSpell = typeof characterSpells.$inferSelect;
 export type Attack = typeof attacks.$inferSelect;
 export type InventoryItem = typeof inventoryItems.$inferSelect;
 export type SrdCondition = typeof srdConditions.$inferSelect;
+export type SpeciesRow = typeof species.$inferSelect;
 export type Note = typeof notes.$inferSelect;
 export type CombatLogRow = typeof combatLog.$inferSelect;

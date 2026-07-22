@@ -282,3 +282,22 @@ export const PROGRESSION: Readonly<
     20: { slots: [4, 3, 3, 3, 3, 2, 2, 1, 1], specific: {"arcane_recovery_levels":10} },
   },
 };
+
+/**
+ * Subklassen-Vorschläge je Klasse — Datalist, keine Auswahl.
+ * Das SRD führt genau eine pro Klasse; Freitext bleibt erlaubt.
+ */
+export const SUBCLASSES: Readonly<Record<string, readonly string[]>> = {
+  "barbarian": ["Path of the Berserker"],
+  "bard": ["College of Lore"],
+  "cleric": ["Life Domain"],
+  "druid": ["Circle of the Land"],
+  "fighter": ["Champion"],
+  "monk": ["Way of the Open Hand"],
+  "paladin": ["Oath of Devotion"],
+  "ranger": ["Hunter"],
+  "rogue": ["Thief"],
+  "sorcerer": ["Draconic Bloodline"],
+  "warlock": ["The Fiend"],
+  "wizard": ["School of Evocation"],
+};

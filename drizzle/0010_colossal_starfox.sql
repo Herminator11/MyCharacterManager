@@ -1,0 +1,1 @@
+ALTER TABLE `characters` ADD `species_bonuses_from` text DEFAULT '' NOT NULL;
