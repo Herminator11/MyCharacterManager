@@ -83,27 +83,31 @@ export function D20Icon({ className }: IconProps) {
 }
 
 /**
- * Ein Laufschuh im Sprint.
+ * Ein Laufschuh im Absprung.
  *
  * Als Fläche gezeichnet, nicht als Umriss. Der erste Versuch war ein
  * Umriss mit Schnürung und Sohle — bei 14 px wurde daraus ein Wölkchen.
  * Eine geschlossene Silhouette übersteht jede Verkleinerung, weil sie
- * keine Innenkanten hat, die zusammenlaufen können. Die hohe Fersenkappe
- * und die angehobene Sohlenspitze vorne sind die beiden Kanten, an denen
- * das Auge „Schuh, kein Fleck" erkennt.
+ * keine Innenkanten hat, die zusammenlaufen können. Die Kerbe oben in der
+ * Fersenkappe ist die eine Kante, an der das Auge „Schuh, kein Fleck"
+ * erkennt; die schräg nach hinten fallende Ferse ist die andere — sie
+ * macht aus der Silhouette eine Bewegung, nicht nur eine Form.
  *
- * Die drei Fahrtlinien dahinter tragen das Tempo. Sie sind derselbe
- * Griff, den vorher der Pfeil benutzt hat — nur jetzt an einem Schuh.
+ * Eine Linie in derselben Fläche wäre unsichtbar (gleiche Farbe frisst
+ * sich selbst) — deshalb bleibt die Sohle Teil der Silhouette statt
+ * eigener Kontur. Die Fahrtlinien schräg dahinter tragen das Tempo —
+ * derselbe Winkel wie die Ferse, damit sie zur Schräge gehören statt
+ * beliebig zu wirken.
  */
 export function ShoeIcon({ className }: IconProps) {
   return (
-    <Icon className={join("size-[1.15rem]", className)} strokeWidth={1.6}>
+    <Icon className={join("size-[1.15rem]", className)} strokeWidth={1.5}>
       <path
-        d="M5 8.6c0-.9.7-1.6 1.6-1.6.9 0 1.8.5 2.3 1.3l1.3 2 6.8 2c2 .6 3.3 2.4 3.3 4.5v.2c0 .6-.5 1-1 1H5.9c-.5 0-.9-.4-.9-.9z"
+        d="M5 7C6 6 6.3 7.6 6.6 8.3 7 7.5 7.3 6.6 7.8 6.8 11 7.5 14 7.8 17 9.5 19.5 10.8 21 12 21 14L20.5 18 5.5 18Z"
         fill="currentColor"
         stroke="none"
       />
-      <path d="M1 10.4h3.2M1 14.4h2.4M1 18.2h3" opacity="0.7" />
+      <path d="M0.5 10.6 3.2 9.4M0.6 13.8 3.4 12.8M0.8 17 3.4 16.2" opacity="0.7" />
     </Icon>
   );
 }

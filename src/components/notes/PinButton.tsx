@@ -57,15 +57,13 @@ export function PinButton({
         aria-label="Vermerk anlegen"
         title="Vermerk anlegen — was ab jetzt für dich gilt"
         className={cx(
-          "relative flex size-7 items-center justify-center rounded-full border transition-colors",
-          open || count > 0
-            ? "border-brass/60 bg-brass/10 text-brass"
-            : "border-edge/0 text-faint hover:border-edge-bright hover:text-mute",
+          "relative flex size-8 items-center justify-center transition-colors",
+          open || count > 0 ? "text-brass" : "text-faint hover:text-mute",
         )}
       >
-        <NoteIcon className="size-4" />
+        <NoteIcon className="size-5" />
         {count > 0 ? (
-          <span className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
+          <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
             {count}
           </span>
         ) : null}

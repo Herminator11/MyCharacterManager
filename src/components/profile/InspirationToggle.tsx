@@ -31,10 +31,8 @@ export function InspirationToggle({ className }: { className?: string }) {
       }
       title={on ? "Inspiration vorhanden — antippen zum Ausgeben" : "Keine Inspiration"}
       className={cx(
-        "flex size-7 items-center justify-center rounded-full border transition-colors",
-        on
-          ? "border-brass/60 bg-brass/10 text-brass"
-          : "border-edge/0 text-faint hover:border-edge-bright hover:text-mute",
+        "flex size-8 items-center justify-center transition-colors",
+        on ? "text-brass" : "text-faint hover:text-mute",
         className,
       )}
     >
@@ -50,7 +48,7 @@ export function InspirationToggle({ className }: { className?: string }) {
  */
 function FlameIcon({ lit }: { lit: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden className="size-4">
+    <svg viewBox="0 0 24 24" aria-hidden className="size-5">
       <path
         d="M12 2.5c3.4 3 5.5 5.6 5.5 8.9a5.5 5.5 0 1 1-11 0c0-1.7.7-3.2 1.9-4.6.3 1 .9 1.8 1.7 2.2.5-2.6.9-4.6 1.9-6.5z"
         fill={lit ? "var(--color-brass)" : "none"}
