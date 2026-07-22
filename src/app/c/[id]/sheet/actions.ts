@@ -53,59 +53,6 @@ export async function saveBasicsAction(
   refresh(characterId);
 }
 
-/**
- * Nur die Rüstungsklasse — direkt am Schild im Profilkopf.
- *
- * `null` heißt „wieder berechnen“, genau wie das leere Feld im Bogen. Die
- * AC ändert sich mitten im Abenteuer (neue Rüstung, Shield of Faith, ein
- * Ring), und dafür den ganzen Bogen zu öffnen ist ein Umweg.
- */
-export async function saveArmorClassAction(
-  characterId: number,
-  value: number | null,
-) {
-  db.update(characters)
-    .set({
-      acOverride:
-        value === null ? null : Math.min(Math.max(Math.round(value), 0), 99),
-    })
-    .where(eq(characters.id, characterId))
-    .run();
-
-  refresh(characterId);
-}
-
-/**
- * Nur die sechs Attributswerte — für den Schnellzugriff auf der Übersicht.
- *
- * Getrennt von `saveBasicsAction`, weil die über das ganze Formular geht und
- * dabei jedes nicht mitgeschickte Feld zurücksetzen würde. Hier kommen sechs
- * Zahlen an, und sechs Zahlen werden geschrieben.
- */
-export async function saveAbilityScoresAction(
-  characterId: number,
-  scores: Record<string, number>,
-) {
-  const score = (key: string) =>
-    Math.min(Math.max(Math.round(Number(scores[key] ?? 10)), 1), 30);
-
-  db.update(characters)
-    .set({
-      str: score("str"),
-      dex: score("dex"),
-      con: score("con"),
-      int: score("int"),
-      wis: score("wis"),
-      cha: score("cha"),
-    })
-    .where(eq(characters.id, characterId))
-    .run();
-
-  // CON verschiebt die maximalen Trefferpunkte, das Zauberattribut den
-  // Spell-DC — refreshDerived zieht beides nach.
-  refresh(characterId);
-}
-
 export async function setProficiencyAction(
   characterId: number,
   kind: "save" | "skill",

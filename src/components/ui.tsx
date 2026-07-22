@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
 import { PenIcon } from "./icons";
@@ -71,6 +72,37 @@ export function EditToggle({
       {editing ? null : <PenIcon />}
       {editing ? "Fertig" : "Edit"}
     </button>
+  );
+}
+
+/**
+ * Derselbe Stift, aber er führt zum Bogen statt ein Feld aufzuklappen.
+ *
+ * Geändert wird an genau einer Stelle — der Übersicht sieht man das nur an,
+ * wenn der gewohnte Stift weiterhin dort steht, wo der Wert steht, und den
+ * Weg zeigt. Ein stummes „hier geht nichts mehr“ wäre die schlechtere
+ * Antwort auf dieselbe Frage.
+ */
+export function EditLink({
+  href,
+  className,
+  label = "Edit",
+}: {
+  href: string;
+  className?: string;
+  label?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cx(
+        "inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina",
+        className,
+      )}
+    >
+      <PenIcon />
+      {label}
+    </Link>
   );
 }
 

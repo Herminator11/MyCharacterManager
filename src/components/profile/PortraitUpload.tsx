@@ -2,13 +2,18 @@
 
 import { useRef, useState, useTransition } from "react";
 
+import { Portrait } from "@/components/profile/Portrait";
 import { cx } from "@/components/ui";
 
 /**
- * Portrait mit Klick-zum-Wechseln.
+ * Portrait mit Klick-zum-Wechseln — steht nur im Bogen.
  *
- * Ohne Bild steht hier die Initiale statt eines leeren Kastens — so hat
- * die Charakterkarte auch vor dem ersten Upload eine erkennbare Form.
+ * Die Übersicht zeigt dasselbe Bild über `Portrait`, ohne Knopf: geändert
+ * wird an einer Stelle, und das ist der Bogen.
+ *
+ * Speichert sofort statt über den Speichern-Knopf darunter. Eine Datei
+ * auszuwählen ist bereits die Bestätigung — ein zweiter Schritt für etwas,
+ * das man am Ergebnis sofort sieht, wäre nur eine Falle.
  */
 export function PortraitUpload({
   characterId,
@@ -24,11 +29,7 @@ export function PortraitUpload({
   const input = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  /** Steigt nach jedem Upload und bricht den Bild-Cache des Browsers auf. */
   const [version, setVersion] = useState(0);
-
-  const initial = name.trim().charAt(0).toUpperCase() || "?";
-  const showImage = hasPortrait || version > 0;
 
   return (
     <div className="shrink-0">
@@ -38,24 +39,17 @@ export function PortraitUpload({
         onClick={() => input.current?.click()}
         aria-label={hasPortrait ? "Portrait wechseln" : "Portrait hochladen"}
         className={cx(
-          "group relative size-24 overflow-hidden rounded-lg border border-edge bg-panel-2 transition-colors hover:border-patina sm:size-28",
+          "group relative block rounded-lg transition-opacity",
           pending && "opacity-50",
         )}
       >
-        {showImage ? (
-          // eslint-disable-next-line @next/next/no-img-element -- Die Datei
-          // liegt außerhalb von public/ und wird über einen Route Handler
-          // ausgeliefert; next/image bringt hier keinen Vorteil.
-          <img
-            src={`/api/characters/${characterId}/portrait?v=${version}`}
-            alt={`Portrait von ${name}`}
-            className="size-full object-cover"
-          />
-        ) : (
-          <span className="flex size-full items-center justify-center text-4xl font-semibold text-faint">
-            {initial}
-          </span>
-        )}
+        <Portrait
+          characterId={characterId}
+          name={name}
+          hasPortrait={hasPortrait}
+          version={version}
+          className="transition-colors group-hover:border-patina"
+        />
 
         <span className="absolute inset-x-0 bottom-0 bg-ink/85 py-1 text-[0.625rem] font-semibold tracking-wide uppercase text-mute opacity-0 transition-opacity group-hover:opacity-100">
           {pending ? "lädt…" : "Bild wählen"}

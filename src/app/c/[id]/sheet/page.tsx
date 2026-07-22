@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { ProficiencyToggle } from "@/components/sheet/ProficiencyToggle";
 import {
   Button,
@@ -14,6 +15,7 @@ import { formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
 import { getSheet } from "@/lib/server/characters";
 
+import { uploadPortraitAction } from "../portrait-actions";
 import {
   addClassAction,
   removeClassAction,
@@ -23,6 +25,35 @@ import {
 } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Der Bogen: die einzige Stelle, an der der Charakter geändert wird.
+ *
+ * Die Übersicht zeigt nur an — vom Portrait über die AC bis zum letzten
+ * Fertigkeitshaken läuft alles hier zusammen. Das kostet auf der Übersicht
+ * ein paar kurze Wege, spart aber die Frage, die jeden dieser Wege teurer
+ * machte als er war: „wo war das nochmal änderbar?“
+ *
+ * Der Preis ist eine lange Seite. Deshalb die Sprungmarken oben: sieben
+ * Abschnitte in fester Reihenfolge, damit man beim zweiten Mal nicht mehr
+ * sucht, sondern zielt.
+ *
+ * Zwei Arten zu speichern, absichtlich unterschieden:
+ * sofort, wo eine einzelne Geste vollständig ist (Portrait wählen, Level
+ * stellen, Haken setzen) — und per Knopf, wo mehrere Felder zusammen einen
+ * Sinn ergeben und ein halb ausgefülltes Formular Unsinn wäre.
+ */
+
+/** Reihenfolge und Beschriftung der Sprungmarken — und der Abschnitte. */
+const SECTIONS = [
+  { id: "bild", label: "Bild" },
+  { id: "klassen", label: "Klassen" },
+  { id: "grunddaten", label: "Grunddaten" },
+  { id: "attribute", label: "Attribute" },
+  { id: "werte", label: "Werte" },
+  { id: "uebungen", label: "Übungen" },
+  { id: "zaubern", label: "Zaubern" },
+] as const;
 
 export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
@@ -36,9 +67,56 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
-      {/* Klassen zuerst: sie bestimmen Zauberplätze, Ressourcen und
-          Proficiency Bonus — also alles, was darunter steht. */}
-      <Panel>
+      {/* Waagerecht scrollbar statt umbrechend: sieben Marken passen am
+          Handy in keine Zeile, und eine zweite Zeile Navigation über einem
+          Formular ist mehr Leiste als Inhalt. */}
+      <nav
+        aria-label="Abschnitte"
+        className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <ul className="flex w-max gap-1.5">
+          {SECTIONS.map((section) => (
+            <li key={section.id}>
+              <a
+                href={`#${section.id}`}
+                className="block rounded-md border border-edge bg-panel px-3 py-1.5 text-xs text-mute transition-colors hover:border-patina hover:text-patina"
+              >
+                {section.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* scroll-mt an jedem Abschnitt: die klebende Kopfleiste des Layouts
+          liegt sonst genau auf der Überschrift, zu der man gerade
+          gesprungen ist. */}
+      <Panel id="bild" className="scroll-mt-24">
+        <SectionLabel
+          right={<span className="text-xs text-faint">speichert sofort</span>}
+        >
+          Bild
+        </SectionLabel>
+        <div className="flex items-center gap-4">
+          <PortraitUpload
+            characterId={characterId}
+            name={character.name}
+            hasPortrait={Boolean(character.portraitFile)}
+            upload={async (formData: FormData) => {
+              "use server";
+              return uploadPortraitAction(characterId, formData);
+            }}
+          />
+          <p className="text-xs text-faint">
+            Antippen wählt eine Datei. Ohne Bild steht auf der Übersicht die
+            Initiale — die Karte hat dann trotzdem eine erkennbare Form.
+          </p>
+        </div>
+      </Panel>
+
+      {/* Klassen vor allem anderen: sie bestimmen Zauberplätze, Ressourcen
+          und Proficiency Bonus — also die Hälfte der Zahlen darunter. */}
+      <Panel id="klassen" className="scroll-mt-24">
         <SectionLabel
           right={
             <span className="text-xs text-mute">
@@ -142,6 +220,10 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         </p>
       </Panel>
 
+      {/* Ein Formular über drei Abschnitte: sie hängen zusammen. CON
+          verschiebt die maximalen Trefferpunkte, DEX die Initiative — sie
+          einzeln zu speichern hieße, zwischendurch einen Zustand zu
+          schreiben, den niemand gemeint hat. */}
       <form
         action={async (formData: FormData) => {
           "use server";
@@ -149,31 +231,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         }}
         className="space-y-3"
       >
-        <Panel>
-          <SectionLabel>Attribute</SectionLabel>
-          <div className="grid grid-cols-3 gap-2.5">
-            {sheet.abilities.map((ability) => (
-              <div key={ability.key}>
-                <label className="block">
-                  <span className="label">{ABILITY_LABELS[ability.key].name}</span>
-                  <input
-                    name={ability.key}
-                    type="number"
-                    min={1}
-                    max={30}
-                    defaultValue={ability.score}
-                    className="mt-1 w-full min-h-12 rounded-md border border-edge bg-ink px-2 text-center text-lg font-semibold focus:border-patina focus:outline-none"
-                  />
-                </label>
-                <p className="mt-1 text-center text-xs text-patina">
-                  {formatModifier(ability.modifier)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel>
+        <Panel id="grunddaten" className="scroll-mt-24">
           <SectionLabel>Grunddaten</SectionLabel>
           <div className="space-y-3">
             <Field label="Name">
@@ -210,11 +268,40 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           </div>
         </Panel>
 
-        <Panel>
-          <SectionLabel>Abgeleitete Werte</SectionLabel>
+        <Panel id="attribute" className="scroll-mt-24">
+          <SectionLabel>Attribute</SectionLabel>
+          <div className="grid grid-cols-3 gap-2.5">
+            {sheet.abilities.map((ability) => (
+              <div key={ability.key}>
+                <label className="block">
+                  <span className="label">{ABILITY_LABELS[ability.key].name}</span>
+                  <input
+                    name={ability.key}
+                    type="number"
+                    min={1}
+                    max={30}
+                    defaultValue={ability.score}
+                    className="mt-1 w-full min-h-12 rounded-md border border-edge bg-ink px-2 text-center text-lg font-semibold focus:border-patina focus:outline-none"
+                  />
+                </label>
+                <p className="mt-1 text-center text-xs text-patina">
+                  {formatModifier(ability.modifier)}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2.5 text-xs text-faint">
+            Rettungswürfe, Fertigkeiten, Zauber-DC und die maximalen
+            Trefferpunkte rechnen sich neu, sobald du speicherst.
+          </p>
+        </Panel>
+
+        <Panel id="werte" className="scroll-mt-24">
+          <SectionLabel>Werte</SectionLabel>
           <p className="mb-3 text-xs text-faint">
             Leer lassen heißt: automatisch berechnen. Der berechnete Wert steht
-            als Platzhalter im Feld.
+            als Platzhalter im Feld. So trägt man eine AC aus Shield of Faith
+            ein und nimmt sie hinterher ebenso schnell wieder zurück.
           </p>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Max. HP">
@@ -275,37 +362,21 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           </div>
         </Panel>
 
+        {/* Steht am Ende seines Formulars, nicht klebend am Bildschirmrand.
+            Ein mitschwebender Knopf stünde auch über den Abschnitten, die er
+            nicht speichert — und benennt damit dauernd eine Zuständigkeit,
+            die er dort gerade nicht hat. */}
         <Button type="submit" variant="solid" size="lg" className="w-full">
-          Änderungen speichern
+          Grunddaten, Attribute und Werte speichern
         </Button>
       </form>
 
-      {sheet.spellcasting ? (
-        <Panel>
-          <SectionLabel>Zaubern</SectionLabel>
-          <dl className="grid grid-cols-3 gap-3 text-center">
-            <div>
-              <dd className="text-xl font-semibold">
-                {ABILITY_LABELS[sheet.spellcasting.ability].name}
-              </dd>
-              <dt className="label mt-1">Attribut</dt>
-            </div>
-            <div>
-              <dd className="text-xl font-semibold">{sheet.spellcasting.saveDc}</dd>
-              <dt className="label mt-1">Save DC</dt>
-            </div>
-            <div>
-              <dd className="text-xl font-semibold">
-                {formatModifier(sheet.spellcasting.attackBonus)}
-              </dd>
-              <dt className="label mt-1">Angriff</dt>
-            </div>
-          </dl>
-        </Panel>
-      ) : null}
-
-      <Panel>
-        <SectionLabel>Rettungswürfe</SectionLabel>
+      <Panel id="uebungen" className="scroll-mt-24">
+        <SectionLabel
+          right={<span className="text-xs text-faint">Tippen wechselt durch</span>}
+        >
+          Rettungswürfe
+        </SectionLabel>
         <div className="grid gap-0.5 sm:grid-cols-2">
           {sheet.abilities.map((ability) => (
             <ProficiencyToggle
@@ -325,60 +396,87 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             />
           ))}
         </div>
-      </Panel>
 
-      <Panel>
-        <SectionLabel
-          right={<span className="text-xs text-faint">Tippen wechselt durch</span>}
-        >
-          Fertigkeiten
-        </SectionLabel>
-        {/* Nach Attribut gruppiert wie auf der Übersicht und auf jedem
-            gedruckten Bogen — nicht alphabetisch. Wer eine Fertigkeit
-            sucht, weiß meist, woran sie hängt. CON hat keine und fällt
-            dadurch von selbst heraus. */}
-        {/* Spalten statt Grid: die Gruppen sind verschieden lang, und ein
-            Grid ließe unter STR mit seiner einen Fertigkeit ein Loch. Der
-            Spaltenfluss verteilt 18 Zeilen von selbst gleichmäßig. */}
-        <div className="gap-x-6 sm:columns-2">
-          {ABILITIES.map((ability) => {
-            const group = sheet.skills.filter((s) => s.ability === ability);
-            if (group.length === 0) return null;
+        <div className="mt-5 border-t border-edge pt-4">
+          <SectionLabel>Fertigkeiten</SectionLabel>
+          {/* Nach Attribut gruppiert wie auf der Übersicht und auf jedem
+              gedruckten Bogen — nicht alphabetisch. Wer eine Fertigkeit
+              sucht, weiß meist, woran sie hängt. CON hat keine und fällt
+              dadurch von selbst heraus. */}
+          {/* Spalten statt Grid: die Gruppen sind verschieden lang, und ein
+              Grid ließe unter STR mit seiner einen Fertigkeit ein Loch. Der
+              Spaltenfluss verteilt 18 Zeilen von selbst gleichmäßig. */}
+          <div className="gap-x-6 sm:columns-2">
+            {ABILITIES.map((ability) => {
+              const group = sheet.skills.filter((s) => s.ability === ability);
+              if (group.length === 0) return null;
 
-            return (
-              <div key={ability} className="mb-4 break-inside-avoid">
-                <h3 className="label mb-1">
-                  {ABILITY_LABELS[ability].name}
-                  <span className="ml-2 font-normal tracking-normal normal-case">
-                    {ABILITY_LABELS[ability].de}
-                  </span>
-                </h3>
-                <div className="grid gap-0.5">
-                  {group.map((skill) => (
-                    <ProficiencyToggle
-                      key={skill.key}
-                      label={skill.name}
-                      sublabel={skill.de}
-                      bonus={skill.bonus}
-                      level={skill.level}
-                      onChange={async (level) => {
-                        "use server";
-                        await setProficiencyAction(
-                          characterId,
-                          "skill",
-                          skill.key,
-                          level,
-                        );
-                      }}
-                    />
-                  ))}
+              return (
+                <div key={ability} className="mb-4 break-inside-avoid">
+                  <h3 className="label mb-1">
+                    {ABILITY_LABELS[ability].name}
+                    <span className="ml-2 font-normal tracking-normal normal-case">
+                      {ABILITY_LABELS[ability].de}
+                    </span>
+                  </h3>
+                  <div className="grid gap-0.5">
+                    {group.map((skill) => (
+                      <ProficiencyToggle
+                        key={skill.key}
+                        label={skill.name}
+                        sublabel={skill.de}
+                        bonus={skill.bonus}
+                        level={skill.level}
+                        onChange={async (level) => {
+                          "use server";
+                          await setProficiencyAction(
+                            characterId,
+                            "skill",
+                            skill.key,
+                            level,
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </Panel>
 
+      {/* Der einzige Abschnitt ohne Eingabefelder: die drei Zahlen fallen
+          aus Klasse, Attribut und Proficiency ab. Überschreiben lassen sie
+          sich trotzdem — aber über die Spalten, die der Import setzt, nicht
+          von Hand. Steht hier, weil man sie im Bogen sucht. */}
+      <Panel id="zaubern" className="scroll-mt-24">
+        <SectionLabel>Zaubern</SectionLabel>
+        {sheet.spellcasting ? (
+          <dl className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <dd className="text-xl font-semibold">
+                {ABILITY_LABELS[sheet.spellcasting.ability].name}
+              </dd>
+              <dt className="label mt-1">Attribut</dt>
+            </div>
+            <div>
+              <dd className="text-xl font-semibold">{sheet.spellcasting.saveDc}</dd>
+              <dt className="label mt-1">Save DC</dt>
+            </div>
+            <div>
+              <dd className="text-xl font-semibold">
+                {formatModifier(sheet.spellcasting.attackBonus)}
+              </dd>
+              <dt className="label mt-1">Angriff</dt>
+            </div>
+          </dl>
+        ) : (
+          <p className="text-sm text-faint">
+            Keine zaubernde Klasse eingetragen.
+          </p>
+        )}
+      </Panel>
     </div>
   );
 }

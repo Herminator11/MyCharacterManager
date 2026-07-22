@@ -20,13 +20,19 @@ import {
   addPinAction,
   resolvePinAction,
 } from "./notes/actions";
-import {
-  saveAbilityScoresAction,
-  saveArmorClassAction,
-} from "./sheet/actions";
-import { uploadPortraitAction } from "./portrait-actions";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Die Übersicht: was gerade gilt, und was der Kampf daran ändert.
+ *
+ * Sie zeigt den Charakter, sie bearbeitet ihn nicht. Änderbar ist hier nur,
+ * was sich am Spieltisch von Minute zu Minute ändert — Trefferpunkte,
+ * Zauberplätze, Ressourcen, Conditions, der Zug — dazu Vermerke und
+ * Logbuch, die beide Notizen sind und keine Werte. Alles andere steht im
+ * Bogen unter `/c/[id]/sheet`, und zwar vollständig an einer Stelle: sonst
+ * sucht man die Bewegungsrate erst hier, dann dort.
+ */
 
 export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
@@ -73,14 +79,6 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
             "use server";
             await addPinAction(characterId, formData);
           }}
-          uploadPortrait={async (formData: FormData) => {
-            "use server";
-            return uploadPortraitAction(characterId, formData);
-          }}
-          saveArmorClass={async (value: number | null) => {
-            "use server";
-            await saveArmorClassAction(characterId, value);
-          }}
         />
 
         <PinnedNotes
@@ -105,10 +103,7 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
           <div className="order-2 min-w-0 space-y-3 lg:order-1">
             <AbilityPanel
               abilities={abilities}
-              save={async (scores: Record<string, number>) => {
-                "use server";
-                await saveAbilityScoresAction(characterId, scores);
-              }}
+              editHref={`/c/${characterId}/sheet#attribute`}
             />
 
             {/* Steht in der Nachschlage-Spalte, nicht in der Kampf-Spalte:

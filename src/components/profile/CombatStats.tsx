@@ -17,25 +17,17 @@ import { ArmorClassShield } from "./ArmorClassShield";
  */
 export function CombatStats({
   armorClass,
-  acOverride,
-  saveArmorClass,
   initiative,
   speed,
 }: {
   armorClass: number;
-  acOverride: number | null;
-  saveArmorClass: (value: number | null) => Promise<void>;
   /** Schon als "+2" formatiert. */
   initiative: string;
   speed: number;
 }) {
   return (
     <dl className="flex shrink-0 gap-2">
-      <ArmorClassShield
-        value={armorClass}
-        override={acOverride}
-        save={saveArmorClass}
-      />
+      <ArmorClassShield value={armorClass} />
       <Plate label="Initiative" value={initiative} icon={<BoltIcon />} />
       <Plate label="Speed" value={speed} unit="ft" icon={<ShoeIcon />} />
     </dl>

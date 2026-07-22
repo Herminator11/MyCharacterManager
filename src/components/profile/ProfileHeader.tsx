@@ -2,7 +2,7 @@ import { PinButton } from "@/components/notes/PinButton";
 import { PROFILE_ANCHOR_ID } from "@/components/StickyStats";
 import { CombatStats } from "@/components/profile/CombatStats";
 import { InspirationToggle } from "@/components/profile/InspirationToggle";
-import { PortraitUpload } from "@/components/profile/PortraitUpload";
+import { Portrait } from "@/components/profile/Portrait";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
@@ -16,17 +16,18 @@ import type { SheetView } from "@/lib/server/characters";
  * Initiative, Speed — als eigene Instrumente. Die klebende Leiste darüber
  * zeigt dieselben Zahlen noch einmal klein; das ist keine Dopplung, sondern
  * Arbeitsteilung: hier liest man sie, dort behält man sie beim Scrollen.
+ *
+ * Nichts davon ist hier änderbar. Was zum Charakter gehört, wird im Bogen
+ * geändert; auf dieser Seite ändert sich nur, was der Kampf ändert.
+ * Ausgenommen bleiben die Vermerke und das Logbuch — das sind Notizen, keine
+ * Werte, und sie entstehen mitten im Spiel.
  */
 export function ProfileHeader({
   sheet,
-  uploadPortrait,
-  saveArmorClass,
   pinCount,
   addPin,
 }: {
   sheet: NonNullable<SheetView>;
-  uploadPortrait: (formData: FormData) => Promise<{ error?: string } | void>;
-  saveArmorClass: (value: number | null) => Promise<void>;
   pinCount: number;
   addPin: (formData: FormData) => Promise<void>;
 }) {
@@ -40,11 +41,11 @@ export function ProfileHeader({
 
   return (
     <Panel className="flex flex-wrap items-start gap-4">
-      <PortraitUpload
+      <Portrait
         characterId={character.id}
         name={character.name}
         hasPortrait={Boolean(character.portraitFile)}
-        upload={uploadPortrait}
+        className="shrink-0"
       />
 
       {/* Mindestbreite, damit die Instrumente rechts lieber in eine eigene
@@ -98,8 +99,6 @@ export function ProfileHeader({
       <div id={PROFILE_ANCHOR_ID} className="flex shrink-0 gap-2">
         <CombatStats
           armorClass={sheet.armorClass}
-          acOverride={character.acOverride}
-          saveArmorClass={saveArmorClass}
           initiative={formatModifier(sheet.initiative)}
           speed={character.speed}
         />
