@@ -294,23 +294,44 @@ function Conditions({
   onToggle: (key: string, active: boolean) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
   const active = options.filter((c) => state.conditions.includes(c.key));
   const detail = options.find((c) => c.key === open);
+
+  // Eingeklappt bleiben nur die aktiven Chips stehen. Fünfzehn Kästchen
+  // dauerhaft anzuzeigen kostet den halben Bildschirm für etwas, das an
+  // den meisten Abenden leer bleibt — was gerade gilt, muss man trotzdem
+  // sehen, ohne erst aufzuklappen.
+  const shown = picking ? options : active;
 
   return (
     <Panel>
       <SectionLabel
         right={
-          active.length > 0 ? (
-            <span className="text-xs text-ember">{active.length} aktiv</span>
-          ) : null
+          <button
+            type="button"
+            onClick={() => setPicking(!picking)}
+            aria-expanded={picking}
+            className="text-[0.6875rem] text-faint transition-colors hover:text-patina"
+          >
+            {picking ? "Fertig" : "Setzen"}
+          </button>
         }
       >
         Conditions
+        {active.length > 0 ? (
+          <span className="ml-2 font-normal tracking-normal normal-case text-ember">
+            {active.length} aktiv
+          </span>
+        ) : null}
       </SectionLabel>
 
+      {shown.length === 0 ? (
+        <p className="text-sm text-faint">Keine aktiv.</p>
+      ) : null}
+
       <div className="flex flex-wrap gap-1.5">
-        {options.map((condition) => {
+        {shown.map((condition) => {
           const isActive = state.conditions.includes(condition.key);
           return (
             <button
