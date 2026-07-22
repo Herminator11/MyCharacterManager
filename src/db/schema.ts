@@ -42,12 +42,38 @@ export type Ability = (typeof ABILITIES)[number];
 const now = sql`(unixepoch())`;
 
 /* ------------------------------------------------------------------ *
+ * Ablage
+ * ------------------------------------------------------------------ */
+
+/**
+ * Ordner für die Startseite — meist eine Kampagne, manchmal ein Archiv.
+ *
+ * Bewusst flach: verschachtelte Ordner brauchen Baumnavigation, und wer
+ * ein Dutzend Charaktere hat, findet sie auch in einer Ebene.
+ */
+export const folders = sqliteTable("folders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: integer("created_at").notNull().default(now),
+});
+
+/* ------------------------------------------------------------------ *
  * Charakter
  * ------------------------------------------------------------------ */
 
 export const characters = sqliteTable("characters", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
+  /** Hebt den Charakter auf der Startseite nach ganz oben. */
+  favorite: integer("favorite", { mode: "boolean" }).notNull().default(false),
+  /**
+   * null heißt „liegt lose“ — das ist der Normalfall und bleibt es auch,
+   * wenn ein Ordner gelöscht wird. Charaktere gehen dabei nie mit.
+   */
+  folderId: integer("folder_id").references(() => folders.id, {
+    onDelete: "set null",
+  }),
   race: text("race").notNull().default(""),
   background: text("background").notNull().default(""),
   alignment: text("alignment").notNull().default(""),

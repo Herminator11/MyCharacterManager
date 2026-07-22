@@ -46,7 +46,13 @@ import { syncDerived } from "./sync";
  * ------------------------------------------------------------------ */
 
 export function listCharacters() {
-  const rows = db.select().from(characters).orderBy(asc(characters.name)).all();
+  // Favoriten zuerst, sonst alphabetisch — die Startseite gruppiert danach
+  // selbst nach Ordnern und kann sich auf diese Reihenfolge verlassen.
+  const rows = db
+    .select()
+    .from(characters)
+    .orderBy(desc(characters.favorite), asc(characters.name))
+    .all();
 
   return rows.map((character) => {
     const classes = db

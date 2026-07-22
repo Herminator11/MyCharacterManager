@@ -1,0 +1,503 @@
+"use client";
+
+import Link from "next/link";
+import { useState, useTransition } from "react";
+
+import { Button, cx, EmptyState, inputClass, Ratio } from "@/components/ui";
+
+export type LibraryCharacter = {
+  id: number;
+  name: string;
+  race: string;
+  classLine: string;
+  hpCurrent: number;
+  hpMax: number;
+  favorite: boolean;
+  folderId: number | null;
+};
+
+export type LibraryFolder = { id: number; name: string };
+
+export type LibraryActions = {
+  setFavorite: (characterId: number, favorite: boolean) => Promise<void>;
+  rename: (characterId: number, name: string) => Promise<void>;
+  move: (characterId: number, folderId: number | null) => Promise<void>;
+  remove: (characterId: number) => Promise<void>;
+  createFolder: (name: string) => Promise<void>;
+  renameFolder: (folderId: number, name: string) => Promise<void>;
+  deleteFolder: (folderId: number) => Promise<void>;
+};
+
+/**
+ * Die Startseite als Ablage.
+ *
+ * Zwei Zustände: normal liest man nur und tippt einen Charakter an, im
+ * Bearbeiten-Modus kommen Umbenennen, Verschieben und Löschen dazu. Das
+ * hält den Alltagsweg — Seite auf, Charakter antippen — frei von Knöpfen,
+ * die man einmal im Monat braucht und versehentlich trifft.
+ */
+export function CharacterLibrary({
+  characters,
+  folders,
+  actions,
+}: {
+  characters: LibraryCharacter[];
+  folders: LibraryFolder[];
+  actions: LibraryActions;
+}) {
+  const [editing, setEditing] = useState(false);
+
+  const favorites = characters.filter((c) => c.favorite);
+  const loose = characters.filter((c) => !c.favorite && c.folderId === null);
+  const folderName = (id: number | null) =>
+    folders.find((f) => f.id === id)?.name ?? "";
+
+  if (characters.length === 0 && folders.length === 0) {
+    return (
+      <div className="mt-8">
+        <EmptyState title="Noch kein Charakter angelegt.">
+          Leg unten deinen ersten an — Klasse und Level bestimmen, welche
+          Zauberplätze und Ressourcen die App für dich mitführt.
+        </EmptyState>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="label">
+          {characters.length}{" "}
+          {characters.length === 1 ? "Charakter" : "Charaktere"}
+        </h2>
+        <button
+          type="button"
+          onClick={() => setEditing(!editing)}
+          aria-pressed={editing}
+          className="text-xs text-faint transition-colors hover:text-patina"
+        >
+          {editing ? "Fertig" : "Bearbeiten"}
+        </button>
+      </div>
+
+      <div className="mt-3 space-y-5">
+        {favorites.length > 0 ? (
+          <Group title="Favoriten">
+            {favorites.map((character) => (
+              <Row
+                key={character.id}
+                character={character}
+                folders={folders}
+                actions={actions}
+                editing={editing}
+                // Favoriten stehen oben statt in ihrem Ordner — der Hinweis
+                // sagt, wo sie liegen, damit nichts verschwunden wirkt.
+                location={folderName(character.folderId)}
+              />
+            ))}
+          </Group>
+        ) : null}
+
+        {loose.length > 0 ? (
+          <Group title={folders.length > 0 ? "Ohne Ordner" : "Alle"}>
+            {loose.map((character) => (
+              <Row
+                key={character.id}
+                character={character}
+                folders={folders}
+                actions={actions}
+                editing={editing}
+              />
+            ))}
+          </Group>
+        ) : null}
+
+        {folders.map((folder) => {
+          const all = characters.filter((c) => c.folderId === folder.id);
+          const inside = all.filter((c) => !c.favorite);
+
+          return (
+            <Group
+              key={folder.id}
+              title={folder.name}
+              folder={folder}
+              actions={actions}
+              editing={editing}
+              count={all.length}
+            >
+              {inside.length === 0 ? (
+                <p className="px-1 py-2 text-sm text-faint">
+                  {/* Zählt der Ordner Charaktere, stehen sie als Favoriten
+                      oben — „nichts drin“ wäre dann schlicht gelogen. */}
+                  {all.length === 0
+                    ? "Nichts in diesem Ordner."
+                    : all.length === 1
+                      ? "Der eine Charakter steht oben bei den Favoriten."
+                      : "Alle stehen oben bei den Favoriten."}
+                </p>
+              ) : (
+                inside.map((character) => (
+                  <Row
+                    key={character.id}
+                    character={character}
+                    folders={folders}
+                    actions={actions}
+                    editing={editing}
+                  />
+                ))
+              )}
+            </Group>
+          );
+        })}
+      </div>
+
+      {editing ? <NewFolder create={actions.createFolder} /> : null}
+    </div>
+  );
+}
+
+function Group({
+  title,
+  count,
+  folder,
+  actions,
+  editing,
+  children,
+}: {
+  title: string;
+  count?: number;
+  folder?: LibraryFolder;
+  actions?: LibraryActions;
+  editing?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="mb-1.5 flex items-center justify-between gap-3">
+        <h3 className="label">
+          {title}
+          {typeof count === "number" ? (
+            <span className="ml-2 font-normal tracking-normal normal-case text-faint">
+              {count}
+            </span>
+          ) : null}
+        </h3>
+        {folder && actions && editing ? (
+          <FolderControls folder={folder} actions={actions} />
+        ) : null}
+      </div>
+      <ul className="space-y-2">{children}</ul>
+    </section>
+  );
+}
+
+function Row({
+  character,
+  folders,
+  actions,
+  editing,
+  location,
+}: {
+  character: LibraryCharacter;
+  folders: LibraryFolder[];
+  actions: LibraryActions;
+  editing: boolean;
+  location?: string;
+}) {
+  const [pending, startTransition] = useTransition();
+  const run = (fn: () => Promise<void>) => startTransition(() => void fn());
+
+  return (
+    <li
+      className={cx(
+        "rounded-lg border border-edge bg-panel transition-opacity",
+        pending && "opacity-60",
+      )}
+    >
+      <div className="flex items-stretch">
+        <Star
+          on={character.favorite}
+          name={character.name}
+          onToggle={() =>
+            run(() => actions.setFavorite(character.id, !character.favorite))
+          }
+        />
+
+        <Link
+          href={`/c/${character.id}`}
+          className="min-w-0 flex-1 py-3.5 pr-4 transition-colors hover:text-patina"
+        >
+          <span className="flex items-baseline justify-between gap-4">
+            <span className="truncate text-lg font-semibold tracking-tight">
+              {character.name}
+            </span>
+            <span className="shrink-0 text-sm text-patina">
+              <Ratio current={character.hpCurrent} total={character.hpMax} />
+              <span className="ml-1 text-faint">HP</span>
+            </span>
+          </span>
+          <span className="mt-1 block truncate text-sm text-mute">
+            {character.race ? `${character.race} · ` : ""}
+            {character.classLine}
+            {location ? (
+              <span className="text-faint"> · in {location}</span>
+            ) : null}
+          </span>
+        </Link>
+      </div>
+
+      {editing ? (
+        <RowEditor
+          character={character}
+          folders={folders}
+          actions={actions}
+          run={run}
+        />
+      ) : null}
+    </li>
+  );
+}
+
+function RowEditor({
+  character,
+  folders,
+  actions,
+  run,
+}: {
+  character: LibraryCharacter;
+  folders: LibraryFolder[];
+  actions: LibraryActions;
+  run: (fn: () => Promise<void>) => void;
+}) {
+  const [name, setName] = useState(character.name);
+  const [confirming, setConfirming] = useState(false);
+
+  if (confirming) {
+    return (
+      <div className="border-t border-ember-dim bg-ember-deep/40 px-4 py-3">
+        <p className="text-sm text-ember">
+          <span className="font-semibold">{character.name}</span> endgültig
+          löschen?
+        </p>
+        <p className="mt-0.5 text-xs text-mute">
+          Mit allen Zaubern, Ressourcen, Notizen und dem Logbuch. Das lässt
+          sich nicht rückgängig machen.
+        </p>
+        <div className="mt-2.5 grid grid-cols-2 gap-2">
+          <Button size="sm" onClick={() => setConfirming(false)}>
+            Abbrechen
+          </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => run(() => actions.remove(character.id))}
+          >
+            Endgültig löschen
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2 border-t border-edge px-4 py-3">
+      <div className="flex gap-2">
+        <input
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && name.trim()) {
+              run(() => actions.rename(character.id, name));
+            }
+          }}
+          aria-label={`Name von ${character.name}`}
+          className={inputClass}
+        />
+        <Button
+          size="sm"
+          disabled={!name.trim() || name.trim() === character.name}
+          onClick={() => run(() => actions.rename(character.id, name))}
+        >
+          Umbenennen
+        </Button>
+      </div>
+
+      <div className="flex gap-2">
+        <select
+          value={character.folderId ?? ""}
+          onChange={(event) =>
+            run(() =>
+              actions.move(
+                character.id,
+                event.target.value === "" ? null : Number(event.target.value),
+              ),
+            )
+          }
+          aria-label={`Ordner von ${character.name}`}
+          className={`${inputClass} flex-1`}
+        >
+          <option value="">Ohne Ordner</option>
+          {folders.map((folder) => (
+            <option key={folder.id} value={folder.id}>
+              {folder.name}
+            </option>
+          ))}
+        </select>
+
+        <Button
+          size="sm"
+          variant="danger"
+          onClick={() => setConfirming(true)}
+          className="px-3"
+        >
+          Löschen
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function Star({
+  on,
+  name,
+  onToggle,
+}: {
+  on: boolean;
+  name: string;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={on}
+      aria-label={on ? `${name} nicht mehr favorisieren` : `${name} favorisieren`}
+      className="flex w-11 shrink-0 items-center justify-center self-stretch text-faint transition-colors hover:text-brass"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden className="size-[1.125rem]">
+        <path
+          d="M12 3.5 14.6 9l6 .8-4.4 4.2 1.1 6-5.3-2.9L6.7 20l1.1-6L3.4 9.8 9.4 9z"
+          fill={on ? "var(--color-brass)" : "none"}
+          stroke={on ? "var(--color-brass)" : "currentColor"}
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
+function FolderControls({
+  folder,
+  actions,
+}: {
+  folder: LibraryFolder;
+  actions: LibraryActions;
+}) {
+  const [name, setName] = useState(folder.name);
+  const [mode, setMode] = useState<"idle" | "rename" | "confirm">("idle");
+  const [, startTransition] = useTransition();
+  const run = (fn: () => Promise<void>) => startTransition(() => void fn());
+
+  if (mode === "rename") {
+    return (
+      <div className="flex gap-2">
+        <input
+          autoFocus
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setMode("idle");
+            if (event.key === "Enter" && name.trim()) {
+              run(() => actions.renameFolder(folder.id, name));
+              setMode("idle");
+            }
+          }}
+          aria-label={`Name von ${folder.name}`}
+          className="min-h-9 rounded-md border border-edge bg-ink px-2 text-sm focus:border-patina focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            run(() => actions.renameFolder(folder.id, name));
+            setMode("idle");
+          }}
+          className="text-xs text-patina"
+        >
+          Speichern
+        </button>
+      </div>
+    );
+  }
+
+  if (mode === "confirm") {
+    return (
+      <p className="flex items-center gap-3 text-xs text-ember">
+        Ordner löschen? Die Charaktere bleiben.
+        <button
+          type="button"
+          onClick={() => setMode("idle")}
+          className="text-faint"
+        >
+          Nein
+        </button>
+        <button
+          type="button"
+          onClick={() => run(() => actions.deleteFolder(folder.id))}
+          className="font-semibold"
+        >
+          Ja
+        </button>
+      </p>
+    );
+  }
+
+  return (
+    <span className="flex gap-3 text-xs text-faint">
+      <button
+        type="button"
+        onClick={() => setMode("rename")}
+        className="transition-colors hover:text-patina"
+      >
+        Umbenennen
+      </button>
+      <button
+        type="button"
+        onClick={() => setMode("confirm")}
+        className="transition-colors hover:text-ember"
+      >
+        Löschen
+      </button>
+    </span>
+  );
+}
+
+function NewFolder({ create }: { create: (name: string) => Promise<void> }) {
+  const [name, setName] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  const commit = () => {
+    if (!name.trim()) return;
+    const value = name;
+    setName("");
+    startTransition(() => void create(value));
+  };
+
+  return (
+    <div className="mt-5 flex gap-2">
+      <input
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") commit();
+        }}
+        placeholder="Neuer Ordner — etwa eine Kampagne"
+        aria-label="Name des neuen Ordners"
+        className={inputClass}
+      />
+      <Button size="sm" onClick={commit} disabled={pending || !name.trim()}>
+        Anlegen
+      </Button>
+    </div>
+  );
+}

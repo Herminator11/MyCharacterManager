@@ -4,6 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createCharacter, deleteCharacter } from "@/lib/server/characters";
+import {
+  createFolder,
+  deleteFolder,
+  moveCharacter,
+  renameCharacter,
+  renameFolder,
+  setFavorite,
+} from "@/lib/server/library";
 import { CLASS_KEYS } from "@/lib/rules/classes";
 
 export async function createCharacterAction(formData: FormData) {
@@ -28,11 +36,57 @@ export async function createCharacterAction(formData: FormData) {
   redirect(`/c/${id}`);
 }
 
-export async function deleteCharacterAction(formData: FormData) {
-  const id = Number(formData.get("id"));
-  if (!Number.isFinite(id)) return;
-
-  deleteCharacter(id);
+/**
+ * Löschen gibt es nur noch von der Startseite aus.
+ *
+ * Vorher stand es auch unten im Charakterbogen, direkt unter den
+ * Fertigkeiten — an einer Stelle also, an der man scrollt, während der
+ * Abend läuft. Ein Charakter mit Monaten Spielstand gehört nicht neben
+ * ein Formularfeld.
+ */
+export async function deleteCharacterAction(characterId: number) {
+  deleteCharacter(characterId);
   revalidatePath("/");
-  redirect("/");
+}
+
+/* ------------------------------------------------------------------ *
+ * Ablage
+ * ------------------------------------------------------------------ */
+
+export async function setFavoriteAction(
+  characterId: number,
+  favorite: boolean,
+) {
+  setFavorite(characterId, favorite);
+  revalidatePath("/");
+}
+
+export async function renameCharacterAction(characterId: number, name: string) {
+  renameCharacter(characterId, name);
+  revalidatePath("/");
+  // Der Name steht auch in der Statusleiste jeder Charakterseite.
+  revalidatePath(`/c/${characterId}`, "layout");
+}
+
+export async function moveCharacterAction(
+  characterId: number,
+  folderId: number | null,
+) {
+  moveCharacter(characterId, folderId);
+  revalidatePath("/");
+}
+
+export async function createFolderAction(name: string) {
+  createFolder(name);
+  revalidatePath("/");
+}
+
+export async function renameFolderAction(folderId: number, name: string) {
+  renameFolder(folderId, name);
+  revalidatePath("/");
+}
+
+export async function deleteFolderAction(folderId: number) {
+  deleteFolder(folderId);
+  revalidatePath("/");
 }

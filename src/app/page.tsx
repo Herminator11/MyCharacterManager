@@ -1,10 +1,21 @@
 import Link from "next/link";
 
-import { Button, EmptyState, Field, inputClass, Panel } from "@/components/ui";
+import { CharacterLibrary } from "@/components/library/CharacterLibrary";
+import { Button, Field, inputClass, Panel } from "@/components/ui";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { listCharacters } from "@/lib/server/characters";
+import { listFolders } from "@/lib/server/library";
 
-import { createCharacterAction } from "./actions";
+import {
+  createCharacterAction,
+  createFolderAction,
+  deleteCharacterAction,
+  deleteFolderAction,
+  moveCharacterAction,
+  renameCharacterAction,
+  renameFolderAction,
+  setFavoriteAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,42 +31,57 @@ export default function Page() {
         </h1>
       </header>
 
-      {characters.length === 0 ? (
-        <div className="mt-8">
-          <EmptyState title="Noch kein Charakter angelegt.">
-            Leg unten deinen ersten an — Klasse und Level bestimmen, welche
-            Zauberplätze und Ressourcen die App für dich mitführt.
-          </EmptyState>
-        </div>
-      ) : (
-        <ul className="mt-8 space-y-2.5">
-          {characters.map((character) => (
-            <li key={character.id}>
-              <Link
-                href={`/c/${character.id}`}
-                className="block rounded-lg border border-edge bg-panel px-4 py-4 transition-colors hover:border-patina"
-              >
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-lg font-semibold tracking-tight">
-                    {character.name}
-                  </span>
-                  <span className="shrink-0 text-sm text-patina">
-                    {character.hpCurrent}/{character.hpMax} HP
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-mute">
-                  {character.race ? `${character.race} · ` : ""}
-                  {character.classes.length > 0
-                    ? character.classes
-                        .map((c) => `${classLabel(c.classKey)} ${c.level}`)
-                        .join(" / ")
-                    : "Ohne Klasse"}
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <CharacterLibrary
+        characters={characters.map((character) => ({
+          id: character.id,
+          name: character.name,
+          race: character.race,
+          classLine:
+            character.classes.length > 0
+              ? character.classes
+                  .map((c) => `${classLabel(c.classKey)} ${c.level}`)
+                  .join(" / ")
+              : "Ohne Klasse",
+          hpCurrent: character.hpCurrent,
+          hpMax: character.hpMax,
+          favorite: character.favorite,
+          folderId: character.folderId,
+        }))}
+        folders={listFolders().map((folder) => ({
+          id: folder.id,
+          name: folder.name,
+        }))}
+        actions={{
+          setFavorite: async (characterId: number, favorite: boolean) => {
+            "use server";
+            await setFavoriteAction(characterId, favorite);
+          },
+          rename: async (characterId: number, name: string) => {
+            "use server";
+            await renameCharacterAction(characterId, name);
+          },
+          move: async (characterId: number, folderId: number | null) => {
+            "use server";
+            await moveCharacterAction(characterId, folderId);
+          },
+          remove: async (characterId: number) => {
+            "use server";
+            await deleteCharacterAction(characterId);
+          },
+          createFolder: async (name: string) => {
+            "use server";
+            await createFolderAction(name);
+          },
+          renameFolder: async (folderId: number, name: string) => {
+            "use server";
+            await renameFolderAction(folderId, name);
+          },
+          deleteFolder: async (folderId: number) => {
+            "use server";
+            await deleteFolderAction(folderId);
+          },
+        }}
+      />
 
       <Link
         href="/import"

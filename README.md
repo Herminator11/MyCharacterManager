@@ -46,6 +46,20 @@ cp data/app.db ~/Backups/charaktere-$(date +%F).db
 Die Datei ist bewusst nicht in der Versionskontrolle. `data/srd/` dagegen
 schon, damit die App ohne Internet läuft.
 
+## Die Startseite
+
+Deine Ablage. Ein Tipp auf einen Charakter öffnet ihn — das ist der
+Alltagsweg und bleibt frei von Knöpfen.
+
+Der Stern links hebt einen Charakter nach oben zu den **Favoriten**; liegt
+er in einem Ordner, steht das in seiner Zeile, damit nichts verschwunden
+wirkt. **Bearbeiten** oben rechts blendet Umbenennen, Ordner und Löschen
+ein — und legt neue Ordner an (flach, eine Ebene, meist eine Kampagne).
+
+Löschen gibt es **nur hier** und nur mit Rückfrage, die den Namen nennt.
+Einen Ordner zu löschen lässt seine Charaktere unangetastet; sie liegen
+danach lose auf der Startseite.
+
 ## Charakterbogen importieren
 
 „Bogen importieren“ auf der Startseite liest ein **ausfüllbares PDF** und

@@ -8,7 +8,6 @@ import {
   Panel,
   SectionLabel,
 } from "@/components/ui";
-import { deleteCharacterAction } from "@/app/actions";
 import { ABILITIES } from "@/db/schema";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
@@ -380,19 +379,6 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         </div>
       </Panel>
 
-      <Panel>
-        <SectionLabel>Charakter löschen</SectionLabel>
-        <p className="text-sm text-mute">
-          Entfernt {character.name} mit allen Zaubern, Ressourcen und Notizen.
-          Das lässt sich nicht rückgängig machen.
-        </p>
-        <form action={deleteCharacterAction} className="mt-3">
-          <input type="hidden" name="id" value={characterId} />
-          <Button type="submit" variant="danger" className="w-full">
-            Endgültig löschen
-          </Button>
-        </form>
-      </Panel>
     </div>
   );
 }
