@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { TrashIcon } from "@/components/icons";
 import { Button, inputClass, Panel, SectionLabel } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
 import { getCharacter, getNotes } from "@/lib/server/characters";
@@ -82,6 +83,7 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
             {pages.map((page) => (
               <Panel key={page.id}>
                 <form
+                  id={`note-${page.id}`}
                   action={async (formData: FormData) => {
                     "use server";
                     await saveNoteAction(characterId, formData);
@@ -103,27 +105,28 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
                     aria-label="Inhalt der Notiz"
                     className={`${textareaClass} font-mono text-sm`}
                   />
-                  <div className="flex gap-2">
-                    <Button type="submit" className="flex-1">
-                      Speichern
-                    </Button>
-                  </div>
                 </form>
 
-                <form
-                  action={async () => {
-                    "use server";
-                    await removeNoteAction(characterId, page.id);
-                  }}
-                  className="mt-2"
-                >
-                  <button
-                    type="submit"
-                    className="text-xs text-faint underline-offset-4 hover:text-ember hover:underline"
+                <div className="mt-2.5 flex gap-2">
+                  <Button type="submit" form={`note-${page.id}`} className="flex-1">
+                    Speichern
+                  </Button>
+
+                  <form
+                    action={async () => {
+                      "use server";
+                      await removeNoteAction(characterId, page.id);
+                    }}
                   >
-                    Diese Seite löschen
-                  </button>
-                </form>
+                    <button
+                      type="submit"
+                      aria-label="Diese Seite löschen"
+                      className="flex min-h-11 w-11 items-center justify-center rounded-md text-faint transition-colors hover:text-ember"
+                    >
+                      <TrashIcon className="size-4" />
+                    </button>
+                  </form>
+                </div>
               </Panel>
             ))}
           </div>
