@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { TrashIcon } from "@/components/icons";
-import { Button, inputClass, Panel, SectionLabel } from "@/components/ui";
+import { NotePageEditor } from "@/components/notes/NotePageEditor";
+import { Button, Panel, SectionLabel } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
 import { getCharacter, getNotes } from "@/lib/server/characters";
 
@@ -73,6 +73,12 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
           Notizseiten
         </SectionLabel>
 
+        {pages.length > 0 ? (
+          <p className="mb-2 text-xs text-faint">
+            Speichert automatisch — Feld verlassen genügt.
+          </p>
+        ) : null}
+
         {pages.length === 0 ? (
           <p className="text-sm text-faint">
             Noch keine Notizen. „Neue Seite“ legt eine an — gut für
@@ -82,51 +88,17 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
           <div className="space-y-3">
             {pages.map((page) => (
               <Panel key={page.id}>
-                <form
-                  id={`note-${page.id}`}
-                  action={async (formData: FormData) => {
+                <NotePageEditor
+                  page={page}
+                  save={async (title: string, body: string) => {
                     "use server";
-                    await saveNoteAction(characterId, formData);
+                    await saveNoteAction(characterId, page.id, title, body);
                   }}
-                  className="space-y-2.5"
-                >
-                  <input type="hidden" name="noteId" value={page.id} />
-                  <input
-                    name="title"
-                    defaultValue={page.title}
-                    aria-label="Titel der Notiz"
-                    className={`${inputClass} font-semibold`}
-                  />
-                  <textarea
-                    name="body"
-                    rows={10}
-                    defaultValue={page.body}
-                    placeholder="Markdown ist willkommen — gespeichert wird der Rohtext."
-                    aria-label="Inhalt der Notiz"
-                    className={`${textareaClass} font-mono text-sm`}
-                  />
-                </form>
-
-                <div className="mt-2.5 flex gap-2">
-                  <Button type="submit" form={`note-${page.id}`} className="flex-1">
-                    Speichern
-                  </Button>
-
-                  <form
-                    action={async () => {
-                      "use server";
-                      await removeNoteAction(characterId, page.id);
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      aria-label="Diese Seite löschen"
-                      className="flex min-h-11 w-11 items-center justify-center rounded-md text-faint transition-colors hover:text-ember"
-                    >
-                      <TrashIcon className="size-4" />
-                    </button>
-                  </form>
-                </div>
+                  remove={async () => {
+                    "use server";
+                    await removeNoteAction(characterId, page.id);
+                  }}
+                />
               </Panel>
             ))}
           </div>

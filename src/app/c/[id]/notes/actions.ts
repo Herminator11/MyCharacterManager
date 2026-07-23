@@ -54,14 +54,16 @@ export async function resolvePinAction(characterId: number, noteId: number) {
   revalidatePath(`/c/${characterId}`, "layout");
 }
 
-export async function saveNoteAction(characterId: number, formData: FormData) {
-  const noteId = Number(formData.get("noteId"));
-  if (!Number.isFinite(noteId)) return;
-
+export async function saveNoteAction(
+  characterId: number,
+  noteId: number,
+  title: string,
+  body: string,
+) {
   db.update(notes)
     .set({
-      title: String(formData.get("title") ?? "").trim() || "Ohne Titel",
-      body: String(formData.get("body") ?? ""),
+      title: title.trim() || "Ohne Titel",
+      body,
       updatedAt: Math.floor(Date.now() / 1000),
     })
     .where(eq(notes.id, noteId))
