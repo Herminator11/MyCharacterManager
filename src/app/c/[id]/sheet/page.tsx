@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
+import { BackgroundEditor } from "@/components/sheet/BackgroundEditor";
+import { FeatureEditor } from "@/components/sheet/FeatureEditor";
 import { ProficiencyToggle } from "@/components/sheet/ProficiencyToggle";
 import { SpeciesPanel } from "@/components/species/SpeciesPanel";
 import {
@@ -58,9 +60,10 @@ export const dynamic = "force-dynamic";
  * nicht mehr sucht, sondern zielt.
  *
  * Zwei Arten zu speichern, absichtlich unterschieden:
- * sofort, wo eine einzelne Geste vollständig ist (Portrait wählen, Level
- * stellen, Haken setzen) — und per Knopf, wo mehrere Felder zusammen einen
- * Sinn ergeben und ein halb ausgefülltes Formular Unsinn wäre.
+ * sofort, wo eine einzelne Geste vollständig ist oder ein Feld für sich
+ * steht (Portrait wählen, Level stellen, Haken setzen, Fähigkeiten und
+ * Vorgeschichte) — und per Knopf, wo mehrere Felder zusammen einen Sinn
+ * ergeben und ein halb ausgefülltes Formular Unsinn wäre.
  */
 
 /** Reihenfolge und Beschriftung der Sprungmarken — und der Abschnitte. */
@@ -115,11 +118,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           liegt sonst genau auf der Überschrift, zu der man gerade
           gesprungen ist. */}
       <Panel id="bild" className="scroll-mt-24">
-        <SectionLabel
-          right={<span className="text-xs text-faint">speichert sofort</span>}
-        >
-          Bild
-        </SectionLabel>
+        <SectionLabel>Bild</SectionLabel>
         <div className="flex items-center gap-4">
           <PortraitUpload
             characterId={characterId}
@@ -330,51 +329,17 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           <ul className="divide-y divide-edge">
             {features.map((feature) => (
               <li key={feature.id} className="py-3 first:pt-0 last:pb-0">
-                <form
-                  action={async (formData: FormData) => {
+                <FeatureEditor
+                  feature={{ id: feature.id, title: feature.title, body: feature.body }}
+                  save={async (name: string, description: string) => {
                     "use server";
-                    await saveFeatureAction(characterId, formData);
+                    await saveFeatureAction(characterId, feature.id, name, description);
                   }}
-                  className="space-y-1.5"
-                >
-                  <input type="hidden" name="featureId" value={feature.id} />
-                  <input
-                    name="name"
-                    defaultValue={feature.title}
-                    aria-label="Name der Fähigkeit"
-                    className={`${inputClass} font-semibold`}
-                  />
-                  <textarea
-                    name="description"
-                    rows={2}
-                    defaultValue={feature.body}
-                    placeholder="Kurzbeschreibung"
-                    aria-label="Beschreibung"
-                    className="w-full rounded-md border border-edge bg-ink px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-patina focus:outline-none"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      className="text-xs text-patina underline-offset-4 hover:underline"
-                    >
-                      Speichern
-                    </button>
-                  </div>
-                </form>
-                <form
-                  action={async () => {
+                  remove={async () => {
                     "use server";
                     await removeFeatureAction(characterId, feature.id);
                   }}
-                  className="-mt-1"
-                >
-                  <button
-                    type="submit"
-                    className="text-xs text-faint underline-offset-4 hover:text-ember hover:underline"
-                  >
-                    Entfernen
-                  </button>
-                </form>
+                />
               </li>
             ))}
           </ul>
@@ -411,28 +376,16 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         </form>
       </Panel>
 
-      <form
-        action={async (formData: FormData) => {
-          "use server";
-          await saveBackgroundAction(characterId, formData);
-        }}
-        className="space-y-3"
-      >
-        <Panel id="vorgeschichte" className="scroll-mt-24">
-          <SectionLabel>Vorgeschichte</SectionLabel>
-          <textarea
-            name="backstory"
-            rows={8}
-            defaultValue={character.backstory}
-            placeholder="Woher kommt dein Charakter?"
-            className="w-full rounded-md border border-edge bg-ink px-3 py-2.5 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
-          />
-        </Panel>
-
-        <Button type="submit" variant="solid" size="lg" className="w-full">
-          Vorgeschichte speichern
-        </Button>
-      </form>
+      <Panel id="vorgeschichte" className="scroll-mt-24">
+        <SectionLabel>Vorgeschichte</SectionLabel>
+        <BackgroundEditor
+          defaultValue={character.backstory}
+          save={async (backstory: string) => {
+            "use server";
+            await saveBackgroundAction(characterId, backstory);
+          }}
+        />
+      </Panel>
 
       {/* Ein Formular über drei Abschnitte: sie hängen zusammen. CON
           verschiebt die maximalen Trefferpunkte, DEX die Initiative — sie

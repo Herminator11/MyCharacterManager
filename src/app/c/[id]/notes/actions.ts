@@ -82,14 +82,16 @@ export async function addFeatureAction(characterId: number, formData: FormData) 
   revalidatePath(`/c/${characterId}/sheet`);
 }
 
-export async function saveFeatureAction(characterId: number, formData: FormData) {
-  const featureId = Number(formData.get("featureId"));
-  if (!Number.isFinite(featureId)) return;
-
+export async function saveFeatureAction(
+  characterId: number,
+  featureId: number,
+  name: string,
+  description: string,
+) {
   db.update(notes)
     .set({
-      title: String(formData.get("name") ?? "").trim() || "Ohne Namen",
-      body: String(formData.get("description") ?? "").trim(),
+      title: name.trim() || "Ohne Namen",
+      body: description,
       updatedAt: Math.floor(Date.now() / 1000),
     })
     .where(eq(notes.id, featureId))

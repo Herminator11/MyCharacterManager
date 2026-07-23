@@ -29,12 +29,9 @@ function refresh(characterId: number) {
  * mitgeschrieben werden — sonst leerte jedes Speichern die Werte, die der
  * Import aus dem Bogen geholt hat.
  */
-export async function saveBackgroundAction(
-  characterId: number,
-  formData: FormData,
-) {
+export async function saveBackgroundAction(characterId: number, backstory: string) {
   db.update(characters)
-    .set({ backstory: String(formData.get("backstory") ?? "").trim() })
+    .set({ backstory: backstory.trim() })
     .where(eq(characters.id, characterId))
     .run();
 
