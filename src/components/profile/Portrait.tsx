@@ -25,11 +25,16 @@ export function Portrait({
   className?: string;
 }) {
   const initial = name.trim().charAt(0).toUpperCase() || "?";
+  // Zwei konkurrierende size-* in Tailwind v4 entscheiden sich nach der
+  // Reihenfolge im erzeugten Stylesheet, nicht im Klassenstring — die
+  // Standardgröße greift deshalb nur, wenn der Aufrufer keine mitbringt.
+  const sized = /\bsize-/.test(className ?? "");
 
   return (
     <div
       className={cx(
-        "size-24 overflow-hidden rounded-lg border border-edge bg-panel-2 sm:size-28",
+        !sized && "size-24 sm:size-28",
+        "overflow-hidden rounded-lg border border-edge bg-panel-2",
         className,
       )}
     >

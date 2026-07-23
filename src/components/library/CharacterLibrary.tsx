@@ -3,25 +3,18 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
-import { TrashIcon } from "@/components/icons";
+import { ChevronDownIcon, TrashIcon } from "@/components/icons";
+import { Portrait } from "@/components/profile/Portrait";
 import { characterPath } from "@/lib/characterUrl";
 
-import {
-  Button,
-  cx,
-  EditToggle,
-  EmptyState,
-  inputClass,
-  Ratio,
-} from "@/components/ui";
+import { Button, cx, EditToggle, EmptyState, inputClass } from "@/components/ui";
 
 export type LibraryCharacter = {
   id: number;
   name: string;
   race: string;
   classLine: string;
-  hpCurrent: number;
-  hpMax: number;
+  hasPortrait: boolean;
   favorite: boolean;
   folderId: number | null;
 };
@@ -229,11 +222,13 @@ function Row({
     </span>
   );
 
-  const hpBadge = (
-    <span className="shrink-0 text-sm text-patina">
-      <Ratio current={character.hpCurrent} total={character.hpMax} />
-      <span className="ml-1 text-faint">HP</span>
-    </span>
+  const portrait = (
+    <Portrait
+      characterId={character.id}
+      name={character.name}
+      hasPortrait={character.hasPortrait}
+      className="my-auto ml-0.5 size-12 shrink-0"
+    />
   );
 
   return (
@@ -252,61 +247,57 @@ function Row({
           }
         />
 
+        {portrait}
+
         {/* Im Bearbeiten-Modus per Doppelklick auf den Namen umbenennen —
             Enter oder Rausklicken speichert sofort, ohne eigenen Knopf.
             Solange umbenannt wird, ist die Zeile bewusst kein Link mehr:
             ein Eingabefeld in einem <a> ist weder gültiges HTML noch
             verlässlich bedienbar. */}
         {renaming ? (
-          <div className="min-w-0 flex-1 py-3.5 pr-4">
-            <span className="flex items-baseline justify-between gap-4">
-              <input
-                autoFocus
-                value={draftName}
-                onChange={(event) => setDraftName(event.target.value)}
-                onBlur={commitRename}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    commitRename();
-                  }
-                  if (event.key === "Escape") {
-                    event.preventDefault();
-                    setDraftName(character.name);
-                    setRenaming(false);
-                  }
-                }}
-                aria-label={`Name von ${character.name}`}
-                className="min-w-0 flex-1 rounded-md border border-patina bg-ink px-2 py-1 text-lg font-semibold tracking-tight focus:outline-none"
-              />
-              {hpBadge}
-            </span>
+          <div className="min-w-0 flex-1 py-3.5 pr-4 pl-3">
+            <input
+              autoFocus
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitRename();
+                }
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  setDraftName(character.name);
+                  setRenaming(false);
+                }
+              }}
+              aria-label={`Name von ${character.name}`}
+              className="w-full rounded-md border border-patina bg-ink px-2 py-1 text-lg font-semibold tracking-tight focus:outline-none"
+            />
             {classAndLocation}
           </div>
         ) : (
           <Link
             href={characterPath(character.id, character.name)}
-            className="min-w-0 flex-1 py-3.5 pr-4 transition-colors hover:text-patina"
+            className="min-w-0 flex-1 py-3.5 pr-4 pl-3 transition-colors hover:text-patina"
           >
-            <span className="flex items-baseline justify-between gap-4">
-              <span
-                className="truncate text-lg font-semibold tracking-tight"
-                onDoubleClick={(event) => {
-                  if (!editing) return;
-                  event.preventDefault();
-                  setDraftName(character.name);
-                  setRenaming(true);
-                }}
-                onClick={(event) => {
-                  // Verhindert, dass der erste Klick eines Doppelklicks
-                  // schon zur Charakterseite navigiert, bevor der zweite
-                  // ankommt — Next.js' Link prüft defaultPrevented.
-                  if (editing) event.preventDefault();
-                }}
-              >
-                {character.name}
-              </span>
-              {hpBadge}
+            <span
+              className="block truncate text-lg font-semibold tracking-tight"
+              onDoubleClick={(event) => {
+                if (!editing) return;
+                event.preventDefault();
+                setDraftName(character.name);
+                setRenaming(true);
+              }}
+              onClick={(event) => {
+                // Verhindert, dass der erste Klick eines Doppelklicks
+                // schon zur Charakterseite navigiert, bevor der zweite
+                // ankommt — Next.js' Link prüft defaultPrevented.
+                if (editing) event.preventDefault();
+              }}
+            >
+              {character.name}
             </span>
             {classAndLocation}
           </Link>
@@ -366,12 +357,8 @@ function RowEditor({
   }
 
   return (
-    <div className="space-y-2 border-t border-edge px-4 py-3">
-      <p className="text-xs text-faint">
-        Doppelklick auf den Namen benennt um.
-      </p>
-
-      <div className="flex gap-2">
+    <div className="flex gap-2 border-t border-edge px-4 py-3">
+      <div className="relative flex-1">
         <select
           value={character.folderId ?? ""}
           onChange={(event) =>
@@ -383,7 +370,11 @@ function RowEditor({
             )
           }
           aria-label={`Ordner von ${character.name}`}
-          className={`${inputClass} flex-1`}
+          // appearance-none statt des nativen Pfeils: der saß ohne Abstand
+          // am rechten Rand. Der eigene Pfeil bekommt seinen Platz über
+          // pr-9 und pointer-events-none, damit er die Klickfläche nicht
+          // stiehlt.
+          className={`${inputClass} w-full appearance-none pr-9`}
         >
           <option value="">Ohne Ordner</option>
           {folders.map((folder) => (
@@ -392,17 +383,17 @@ function RowEditor({
             </option>
           ))}
         </select>
-
-        <Button
-          size="sm"
-          variant="danger"
-          onClick={() => setConfirming(true)}
-          aria-label={`${character.name} löschen`}
-          className="px-3"
-        >
-          <TrashIcon className="size-4" />
-        </Button>
+        <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-faint" />
       </div>
+
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        aria-label={`${character.name} löschen`}
+        className="flex w-11 shrink-0 items-center justify-center rounded-md text-faint transition-colors hover:text-ember"
+      >
+        <TrashIcon className="size-4" />
+      </button>
     </div>
   );
 }

@@ -65,6 +65,15 @@ export function PenIcon({ className }: IconProps) {
   );
 }
 
+/** Der Pfeil für eigens gestaltete Dropdowns — der native Browser-Pfeil sitzt zu dicht am Rand. */
+export function ChevronDownIcon({ className }: IconProps) {
+  return (
+    <Icon className={className} strokeWidth={1.8}>
+      <path d="M5 8.5 12 15.5 19 8.5" />
+    </Icon>
+  );
+}
+
 /** Der Papierkorb — für endgültiges Löschen, nie für ein bloßes Entfernen. */
 export function TrashIcon({ className }: IconProps) {
   return (

@@ -48,8 +48,7 @@ export default function Page() {
                   .map((c) => `${classLabel(c.classKey)} ${c.level}`)
                   .join(" / ")
               : "Ohne Klasse",
-          hpCurrent: character.hpCurrent,
-          hpMax: character.hpMax,
+          hasPortrait: Boolean(character.portraitFile),
           favorite: character.favorite,
           folderId: character.folderId,
         }))}
