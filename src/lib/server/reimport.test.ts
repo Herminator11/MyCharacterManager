@@ -10,9 +10,9 @@ import kaelFields from "@/test/fixtures/kael-sheet-fields.json";
 import {
   deleteCharacter,
   getCharacterSpells,
+  getFeatures,
   getInventory,
   getLiveState,
-  getNotes,
   getSheet,
   listCharacters,
 } from "./characters";
@@ -215,9 +215,10 @@ describe("Spielstand bleibt", () => {
     );
   });
 
-  it("legt Notizen nicht doppelt an", () => {
-    const titles = getNotes(id).map((n) => n.title);
-    expect(titles.filter((t) => t === "Klassenfeatures")).toHaveLength(1);
+  it("legt Fähigkeiten nicht doppelt an", () => {
+    const names = getFeatures(id).map((f) => f.title);
+    expect(names.length).toBeGreaterThan(0);
+    expect(new Set(names).size).toBe(names.length);
   });
 });
 

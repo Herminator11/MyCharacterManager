@@ -152,8 +152,13 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
 
   const notes: { title: string; body: string }[] = [];
 
-  const features = clean(text(fields, "Feat+Traits"));
-  if (features) notes.push({ title: "Merkmale & Fähigkeiten", body: features });
+  // Ein einziges Freitextfeld ohne jede Gliederung — anders als bei Aurora
+  // gibt es hier keine einzelnen Merkmale zu trennen, nur einen Block.
+  const features: { name: string; description: string }[] = [];
+  const featTraits = clean(text(fields, "Feat+Traits"));
+  if (featTraits) {
+    features.push({ name: "Merkmale & Fähigkeiten", description: featTraits });
+  }
 
   const proficiencies = clean(text(fields, "ProficienciesLang"));
   if (proficiencies) {
@@ -251,6 +256,7 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
     backstory: clean(text(fields, "Backstory")),
 
     notes,
+    features,
     warnings,
   };
 }

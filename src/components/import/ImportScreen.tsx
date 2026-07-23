@@ -343,6 +343,11 @@ function Review({
           empty="Keine im Bogen gefunden."
           items={draft.notes.map((n) => n.title)}
         />
+        <ListPanel
+          title="Fähigkeiten"
+          empty="Keine im Bogen gefunden."
+          items={draft.features.map((f) => f.name)}
+        />
       </div>
 
       {target}

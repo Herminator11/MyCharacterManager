@@ -507,6 +507,20 @@ export function getCampaignLog(characterId: number) {
 }
 
 /**
+ * Das Kampflog der laufenden bzw. letzten Begegnung — dieselben Zeilen,
+ * die während des Kampfs live mitschreiben. Lebt nur bis zum nächsten
+ * „Roll Initiative…“, deshalb taucht hier nie mehr als eine Begegnung auf.
+ */
+export function getCombatLog(characterId: number) {
+  return db
+    .select()
+    .from(combatLog)
+    .where(eq(combatLog.characterId, characterId))
+    .orderBy(desc(combatLog.at), desc(combatLog.id))
+    .all();
+}
+
+/**
  * Was gerade gilt: Fluch, Pakt, Segen, die Vergiftung über drei Tage.
  *
  * Das sind keine 5e-Conditions — die haben Regeltext und einen Katalog.

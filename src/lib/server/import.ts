@@ -146,6 +146,17 @@ export function importCharacter(draft: ImportedCharacter): number {
         .run();
     });
 
+    draft.features.forEach((feature) => {
+      db.insert(notes)
+        .values({
+          characterId: id,
+          kind: "feature",
+          title: feature.name,
+          body: feature.description,
+        })
+        .run();
+    });
+
     linkSpellsFromCatalog(id, draft);
 
     // Erst jetzt ableiten: Zauberplätze und Klassenressourcen brauchen die

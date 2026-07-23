@@ -1,8 +1,14 @@
 import { notFound } from "next/navigation";
 
+import { CombatLogRow } from "@/components/play/CombatLog";
 import { Button, Panel, SectionLabel } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
-import { getCampaignLog, getCharacter } from "@/lib/server/characters";
+import type { LiveLogEntry } from "@/lib/live-types";
+import {
+  getCampaignLog,
+  getCharacter,
+  getCombatLog,
+} from "@/lib/server/characters";
 
 import { addCampaignLogAction, removeCampaignLogAction } from "../actions";
 
@@ -17,6 +23,10 @@ function formatStamp(unixSeconds: number): string {
   });
 }
 
+type TimelineItem =
+  | { type: "note"; id: number; at: number; body: string }
+  | { type: "combat"; id: number; at: number; entry: LiveLogEntry };
+
 export default async function CampaignLogPage({
   params,
 }: PageProps<"/c/[id]">) {
@@ -26,7 +36,26 @@ export default async function CampaignLogPage({
   const character = getCharacter(characterId);
   if (!character) notFound();
 
-  const entries = getCampaignLog(characterId);
+  const notes = getCampaignLog(characterId);
+  const combat = getCombatLog(characterId);
+
+  // Zwei Quellen, eine Zeitleiste: von Hand notiert und von selbst
+  // mitgeschrieben landen nach Zeitstempel gemischt — nur so sieht man
+  // "wir haben X entdeckt" neben "wir haben gerade gekämpft".
+  const timeline: TimelineItem[] = [
+    ...notes.map((entry) => ({
+      type: "note" as const,
+      id: entry.id,
+      at: entry.createdAt,
+      body: entry.body,
+    })),
+    ...combat.map((entry) => ({
+      type: "combat" as const,
+      id: entry.id,
+      at: entry.at,
+      entry,
+    })),
+  ].sort((a, b) => b.at - a.at || b.id - a.id);
 
   return (
     <>
@@ -50,36 +79,49 @@ export default async function CampaignLogPage({
         </form>
       </Panel>
 
-      {entries.length === 0 ? (
+      {timeline.length === 0 ? (
         <p className="text-sm text-faint">
-          Noch nichts festgehalten. Ein Satz, Eingabetaste, fertig.
+          Noch nichts festgehalten. Ein Satz, Eingabetaste, fertig — Kämpfe
+          tragen sich von selbst ein, solange der nächste noch nicht
+          begonnen hat.
         </p>
       ) : (
-        <Panel className="space-y-2.5">
-          {entries.map((entry) => (
-            <div key={entry.id} className="flex gap-3">
-              <time className="w-20 shrink-0 text-xs text-faint tabular-nums">
-                {formatStamp(entry.createdAt)}
-              </time>
-              <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
-                {entry.body}
-              </p>
-              <form
-                action={async () => {
-                  "use server";
-                  await removeCampaignLogAction(characterId, entry.id);
-                }}
-              >
-                <button
-                  type="submit"
-                  aria-label="Eintrag löschen"
-                  className="px-1 text-faint transition-colors hover:text-ember"
-                >
-                  ✕
-                </button>
-              </form>
-            </div>
-          ))}
+        <Panel>
+          <SectionLabel>Verlauf</SectionLabel>
+          <ul className="space-y-2.5">
+            {timeline.map((item) =>
+              item.type === "note" ? (
+                <li key={`note-${item.id}`} className="flex gap-3">
+                  <time className="w-20 shrink-0 text-xs text-faint tabular-nums">
+                    {formatStamp(item.at)}
+                  </time>
+                  <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
+                    {item.body}
+                  </p>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await removeCampaignLogAction(characterId, item.id);
+                    }}
+                  >
+                    <button
+                      type="submit"
+                      aria-label="Eintrag löschen"
+                      className="px-1 text-faint transition-colors hover:text-ember"
+                    >
+                      ✕
+                    </button>
+                  </form>
+                </li>
+              ) : (
+                <CombatLogRow
+                  key={`combat-${item.id}`}
+                  entry={item.entry}
+                  timestamp={formatStamp(item.at)}
+                />
+              ),
+            )}
+          </ul>
         </Panel>
       )}
     </>

@@ -237,21 +237,21 @@ describe("Ressourcen", () => {
 });
 
 describe("Notizen", () => {
-  it("sammelt die Klassenfeatures auf einer Seite", () => {
-    const features = kael().notes.find((n) => n.title === "Klassenfeatures");
-    expect(features).toBeDefined();
-    expect(features!.body).toContain("EYES OF THE DARK");
-    expect(features!.body).toContain("HOUND OF ILL OMEN");
+  it("sammelt die Klassenfeatures als Fähigkeiten", () => {
+    const names = kael().features.map((f) => f.name);
+    expect(names.some((n) => n.includes("EYES OF THE DARK"))).toBe(true);
+    expect(names.some((n) => n.includes("HOUND OF ILL OMEN"))).toBe(true);
   });
 
   it("lässt die Platzhalterzeilen „FEATURE“ weg", () => {
-    const features = kael().notes.find((n) => n.title === "Klassenfeatures");
-    expect(features!.body).not.toMatch(/## FEATURE/);
+    const names = kael().features.map((f) => f.name);
+    expect(names).not.toContain("FEATURE");
   });
 
   it("wandelt die Wagenrückläufe des PDFs in Zeilenumbrüche", () => {
-    const features = kael().notes.find((n) => n.title === "Klassenfeatures");
-    expect(features!.body).not.toContain("\r");
+    expect(kael().features.some((f) => f.description.includes("\r"))).toBe(
+      false,
+    );
   });
 
   it("sammelt Sprachen und Merkmale", () => {

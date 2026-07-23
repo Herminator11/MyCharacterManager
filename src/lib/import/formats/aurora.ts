@@ -158,7 +158,6 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
   const notes: { title: string; body: string }[] = [];
 
   const features = collectFeatures(fields);
-  if (features) notes.push({ title: "Merkmale & Fähigkeiten", body: features });
 
   const looks = describeAppearance(fields);
   if (looks) notes.push({ title: "Äußeres", body: looks });
@@ -228,6 +227,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
     backstory: clean(text(fields, "background_story")),
 
     notes,
+    features,
     warnings,
   };
 }
@@ -348,20 +348,26 @@ function collectItems(fields: FieldMap): { name: string; description: string }[]
  * aber ohne Wirkungstext — den trägt der Bogen nur in der druckbaren Ebene,
  * nicht als Formularfeld. Der Hintergrund steuert sein eigenes Merkmal bei.
  */
-function collectFeatures(fields: FieldMap): string {
-  const lines = collectCards(fields, 5).map((card) => {
-    const source = card.footerLeft ? ` (${card.footerLeft})` : "";
-    return `- **${card.title}** — ${card.subtitle}${source}`;
-  });
+function collectFeatures(fields: FieldMap): { name: string; description: string }[] {
+  const features = collectCards(fields, 5).map((card) => ({
+    name: card.title,
+    description: card.footerLeft
+      ? `${card.subtitle} (${card.footerLeft})`
+      : card.subtitle,
+  }));
 
   const backgroundFeature = text(fields, "background_feature_name");
   const background = text(fields, "details_background");
   if (backgroundFeature) {
-    const from = background ? ` (${background})` : "";
-    lines.push(`- **${backgroundFeature}** — Hintergrundmerkmal${from}`);
+    features.push({
+      name: backgroundFeature,
+      description: background
+        ? `Hintergrundmerkmal (${background})`
+        : "Hintergrundmerkmal",
+    });
   }
 
-  return lines.join("\n");
+  return features;
 }
 
 type Card = {

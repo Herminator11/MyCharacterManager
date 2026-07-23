@@ -178,22 +178,20 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
 
   /* --- Notizen --- */
 
-  const featureBlocks: string[] = [];
+  const features: { name: string; description: string }[] = [];
   for (let slot = 1; slot <= 10; slot++) {
     const name = text(fields, `Front_Feature Name ${slot}`);
     const body = text(fields, `Front_Feature ${slot}`);
     // Unbenutzte Zeilen tragen im Bogen den Platzhalter "FEATURE".
     if (!body || name.toUpperCase() === "FEATURE") continue;
     const level = text(fields, `Front_Level Value ${slot}`);
-    featureBlocks.push(
-      `## ${name}${level ? ` (Stufe ${level})` : ""}\n\n${clean(body)}`,
-    );
+    features.push({
+      name: level ? `${name} (Stufe ${level})` : name,
+      description: clean(body),
+    });
   }
 
   const notes: { title: string; body: string }[] = [];
-  if (featureBlocks.length > 0) {
-    notes.push({ title: "Klassenfeatures", body: featureBlocks.join("\n\n") });
-  }
 
   const extraTraits = text(fields, "Back_Additional Features & Traits");
   const racialTraits = text(fields, "Front_Racial Traits");
@@ -298,6 +296,7 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
     backstory: clean(text(fields, "Back_Background")),
 
     notes,
+    features,
     warnings,
   };
 }

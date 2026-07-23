@@ -225,14 +225,11 @@ describe("Ausrüstung", () => {
 });
 
 describe("Notizen", () => {
-  it("sammelt die Merkmale samt Hintergrundmerkmal auf einer Seite", () => {
-    const features = eris().notes.find(
-      (n) => n.title === "Merkmale & Fähigkeiten",
-    );
-    expect(features).toBeDefined();
-    expect(features!.body).toContain("Arcane Recovery");
-    expect(features!.body).toContain("Grim Harvest");
-    expect(features!.body).toContain("Heart of Darkness");
+  it("sammelt die Merkmale samt Hintergrundmerkmal als Fähigkeiten", () => {
+    const names = eris().features.map((f) => f.name);
+    expect(names).toContain("Arcane Recovery");
+    expect(names).toContain("Grim Harvest");
+    expect(names).toContain("Heart of Darkness");
   });
 
   it("hält das Äußere fest, soweit der Bogen etwas hergibt", () => {

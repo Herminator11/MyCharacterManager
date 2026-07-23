@@ -9,6 +9,7 @@ import {
   deleteCharacter,
   getCharacterSpells,
   getAttacks,
+  getFeatures,
   getInventory,
   getLiveState,
   getNotes,
@@ -178,10 +179,9 @@ describe("Angriffe und Ausrüstung", () => {
 });
 
 describe("Notizen", () => {
-  it("legt Klassenfeatures und Merkmale als Seiten an", () => {
-    const titles = getNotes(id).map((n) => n.title);
-    expect(titles).toContain("Klassenfeatures");
-    expect(titles).toContain("Merkmale & Sprachen");
+  it("legt Merkmale & Sprachen als Seite, Klassenfeatures als Fähigkeiten an", () => {
+    expect(getNotes(id).map((n) => n.title)).toContain("Merkmale & Sprachen");
+    expect(getFeatures(id).length).toBeGreaterThan(0);
   });
 });
 

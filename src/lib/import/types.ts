@@ -78,6 +78,8 @@ export type ImportedCharacter = {
   backstory: string;
 
   notes: { title: string; body: string }[];
+  /** Klassenmerkmale, Rassenmerkmale, Feats — landet im Bogen, nicht bei den Notizen. */
+  features: { name: string; description: string }[];
 
   /** Was der Bogen nicht hergab oder was Aufmerksamkeit braucht. */
   warnings: string[];

@@ -54,7 +54,7 @@ const PRESERVED = [
   "Von Hand angelegte Ressourcen",
   "Conditions und Konzentration",
   "Inventar und Geldbeutel",
-  "Notizen und Hintergrundtexte",
+  "Notizen, Fähigkeiten und Hintergrundtexte",
   "Portrait",
 ] as const;
 
@@ -195,6 +195,7 @@ export function applyReimport(
     replaceAttacks(characterId, draft);
     addNewSpells(characterId, draft);
     addNewNotes(characterId, draft);
+    addNewFeatures(characterId, draft);
 
     // Zauberplätze und Klassenressourcen neu ableiten. Verbrauch bleibt
     // stehen, und die aktuellen HP wachsen um den Zugewinn mit — beides
@@ -323,6 +324,30 @@ function addNewNotes(characterId: number, draft: ImportedCharacter) {
     if (existing.has(note.title.toLowerCase())) continue;
     db.insert(notes)
       .values({ characterId, title: note.title, body: note.body })
+      .run();
+  }
+}
+
+/** Fähigkeiten nur anlegen, wenn sie noch nicht existieren — nie überschreiben. */
+function addNewFeatures(characterId: number, draft: ImportedCharacter) {
+  const existing = new Set(
+    db
+      .select({ title: notes.title })
+      .from(notes)
+      .where(and(eq(notes.characterId, characterId), eq(notes.kind, "feature")))
+      .all()
+      .map((row) => row.title.toLowerCase()),
+  );
+
+  for (const feature of draft.features) {
+    if (existing.has(feature.name.toLowerCase())) continue;
+    db.insert(notes)
+      .values({
+        characterId,
+        kind: "feature",
+        title: feature.name,
+        body: feature.description,
+      })
       .run();
   }
 }
