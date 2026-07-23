@@ -1,3 +1,4 @@
+import { isAuroraSheet, parseAuroraSheet } from "./formats/aurora";
 import { isCustomSheet, parseCustomSheet } from "./formats/custom";
 import { isOfficialSheet, parseOfficialSheet } from "./formats/official";
 import type { FieldMap, ImportedCharacter, SheetFormat } from "./types";
@@ -23,7 +24,8 @@ export class UnknownSheetFormatError extends Error {
     super(
       `Dieses PDF hat ${fieldCount} Formularfelder, aber keine, die ich einem bekannten Bogen zuordnen kann. ` +
         "Der Import versteht den offiziellen D&D-Charakterbogen von Wizards of the Coast " +
-        "(den auch Aurora ausgibt) sowie das erweiterte Format mit Front_/Back_-Feldern.",
+        "(den auch Aurora ausgibt), Auroras eigenen ausfüllbaren Bogen sowie das " +
+        "erweiterte Format mit Front_/Back_-Feldern.",
     );
   }
 }
@@ -31,6 +33,7 @@ export class UnknownSheetFormatError extends Error {
 export function detectFormat(fields: FieldMap): SheetFormat | null {
   if (isOfficialSheet(fields)) return "official";
   if (isCustomSheet(fields)) return "custom";
+  if (isAuroraSheet(fields)) return "aurora";
   return null;
 }
 
@@ -40,6 +43,8 @@ export function parseSheet(fields: FieldMap): ImportedCharacter {
       return parseOfficialSheet(fields);
     case "custom":
       return parseCustomSheet(fields);
+    case "aurora":
+      return parseAuroraSheet(fields);
     default:
       throw new UnknownSheetFormatError(Object.keys(fields).length);
   }

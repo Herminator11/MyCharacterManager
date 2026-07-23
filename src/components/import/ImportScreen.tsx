@@ -10,8 +10,15 @@ import { formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS, SKILLS } from "@/lib/rules/skills";
 
 import type { PlanResult, ReadResult } from "@/app/import/actions";
+import type { SheetFormat } from "@/lib/import/types";
 import type { ReimportPlan } from "@/lib/server/reimport";
 import { ReimportPanel, type ImportTarget } from "./ReimportPanel";
+
+const FORMAT_LABELS: Record<SheetFormat, string> = {
+  official: "Offizieller Bogen",
+  custom: "Erweitertes Format",
+  aurora: "Aurora-Bogen",
+};
 
 /**
  * Import in zwei Schritten: erst lesen, dann bestätigen.
@@ -182,7 +189,7 @@ function Review({
         <SectionLabel
           right={
             <span className="text-[0.6875rem] text-faint">
-              {draft.format === "official" ? "Offizieller Bogen" : "Eigenes Format"}
+              {FORMAT_LABELS[draft.format]}
             </span>
           }
         >

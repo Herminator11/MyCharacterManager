@@ -3,7 +3,7 @@ import type { Ability } from "@/db/schema";
 /** Rohe Formularfelder eines PDFs: Textfelder als String, Kästchen als Boolean. */
 export type FieldMap = Record<string, string | boolean>;
 
-export type SheetFormat = "official" | "custom";
+export type SheetFormat = "official" | "custom" | "aurora";
 
 export type ImportedClass = {
   classKey: string;
