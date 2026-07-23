@@ -1,6 +1,6 @@
 "use client";
 
-import { cx } from "@/components/ui";
+import { cx, Tooltip } from "@/components/ui";
 import { useLive } from "@/lib/live-context";
 
 /**
@@ -21,22 +21,25 @@ export function InspirationToggle({ className }: { className?: string }) {
   const on = state.inspiration;
 
   return (
-    <button
-      type="button"
-      onClick={() => send({ type: "inspiration.set", value: !on })}
-      aria-pressed={on}
-      aria-label={
-        on ? "Inspiration ausgeben" : "Inspiration erhalten"
-      }
-      title={on ? "Inspiration vorhanden — antippen zum Ausgeben" : "Keine Inspiration"}
-      className={cx(
-        "flex size-10 items-center justify-center transition-colors",
-        on ? "text-brass" : "text-faint hover:text-mute",
-        className,
-      )}
+    <Tooltip
+      label={on ? "Inspiration vorhanden — antippen zum Ausgeben" : "Keine Inspiration"}
+      className={className}
     >
-      <FlameIcon lit={on} />
-    </button>
+      <button
+        type="button"
+        onClick={() => send({ type: "inspiration.set", value: !on })}
+        aria-pressed={on}
+        aria-label={
+          on ? "Inspiration ausgeben" : "Inspiration erhalten"
+        }
+        className={cx(
+          "flex size-10 items-center justify-center transition-colors",
+          on ? "text-brass" : "text-faint hover:text-mute",
+        )}
+      >
+        <FlameIcon lit={on} />
+      </button>
+    </Tooltip>
   );
 }
 

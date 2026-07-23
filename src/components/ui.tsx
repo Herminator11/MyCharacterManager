@@ -212,6 +212,44 @@ export function EmptyState({
   );
 }
 
+/**
+ * Ein Label, das erst bei Hover oder Fokus erscheint — für Icon-Knöpfe
+ * ohne sichtbaren Text wie Inspiration oder den Vermerk.
+ *
+ * Kein natives `title`: das kommt auf Touch am Spieltisch ohnehin nie an
+ * und zeigt sich am Desktop erst nach einer Verzögerung, die man nicht
+ * steuern kann. `group-focus-within` deckt Tastaturbedienung mit ab,
+ * `pointer-events-none` verhindert, dass das Label selbst zum Hover-Ziel
+ * wird und flackert.
+ */
+export function Tooltip({
+  label,
+  children,
+  align = "center",
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  /** "end" hält das Label an Bildschirmkanten im sichtbaren Bereich. */
+  align?: "center" | "end";
+  className?: string;
+}) {
+  return (
+    <span className={cx("group relative inline-flex", className)}>
+      {children}
+      <span
+        role="tooltip"
+        className={cx(
+          "pointer-events-none absolute top-full z-40 mt-1.5 rounded-md border border-edge-bright bg-panel px-2 py-1 text-xs whitespace-nowrap text-fg opacity-0 shadow-lg shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100",
+          align === "end" ? "right-0" : "left-1/2 -translate-x-1/2",
+        )}
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
+
 export function Field({
   label,
   children,

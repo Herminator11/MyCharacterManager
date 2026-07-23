@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { NoteIcon } from "@/components/icons";
-import { Button, cx, inputClass } from "@/components/ui";
+import { Button, cx, inputClass, Tooltip } from "@/components/ui";
 
 /**
  * „Aktuell gilt für dich" — anlegen, wo man es anlegen will: oben in der Ecke.
@@ -48,26 +48,38 @@ export function PinButton({
     };
   }, [open]);
 
+  const trigger = (
+    <button
+      type="button"
+      onClick={() => setOpen(!open)}
+      aria-expanded={open}
+      aria-label="Vermerk anlegen"
+      className={cx(
+        "relative flex size-8 items-center justify-center transition-colors",
+        open || count > 0 ? "text-brass" : "text-faint hover:text-mute",
+      )}
+    >
+      <NoteIcon className="size-5" />
+      {count > 0 ? (
+        <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
+          {count}
+        </span>
+      ) : null}
+    </button>
+  );
+
   return (
     <div ref={box} className="absolute top-3 right-3">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        aria-label="Vermerk anlegen"
-        title="Vermerk anlegen — was ab jetzt für dich gilt"
-        className={cx(
-          "relative flex size-8 items-center justify-center transition-colors",
-          open || count > 0 ? "text-brass" : "text-faint hover:text-mute",
-        )}
-      >
-        <NoteIcon className="size-5" />
-        {count > 0 ? (
-          <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
-            {count}
-          </span>
-        ) : null}
-      </button>
+      {/* Kein Tooltip, solange das Formular offen ist — beide sitzen an
+          derselben Stelle unter dem Knopf und würden sich sonst
+          überlappen. Das Formular erklärt sich dann ohnehin selbst. */}
+      {open ? (
+        trigger
+      ) : (
+        <Tooltip label="Vermerk anlegen — was ab jetzt für dich gilt" align="end">
+          {trigger}
+        </Tooltip>
+      )}
 
       {open ? (
         <div className="absolute top-full right-0 z-30 mt-2 w-72 rounded-lg border border-edge-bright bg-panel p-3 shadow-lg shadow-black/40">
