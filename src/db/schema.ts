@@ -9,6 +9,8 @@ import {
   unique,
 } from "drizzle-orm/sqlite-core";
 
+import type { ActionCost } from "@/lib/rules/actions";
+
 /* ------------------------------------------------------------------ *
  * Hilfstypen
  * ------------------------------------------------------------------ */
@@ -472,6 +474,11 @@ export const combatLog = sqliteTable(
     kind: text("kind").$type<CombatLogKind>().notNull(),
     text: text("text").notNull(),
     detail: text("detail").notNull().default(""),
+    /**
+     * Nur bei Zaubern gesetzt — steuert die Form im Log (Kreis/Dreieck),
+     * die Aktionskosten-Wörter selbst stehen nicht mehr im Text.
+     */
+    actionCost: text("action_cost").$type<ActionCost | null>(),
     /** Schaden bzw. geheilte HP — für die Zusammenfassung am Kampfende. */
     amount: integer("amount").notNull().default(0),
     at: integer("at").notNull().default(now),

@@ -20,15 +20,14 @@ export type CombatLogLine = {
   kind: CombatLogKind;
   text: string;
   detail: string;
+  /**
+   * Nur bei `kind: "cast"` gesetzt — steuert Kreis (Aktion) oder Dreieck
+   * (Bonusaktion/Reaktion) in der Anzeige, statt das Wort im Text zu
+   * wiederholen.
+   */
+  actionCost: ActionCost | null;
   /** Schaden bzw. geheilte HP, sonst 0 — nur für die Zusammenfassung. */
   amount: number;
-};
-
-const COST_LABEL: Record<ActionCost, string> = {
-  action: "Aktion",
-  bonus: "Bonusaktion",
-  reaction: "Reaktion",
-  long: "",
 };
 
 export function describeMutation(
@@ -51,6 +50,7 @@ export function describeMutation(
           kind: "damage",
           text: `${-amount} Schaden`,
           detail: absorbed > 0 ? `${range} · ${absorbed} über temporäre HP` : range,
+          actionCost: null,
           amount: -amount,
         };
       }
@@ -58,6 +58,7 @@ export function describeMutation(
         kind: "heal",
         text: `${amount} geheilt`,
         detail: range,
+        actionCost: null,
         amount: after.hpCurrent - before.hpCurrent,
       };
     }
@@ -69,6 +70,7 @@ export function describeMutation(
         kind: up ? "heal" : "damage",
         text: "HP korrigiert",
         detail: `${before.hpCurrent} → ${after.hpCurrent}`,
+        actionCost: null,
         amount: 0,
       };
     }
@@ -82,6 +84,7 @@ export function describeMutation(
             ? `${after.hpTemp} temporäre HP`
             : "Temporäre HP weg",
         detail: "",
+        actionCost: null,
         amount: 0,
       };
 
@@ -95,6 +98,7 @@ export function describeMutation(
         kind: "heal",
         text: `Trefferwürfel${die ? ` d${die.hitDie}` : ""}`,
         detail: `+${healed} HP · ${before.hpCurrent} → ${after.hpCurrent}`,
+        actionCost: null,
         amount: healed,
       };
     }
@@ -111,17 +115,19 @@ export function describeMutation(
       }
 
       const pool = after.pools.find((p) => p.id === mutation.poolId);
-      const parts = [
+      const detail =
         mutation.level === 0
           ? "Zaubertrick"
-          : `Grad ${mutation.level}${pool ? ` · ${pool.name}` : ""}`,
-        COST_LABEL[mutation.cost],
-      ].filter(Boolean);
+          : `Grad ${mutation.level}${pool ? ` · ${pool.name}` : ""}`;
 
       return {
         kind: "cast",
         text: mutation.spellName || "Zauber gewirkt",
-        detail: parts.join(" · "),
+        detail,
+        // "long" (z.B. Rituale mit langer Wirkzeit) bekommt keine eigene
+        // Form — die Unterscheidung Aktion/Bonusaktion/Reaktion lohnt sich
+        // nur, wenn sie auch ein Zugkonto belastet hat.
+        actionCost: mutation.cost === "long" ? null : mutation.cost,
         amount: 0,
       };
     }
@@ -135,6 +141,7 @@ export function describeMutation(
           ? conditionLabel(mutation.key)
           : `${conditionLabel(mutation.key)} beendet`,
         detail: "",
+        actionCost: null,
         amount: 0,
       };
     }
@@ -145,6 +152,7 @@ export function describeMutation(
         kind: "state",
         text: `Konzentration: ${after.concentration.label || "aktiv"}`,
         detail: "",
+        actionCost: null,
         amount: 0,
       };
 
@@ -154,6 +162,7 @@ export function describeMutation(
         kind: "state",
         text: "Konzentration verloren",
         detail: before.concentration.label,
+        actionCost: null,
         amount: 0,
       };
 
@@ -165,6 +174,7 @@ export function describeMutation(
           kind: "heal",
           text: "Stabilisiert",
           detail: "keine Würfe mehr, weiter bei 0 HP",
+          actionCost: null,
           amount: 0,
         };
       }
@@ -173,6 +183,7 @@ export function describeMutation(
           kind: "damage",
           text: "Gestorben",
           detail: "drei Fehlschläge",
+          actionCost: null,
           amount: 0,
         };
       }
@@ -187,6 +198,7 @@ export function describeMutation(
         kind: "damage",
         text: "Todesrettungswurf",
         detail: `${after.deathSaveSuccesses} Erfolge · ${after.deathSaveFailures} Fehlschläge`,
+        actionCost: null,
         amount: 0,
       };
     }
@@ -202,6 +214,7 @@ export function describeMutation(
             ? `${is.name} eingesetzt`
             : `${is.name} zurückgelegt`,
         detail: `${is.current}/${is.max}`,
+        actionCost: null,
         amount: 0,
       };
     }
@@ -212,14 +225,27 @@ export function describeMutation(
         kind: "resource",
         text: after.inspiration ? "Inspiration erhalten" : "Inspiration eingesetzt",
         detail: "",
+        actionCost: null,
         amount: 0,
       };
 
     case "rest.short":
-      return { kind: "rest", text: "Kurze Rast", detail: "", amount: 0 };
+      return {
+        kind: "rest",
+        text: "Kurze Rast",
+        detail: "",
+        actionCost: null,
+        amount: 0,
+      };
 
     case "rest.long":
-      return { kind: "rest", text: "Lange Rast", detail: "", amount: 0 };
+      return {
+        kind: "rest",
+        text: "Lange Rast",
+        detail: "",
+        actionCost: null,
+        amount: 0,
+      };
 
     // Bewusst still: die Zugkonten und einzelne Slots sind Korrekturen am
     // Zähler, keine Ereignisse. Der Rundenwechsel steht als Überschrift im

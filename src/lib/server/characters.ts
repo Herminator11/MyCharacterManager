@@ -289,6 +289,7 @@ export function getLiveState(characterId: number): LiveState | null {
       kind: row.kind,
       text: row.text,
       detail: row.detail,
+      actionCost: row.actionCost,
     })),
     hitDice: classes.map((c) => ({
       classId: c.id,

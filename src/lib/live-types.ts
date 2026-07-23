@@ -60,6 +60,8 @@ export type LiveLogEntry = {
   kind: CombatLogKind;
   text: string;
   detail: string;
+  /** Nur bei `kind: "cast"` gesetzt — steuert Kreis vs. Dreieck im Log. */
+  actionCost: ActionCost | null;
 };
 
 export type LiveConcentration = {

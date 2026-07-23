@@ -61,6 +61,7 @@ describe("Schaden und Heilung", () => {
       kind: "damage",
       text: "7 Schaden",
       detail: "30 → 23",
+      actionCost: null,
       amount: 7,
     });
   });
@@ -103,7 +104,7 @@ describe("Zauber", () => {
     cost: "bonus",
   } as const;
 
-  it("nennt Grad, Pool und was es im Zug gekostet hat", () => {
+  it("nennt Grad, Pool und die Aktionskosten getrennt fürs Zeichen", () => {
     const after = state({
       pools: [
         {
@@ -118,7 +119,8 @@ describe("Zauber", () => {
     expect(describeMutation(cast, BASE, after)).toEqual({
       kind: "cast",
       text: "Misty Step",
-      detail: "Grad 2 · Pact Magic · Bonusaktion",
+      detail: "Grad 2 · Pact Magic",
+      actionCost: "bonus",
       amount: 0,
     });
   });
@@ -144,7 +146,8 @@ describe("Zauber", () => {
       BASE,
     );
 
-    expect(line?.detail).toBe("Zaubertrick · Aktion");
+    expect(line?.detail).toBe("Zaubertrick");
+    expect(line?.actionCost).toBe("action");
   });
 });
 

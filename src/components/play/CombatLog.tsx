@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionShape } from "@/components/icons";
 import { Panel, SectionLabel, cx } from "@/components/ui";
 import type { LiveLogEntry, LiveState } from "@/lib/live-types";
 
@@ -20,17 +21,7 @@ export function CombatLog({ state }: { state: LiveState }) {
 
   return (
     <Panel>
-      <SectionLabel
-        right={
-          state.log.length > 0 ? (
-            <span className="text-[0.6875rem] text-faint">
-              schreibt sich selbst
-            </span>
-          ) : null
-        }
-      >
-        Kampflog
-      </SectionLabel>
+      <SectionLabel>Kampflog</SectionLabel>
 
       {state.log.length === 0 ? (
         <p className="text-sm text-faint">
@@ -45,13 +36,7 @@ export function CombatLog({ state }: { state: LiveState }) {
               <ul className="space-y-1">
                 {entries.map((entry) => (
                   <li key={entry.id} className="flex items-baseline gap-2">
-                    <span
-                      aria-hidden
-                      className={cx(
-                        "mt-1.5 size-1.5 shrink-0 rounded-full",
-                        DOT[entry.kind],
-                      )}
-                    />
+                    <Marker entry={entry} />
                     <span className="min-w-0 flex-1 text-sm">
                       <span className={TEXT[entry.kind]}>{entry.text}</span>
                       {entry.detail ? (
@@ -69,6 +54,36 @@ export function CombatLog({ state }: { state: LiveState }) {
         </div>
       )}
     </Panel>
+  );
+}
+
+/**
+ * Zauber tragen dieselbe Form wie im Zugkonto: Kreis für die Aktion,
+ * Dreieck für Bonusaktion und Reaktion — die beiden teilen sich am Tisch
+ * ohnehin die Frage "geht das noch?" und damit auch das Zeichen. Alles
+ * andere bleibt beim schlichten Punkt.
+ */
+function Marker({ entry }: { entry: LiveLogEntry }) {
+  if (entry.kind === "cast" && entry.actionCost && entry.actionCost !== "long") {
+    const isAction = entry.actionCost === "action";
+    return (
+      <span
+        aria-hidden
+        className={cx(
+          "mt-0.5 flex size-3 shrink-0 items-center justify-center",
+          isAction ? "text-patina" : "text-ember",
+        )}
+      >
+        <ActionShape kind={isAction ? "action" : "bonus"} className="size-3" />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-hidden
+      className={cx("mt-1.5 size-1.5 shrink-0 rounded-full", DOT[entry.kind])}
+    />
   );
 }
 
