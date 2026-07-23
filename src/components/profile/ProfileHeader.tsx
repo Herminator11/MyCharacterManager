@@ -57,9 +57,18 @@ export function ProfileHeader({
           Zeile rutschen, als Namen und Kennzahlen zusammenzuquetschen. */}
       <div className="flex min-w-[15rem] flex-1 flex-col justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="truncate text-2xl leading-tight font-semibold tracking-tight">
-            {character.name}
-          </h1>
+          {/* Inspiration sitzt hier, neben Namen und Klasse, statt als
+              eigenes Flex-Element in der Kopfzeile — dort verschob sie je
+              nach Breite die Instrumentenreihe in eine zweite Zeile und
+              ließ die ganze Box springen. Innerhalb dieser Spalte kostet
+              sie nur Platz, den der eh schon abschneidende Name sowieso
+              nicht braucht. */}
+          <div className="flex items-center gap-2">
+            <h1 className="truncate text-2xl leading-tight font-semibold tracking-tight">
+              {character.name}
+            </h1>
+            <InspirationToggle className="shrink-0" />
+          </div>
           <p className="mt-0.5 truncate text-sm text-patina">
             {/* Subklasse in Klammern hinter dem Level: sie beantwortet die
                 Frage „was für ein Warlock", und die stellt am Tisch jeder
@@ -108,13 +117,6 @@ export function ProfileHeader({
           ) : null}
         </dl>
       </div>
-
-      {/* Neben dem Namen statt in der Ecke: Inspiration ist kein
-          Kampfwert wie AC oder Speed, den man nachschlägt, sondern ein
-          Zustand, an den man sich erinnern lassen muss — ein eigener Platz
-          in der Kopfzeile tut das, ohne mit den Instrumenten rechts zu
-          verschmelzen. */}
-      <InspirationToggle className="self-center" />
 
       {/* Anker für die klebende Leiste: solange dieser Block sichtbar
           ist, hält sie ihre Zahlen zurück. */}
