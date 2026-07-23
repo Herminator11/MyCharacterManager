@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
-import { ChevronDownIcon, TrashIcon } from "@/components/icons";
+import { ChevronDownIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { Portrait } from "@/components/profile/Portrait";
 import { characterPath } from "@/lib/characterUrl";
 
@@ -49,6 +49,7 @@ export function CharacterLibrary({
   actions: LibraryActions;
 }) {
   const [editing, setEditing] = useState(false);
+  const [addingFolder, setAddingFolder] = useState(false);
 
   const favorites = characters.filter((c) => c.favorite);
   const loose = characters.filter((c) => !c.favorite && c.folderId === null);
@@ -73,8 +74,26 @@ export function CharacterLibrary({
           {characters.length}{" "}
           {characters.length === 1 ? "Charakter" : "Charaktere"}
         </h2>
-        <EditToggle editing={editing} onClick={() => setEditing(!editing)} />
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => setAddingFolder((value) => !value)}
+            aria-pressed={addingFolder}
+            className="inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina"
+          >
+            <PlusIcon />
+            Ordner
+          </button>
+          <EditToggle editing={editing} onClick={() => setEditing(!editing)} />
+        </div>
       </div>
+
+      {addingFolder ? (
+        <NewFolder
+          create={actions.createFolder}
+          onDone={() => setAddingFolder(false)}
+        />
+      ) : null}
 
       <div className="mt-3 space-y-5">
         {favorites.length > 0 ? (
@@ -146,8 +165,6 @@ export function CharacterLibrary({
           );
         })}
       </div>
-
-      {editing ? <NewFolder create={actions.createFolder} /> : null}
     </div>
   );
 }
@@ -513,30 +530,40 @@ function FolderControls({
   );
 }
 
-function NewFolder({ create }: { create: (name: string) => Promise<void> }) {
+function NewFolder({
+  create,
+  onDone,
+}: {
+  create: (name: string) => Promise<void>;
+  onDone: () => void;
+}) {
   const [name, setName] = useState("");
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const commit = () => {
     if (!name.trim()) return;
-    const value = name;
-    setName("");
-    startTransition(() => void create(value));
+    startTransition(() => void create(name));
+    onDone();
   };
 
   return (
-    <div className="mt-5 flex gap-2">
+    <div className="mt-3 flex gap-2">
       <input
+        autoFocus
         value={name}
         onChange={(event) => setName(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === "Enter") commit();
+          if (event.key === "Escape") onDone();
+        }}
+        onBlur={() => {
+          if (!name.trim()) onDone();
         }}
         placeholder="Neuer Ordner — etwa eine Kampagne"
         aria-label="Name des neuen Ordners"
         className={inputClass}
       />
-      <Button size="sm" onClick={commit} disabled={pending || !name.trim()}>
+      <Button size="sm" onClick={commit} disabled={!name.trim()}>
         Anlegen
       </Button>
     </div>
