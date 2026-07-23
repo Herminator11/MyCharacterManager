@@ -27,7 +27,7 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
   const pages = getNotes(characterId);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-3">
+    <>
       <form
         action={async (formData: FormData) => {
           "use server";
@@ -129,6 +129,6 @@ export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

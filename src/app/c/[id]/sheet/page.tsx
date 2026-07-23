@@ -16,13 +16,18 @@ import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
 import { SUBCLASSES } from "@/lib/rules/progression.generated";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
-import { getSheet } from "@/lib/server/characters";
+import { getFeatures, getSheet } from "@/lib/server/characters";
 import {
   findSpeciesByName,
   getSpecies,
   listSpecies,
 } from "@/lib/server/species";
 
+import {
+  addFeatureAction,
+  removeFeatureAction,
+  saveFeatureAction,
+} from "../notes/actions";
 import { uploadPortraitAction } from "../portrait-actions";
 import {
   addClassAction,
@@ -62,6 +67,7 @@ const SECTIONS = [
   { id: "bild", label: "Bild" },
   { id: "spezies", label: "Spezies" },
   { id: "klassen", label: "Klassen" },
+  { id: "faehigkeiten", label: "Fähigkeiten" },
   { id: "grunddaten", label: "Grunddaten" },
   { id: "attribute", label: "Attribute" },
   { id: "werte", label: "Werte" },
@@ -78,6 +84,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
 
   const { character } = sheet;
   const usedClassKeys = sheet.classes.map((c) => c.classKey);
+  const features = getFeatures(characterId);
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
@@ -304,6 +311,102 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           Zauberplätze und Ressourcen werden daraus abgeleitet — bei
           Multiclassing bekommt Warlock einen eigenen Pact-Magic-Pool.
         </p>
+      </Panel>
+
+      {/* Kein Katalog: die App leitet kein Klassenfeature aus Klasse und
+          Level ab, das wäre ein eigener Umfang wie der Zauberkatalog. Wer
+          nachschlagen will, was "Sneak Attack" gerade bedeutet, trägt es
+          hier einmal ein. */}
+      <Panel id="faehigkeiten" className="scroll-mt-24">
+        <SectionLabel>Fähigkeiten</SectionLabel>
+        <p className="mb-3 text-xs text-faint">
+          Klassenmerkmale, Rassenmerkmale, Feats — was du selbst
+          nachschlagen willst.
+        </p>
+
+        {features.length > 0 ? (
+          <ul className="divide-y divide-edge">
+            {features.map((feature) => (
+              <li key={feature.id} className="py-3 first:pt-0 last:pb-0">
+                <form
+                  action={async (formData: FormData) => {
+                    "use server";
+                    await saveFeatureAction(characterId, formData);
+                  }}
+                  className="space-y-1.5"
+                >
+                  <input type="hidden" name="featureId" value={feature.id} />
+                  <input
+                    name="name"
+                    defaultValue={feature.title}
+                    aria-label="Name der Fähigkeit"
+                    className={`${inputClass} font-semibold`}
+                  />
+                  <textarea
+                    name="description"
+                    rows={2}
+                    defaultValue={feature.body}
+                    placeholder="Kurzbeschreibung"
+                    aria-label="Beschreibung"
+                    className="w-full rounded-md border border-edge bg-ink px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-patina focus:outline-none"
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="text-xs text-patina underline-offset-4 hover:underline"
+                    >
+                      Speichern
+                    </button>
+                  </div>
+                </form>
+                <form
+                  action={async () => {
+                    "use server";
+                    await removeFeatureAction(characterId, feature.id);
+                  }}
+                  className="-mt-1"
+                >
+                  <button
+                    type="submit"
+                    className="text-xs text-faint underline-offset-4 hover:text-ember hover:underline"
+                  >
+                    Entfernen
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        <form
+          action={async (formData: FormData) => {
+            "use server";
+            await addFeatureAction(characterId, formData);
+          }}
+          className={
+            features.length > 0
+              ? "mt-4 space-y-2 border-t border-edge pt-4"
+              : "space-y-2"
+          }
+        >
+          <input
+            name="name"
+            required
+            placeholder="z.B. Sneak Attack"
+            aria-label="Name der neuen Fähigkeit"
+            className={inputClass}
+          />
+          <textarea
+            name="description"
+            rows={2}
+            placeholder="Optional — kurze Beschreibung"
+            aria-label="Beschreibung der neuen Fähigkeit"
+            className="w-full rounded-md border border-edge bg-ink px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-patina focus:outline-none"
+          />
+          <Button type="submit" className="w-full">
+            Hinzufügen
+          </Button>
+        </form>
       </Panel>
 
       {/* Ein Formular über drei Abschnitte: sie hängen zusammen. CON

@@ -74,3 +74,66 @@ export async function removeNoteAction(characterId: number, noteId: number) {
   db.delete(notes).where(eq(notes.id, noteId)).run();
   revalidatePath(`/c/${characterId}/notes`);
 }
+
+/**
+ * Eine Fähigkeit: Klassenmerkmal, Rassenmerkmal oder Feat, selbst
+ * eingetragen. Steht auf dem Bogen, nicht bei den Notizen — sie gehört
+ * zum Charakter, nicht zur Kampagne.
+ */
+export async function addFeatureAction(characterId: number, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  db.insert(notes)
+    .values({
+      characterId,
+      kind: "feature",
+      title: name,
+      body: String(formData.get("description") ?? "").trim(),
+    })
+    .run();
+
+  revalidatePath(`/c/${characterId}/sheet`);
+}
+
+export async function saveFeatureAction(characterId: number, formData: FormData) {
+  const featureId = Number(formData.get("featureId"));
+  if (!Number.isFinite(featureId)) return;
+
+  db.update(notes)
+    .set({
+      title: String(formData.get("name") ?? "").trim() || "Ohne Namen",
+      body: String(formData.get("description") ?? "").trim(),
+      updatedAt: Math.floor(Date.now() / 1000),
+    })
+    .where(eq(notes.id, featureId))
+    .run();
+
+  revalidatePath(`/c/${characterId}/sheet`);
+}
+
+export async function removeFeatureAction(characterId: number, featureId: number) {
+  db.delete(notes).where(eq(notes.id, featureId)).run();
+  revalidatePath(`/c/${characterId}/sheet`);
+}
+
+/**
+ * Ein Kampagnen-Log-Eintrag. Rein manuell — nur Text, das Datum setzt die
+ * Datenbank. Anders als das frühere Logbuch schreibt hier nichts mehr von
+ * selbst mit.
+ */
+export async function addCampaignLogAction(characterId: number, formData: FormData) {
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return;
+
+  db.insert(notes)
+    .values({ characterId, kind: "log", title: "", body })
+    .run();
+
+  revalidatePath(`/c/${characterId}/notes/log`);
+}
+
+export async function removeCampaignLogAction(characterId: number, entryId: number) {
+  db.delete(notes).where(eq(notes.id, entryId)).run();
+  revalidatePath(`/c/${characterId}/notes/log`);
+}

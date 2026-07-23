@@ -478,6 +478,35 @@ export function getNotes(characterId: number) {
 }
 
 /**
+ * Fähigkeiten: Klassenmerkmale, Rassenmerkmale, Feats — was man selbst
+ * nachschlagen will. Kein Katalog, keine Ableitung aus Klasse oder Level;
+ * nur was von Hand eingetragen wurde, in der Reihenfolge des Eintragens.
+ */
+export function getFeatures(characterId: number) {
+  return db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.characterId, characterId), eq(notes.kind, "feature")))
+    .orderBy(asc(notes.id))
+    .all();
+}
+
+/**
+ * Das Kampagnen-Log: was gerade passiert, neueste zuerst.
+ *
+ * Rein manuell — anders als das frühere Logbuch bekommt es nie
+ * automatische Einträge aus Kampfende oder aufgelösten Vermerken.
+ */
+export function getCampaignLog(characterId: number) {
+  return db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.characterId, characterId), eq(notes.kind, "log")))
+    .orderBy(desc(notes.createdAt), desc(notes.id))
+    .all();
+}
+
+/**
  * Was gerade gilt: Fluch, Pakt, Segen, die Vergiftung über drei Tage.
  *
  * Das sind keine 5e-Conditions — die haben Regeltext und einen Katalog.

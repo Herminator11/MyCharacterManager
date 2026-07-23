@@ -36,7 +36,7 @@ export type ConfigSource = "auto" | "manual";
 export type SpellSource = "srd" | "custom" | "imported";
 
 /** Wozu ein Notizeintrag da ist — siehe Kommentar an der Spalte `kind`. */
-export type NoteKind = "page" | "pin";
+export type NoteKind = "page" | "pin" | "feature" | "log";
 
 /**
  * Woher eine Spezies stammt.
@@ -618,11 +618,17 @@ export const notes = sqliteTable(
     title: text("title").notNull().default("Neue Notiz"),
     body: text("body").notNull().default(""),
     /**
-     * Wozu der Eintrag da ist — zwei Dinge mit sehr verschiedenem Lebenslauf:
+     * Wozu der Eintrag da ist — vier Dinge mit sehr verschiedenem Lebenslauf:
      *
-     * `page` — ausformulierte Seite, wird überarbeitet.
-     * `pin`  — was gerade gilt: Fluch, Pakt, Segen. Muss sichtbar sein,
-     *          nicht auffindbar, und steht deshalb auf der Charakterseite.
+     * `page`    — ausformulierte Seite, wird überarbeitet.
+     * `pin`     — was gerade gilt: Fluch, Pakt, Segen. Muss sichtbar sein,
+     *             nicht auffindbar, und steht deshalb auf der Charakterseite.
+     * `feature` — Klassenmerkmal, Rassenmerkmal oder Feat, selbst
+     *             eingetragen. Gehört zum Charakter, steht deshalb im
+     *             Bogen statt bei den Notizen.
+     * `log`     — was in der Kampagne passiert ist. Chronologisch, wächst
+     *             an, rein manuell — anders als das frühere Logbuch
+     *             schreibt hier nichts automatisch mit.
      */
     kind: text("kind").$type<NoteKind>().notNull().default("page"),
     createdAt: integer("created_at").notNull().default(now),
