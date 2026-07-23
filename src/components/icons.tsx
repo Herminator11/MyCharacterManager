@@ -65,6 +65,19 @@ export function PenIcon({ className }: IconProps) {
   );
 }
 
+/** Der Papierkorb — für endgültiges Löschen, nie für ein bloßes Entfernen. */
+export function TrashIcon({ className }: IconProps) {
+  return (
+    <Icon className={className} strokeWidth={1.7}>
+      <path d="M4 7h16" />
+      <path d="M9 7V4.8c0-.4.3-.8.8-.8h4.4c.5 0 .8.4.8.8V7" />
+      <path d="M6 7l1 13.2c0 .5.4.8.9.8h8.2c.5 0 .9-.3.9-.8L18 7" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </Icon>
+  );
+}
+
 /**
  * Der W20.
  *

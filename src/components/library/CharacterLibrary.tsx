@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
+import { TrashIcon } from "@/components/icons";
 import { characterPath } from "@/lib/characterUrl";
 
 import {
@@ -209,6 +210,32 @@ function Row({
   const [pending, startTransition] = useTransition();
   const run = (fn: () => Promise<void>) => startTransition(() => void fn());
 
+  const [renaming, setRenaming] = useState(false);
+  const [draftName, setDraftName] = useState(character.name);
+
+  const commitRename = () => {
+    setRenaming(false);
+    const trimmed = draftName.trim();
+    if (trimmed && trimmed !== character.name) {
+      run(() => actions.rename(character.id, trimmed));
+    }
+  };
+
+  const classAndLocation = (
+    <span className="mt-1 block truncate text-sm text-mute">
+      {character.race ? `${character.race} · ` : ""}
+      {character.classLine}
+      {location ? <span className="text-faint"> · in {location}</span> : null}
+    </span>
+  );
+
+  const hpBadge = (
+    <span className="shrink-0 text-sm text-patina">
+      <Ratio current={character.hpCurrent} total={character.hpMax} />
+      <span className="ml-1 text-faint">HP</span>
+    </span>
+  );
+
   return (
     <li
       className={cx(
@@ -225,27 +252,65 @@ function Row({
           }
         />
 
-        <Link
-          href={characterPath(character.id, character.name)}
-          className="min-w-0 flex-1 py-3.5 pr-4 transition-colors hover:text-patina"
-        >
-          <span className="flex items-baseline justify-between gap-4">
-            <span className="truncate text-lg font-semibold tracking-tight">
-              {character.name}
+        {/* Im Bearbeiten-Modus per Doppelklick auf den Namen umbenennen —
+            Enter oder Rausklicken speichert sofort, ohne eigenen Knopf.
+            Solange umbenannt wird, ist die Zeile bewusst kein Link mehr:
+            ein Eingabefeld in einem <a> ist weder gültiges HTML noch
+            verlässlich bedienbar. */}
+        {renaming ? (
+          <div className="min-w-0 flex-1 py-3.5 pr-4">
+            <span className="flex items-baseline justify-between gap-4">
+              <input
+                autoFocus
+                value={draftName}
+                onChange={(event) => setDraftName(event.target.value)}
+                onBlur={commitRename}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    commitRename();
+                  }
+                  if (event.key === "Escape") {
+                    event.preventDefault();
+                    setDraftName(character.name);
+                    setRenaming(false);
+                  }
+                }}
+                aria-label={`Name von ${character.name}`}
+                className="min-w-0 flex-1 rounded-md border border-patina bg-ink px-2 py-1 text-lg font-semibold tracking-tight focus:outline-none"
+              />
+              {hpBadge}
             </span>
-            <span className="shrink-0 text-sm text-patina">
-              <Ratio current={character.hpCurrent} total={character.hpMax} />
-              <span className="ml-1 text-faint">HP</span>
+            {classAndLocation}
+          </div>
+        ) : (
+          <Link
+            href={characterPath(character.id, character.name)}
+            className="min-w-0 flex-1 py-3.5 pr-4 transition-colors hover:text-patina"
+          >
+            <span className="flex items-baseline justify-between gap-4">
+              <span
+                className="truncate text-lg font-semibold tracking-tight"
+                onDoubleClick={(event) => {
+                  if (!editing) return;
+                  event.preventDefault();
+                  setDraftName(character.name);
+                  setRenaming(true);
+                }}
+                onClick={(event) => {
+                  // Verhindert, dass der erste Klick eines Doppelklicks
+                  // schon zur Charakterseite navigiert, bevor der zweite
+                  // ankommt — Next.js' Link prüft defaultPrevented.
+                  if (editing) event.preventDefault();
+                }}
+              >
+                {character.name}
+              </span>
+              {hpBadge}
             </span>
-          </span>
-          <span className="mt-1 block truncate text-sm text-mute">
-            {character.race ? `${character.race} · ` : ""}
-            {character.classLine}
-            {location ? (
-              <span className="text-faint"> · in {location}</span>
-            ) : null}
-          </span>
-        </Link>
+            {classAndLocation}
+          </Link>
+        )}
       </div>
 
       {editing ? (
@@ -271,7 +336,6 @@ function RowEditor({
   actions: LibraryActions;
   run: (fn: () => Promise<void>) => void;
 }) {
-  const [name, setName] = useState(character.name);
   const [confirming, setConfirming] = useState(false);
 
   if (confirming) {
@@ -303,26 +367,9 @@ function RowEditor({
 
   return (
     <div className="space-y-2 border-t border-edge px-4 py-3">
-      <div className="flex gap-2">
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && name.trim()) {
-              run(() => actions.rename(character.id, name));
-            }
-          }}
-          aria-label={`Name von ${character.name}`}
-          className={inputClass}
-        />
-        <Button
-          size="sm"
-          disabled={!name.trim() || name.trim() === character.name}
-          onClick={() => run(() => actions.rename(character.id, name))}
-        >
-          Umbenennen
-        </Button>
-      </div>
+      <p className="text-xs text-faint">
+        Doppelklick auf den Namen benennt um.
+      </p>
 
       <div className="flex gap-2">
         <select
@@ -350,9 +397,10 @@ function RowEditor({
           size="sm"
           variant="danger"
           onClick={() => setConfirming(true)}
+          aria-label={`${character.name} löschen`}
           className="px-3"
         >
-          Löschen
+          <TrashIcon className="size-4" />
         </Button>
       </div>
     </div>
