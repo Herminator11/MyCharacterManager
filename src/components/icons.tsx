@@ -410,6 +410,19 @@ export function SkullIcon({ className }: IconProps) {
   );
 }
 
+/**
+ * Play-Knopf fürs direkte Wirken — ein gefülltes Dreieck, das Zeichen
+ * jedes Medienspielers. Neben dem Zauber, statt auf ihm: der Rest der
+ * Zeile bleibt der Weg zu Details und Zauberplatzwahl.
+ */
+export function PlayIcon({ className }: IconProps) {
+  return (
+    <Icon className={className} fill="currentColor" strokeWidth={0}>
+      <path d="M7 4.2 19.5 12 7 19.8z" strokeLinejoin="round" />
+    </Icon>
+  );
+}
+
 /* ------------------------------------------------------------------ *
  * Conditions
  * ------------------------------------------------------------------ */

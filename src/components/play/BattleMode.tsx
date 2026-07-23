@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
-import { ActionShape, CrossedSwordsIcon } from "@/components/icons";
+import { ActionShape, CrossedSwordsIcon, PlayIcon } from "@/components/icons";
 import { cx, Panel, SectionLabel } from "@/components/ui";
 import { characterPath } from "@/lib/characterUrl";
 import { useLive } from "@/lib/live-context";
+import type { LiveMutation } from "@/lib/live-types";
 import {
   isSlotCost,
   parseActionCost,
@@ -108,6 +109,7 @@ export function BattleMode({
         favorites={favorites}
         state={state}
         onPick={setCasting}
+        onQuickCast={(spell) => send(quickCastMutation(spell, state))}
       />
 
       <HpBlock state={state} send={send} />
@@ -141,10 +143,12 @@ function FavoriteSpells({
   favorites,
   state,
   onPick,
+  onQuickCast,
 }: {
   favorites: CastableSpell[];
   state: ReturnType<typeof useLive>["state"];
   onPick: (spell: CastableSpell) => void;
+  onQuickCast: (spell: CastableSpell) => void;
 }) {
   return (
     <Panel>
@@ -180,32 +184,83 @@ function FavoriteSpells({
             const ready = slotFree && turnFree;
 
             return (
-              <button
+              <div
                 key={spell.id}
-                type="button"
-                onClick={() => onPick(spell)}
                 className={cx(
-                  "min-h-14 rounded-md border border-edge bg-panel-2 px-3 py-2 text-left transition-all hover:border-patina",
+                  "min-h-14 rounded-md border border-edge bg-panel-2 transition-all hover:border-patina",
                   !ready && "opacity-45",
                 )}
               >
-                <span className="flex items-center justify-between gap-2">
-                  <span className="truncate text-sm font-medium">
+                {/* Der Play-Knopf wirkt sofort (Mindestgrad, erster freier
+                    Pool) — für alles andere (Hochwirken, Pool wählen,
+                    Beschreibung) bleibt der Rest der Kachel der Weg zum
+                    Cast-Sheet. Zwei Knöpfe statt einem verschachtelten. */}
+                <button
+                  type="button"
+                  onClick={() => onPick(spell)}
+                  className="block w-full px-3 pt-2 text-left"
+                >
+                  <span className="truncate block text-sm font-medium">
                     {spell.name}
                   </span>
-                  <CostBadge cost={cost} />
-                </span>
-                <span className="mt-0.5 block text-xs text-faint">
-                  {spell.level === 0 ? "Cantrip" : `Grad ${spell.level}`}
-                  {spell.concentration ? " · K" : ""}
-                </span>
-              </button>
+                </button>
+                <div className="flex items-center justify-between gap-2 py-1 pr-1.5 pl-3">
+                  <button
+                    type="button"
+                    onClick={() => onPick(spell)}
+                    className="min-w-0 flex-1 text-left text-xs text-faint"
+                  >
+                    {spell.level === 0 ? "Cantrip" : `Grad ${spell.level}`}
+                    {spell.concentration ? " · K" : ""}
+                  </button>
+                  <span className="flex shrink-0 items-center gap-1">
+                    <CostBadge cost={cost} />
+                    <button
+                      type="button"
+                      onClick={() => onQuickCast(spell)}
+                      aria-label={`${spell.name} direkt wirken`}
+                      title="Direkt wirken"
+                      className="flex size-6 items-center justify-center rounded text-patina transition-colors hover:bg-patina-deep"
+                    >
+                      <PlayIcon className="size-3.5" />
+                    </button>
+                  </span>
+                </div>
+              </div>
             );
           })}
         </div>
       )}
     </Panel>
   );
+}
+
+/**
+ * Was der Play-Knopf tatsächlich wirkt: kein Hochwirken, kein
+ * Pool-Auswahldialog — der erste Pool mit freiem Slot am Mindestgrad.
+ * Genau der Pfad, den das Cast-Sheet auch vorschlägt, nur ohne den
+ * Zwischenschritt. Ohne freien Slot wirkt es wie "Ohne Zauberplatz
+ * wirken" im Sheet: nicht gesperrt, nur ohne Slot verbucht.
+ */
+function quickCastMutation(
+  spell: CastableSpell,
+  state: ReturnType<typeof useLive>["state"],
+): LiveMutation {
+  const level = Math.max(spell.level, 1);
+  const pool = state.pools.find((p) =>
+    p.slots.some((s) => s.level === level && s.used < s.total),
+  );
+  const poolId = spell.level === 0 ? null : (pool?.id ?? null);
+
+  return {
+    type: "cast",
+    poolId,
+    level: poolId === null ? 0 : level,
+    spellId: spell.id,
+    spellName: spell.name,
+    concentration: spell.concentration,
+    cost: parseActionCost(spell.castingTime),
+  };
 }
 
 /**
