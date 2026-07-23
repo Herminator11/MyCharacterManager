@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { Button, inputClass, Panel, SectionLabel } from "@/components/ui";
+import { characterIdFromParam } from "@/lib/characterUrl";
 import {
   getCharacter,
   getLogEntries,
@@ -31,7 +32,7 @@ function formatStamp(unixSeconds: number): string {
 
 export default async function NotesPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const characterId = Number(id);
+  const characterId = characterIdFromParam(id);
 
   const character = getCharacter(characterId);
   if (!character) notFound();

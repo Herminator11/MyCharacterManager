@@ -5,6 +5,7 @@ import { QuickLog } from "@/components/notes/QuickLog";
 import { Dashboard } from "@/components/play/Dashboard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AbilityPanel } from "@/components/sheet/AbilityPanel";
+import { characterIdFromParam, characterPath } from "@/lib/characterUrl";
 import { LiveProvider } from "@/lib/live-context";
 import { CLASSES } from "@/lib/rules/classes";
 import {
@@ -36,7 +37,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const characterId = Number(id);
+  const characterId = characterIdFromParam(id);
 
   const initial = getLiveState(characterId);
   const sheet = getSheet(characterId);
@@ -103,7 +104,7 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
           <div className="order-2 min-w-0 space-y-3 lg:order-1">
             <AbilityPanel
               abilities={abilities}
-              editHref={`/c/${characterId}/sheet#attribute`}
+              editHref={characterPath(characterId, sheet.character.name, "/sheet#attribute")}
             />
 
             {/* Steht in der Nachschlage-Spalte, nicht in der Kampf-Spalte:
@@ -123,6 +124,7 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
 
           <div className="order-1 min-w-0 lg:order-2">
             <Dashboard
+              characterName={sheet.character.name}
               conditions={listConditions().map((c) => ({
                 key: c.key,
                 name: c.name,

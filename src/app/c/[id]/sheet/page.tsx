@@ -11,6 +11,7 @@ import {
   SectionLabel,
 } from "@/components/ui";
 import { ABILITIES } from "@/db/schema";
+import { characterIdFromParam } from "@/lib/characterUrl";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
 import { SUBCLASSES } from "@/lib/rules/progression.generated";
@@ -70,7 +71,7 @@ const SECTIONS = [
 
 export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const characterId = Number(id);
+  const characterId = characterIdFromParam(id);
 
   const sheet = getSheet(characterId);
   if (!sheet) notFound();

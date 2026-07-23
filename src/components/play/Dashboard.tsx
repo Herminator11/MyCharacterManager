@@ -12,6 +12,7 @@ import {
   MoonIcon,
 } from "@/components/icons";
 import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
+import { characterPath } from "@/lib/characterUrl";
 import { useLive } from "@/lib/live-context";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 
@@ -21,9 +22,11 @@ import { PoolsPanel, ResourcesPanel } from "./panels";
 export type ConditionOption = { key: string; name: string; description: string };
 
 export function Dashboard({
+  characterName,
   conditions,
   classLabels,
 }: {
+  characterName: string;
   conditions: ConditionOption[];
   /** classKey → Anzeigename, für die Hit-Dice-Zeilen. */
   classLabels: Record<string, string>;
@@ -40,7 +43,7 @@ export function Dashboard({
           Zwischen den Kämpfen braucht niemand Aktion und Bonusaktion.
           Läuft schon ein Kampf, sagt der Knopf das: sonst tippt man
           zwischen zwei Reitern hin und her und verliert die Runde. */}
-      <RollInitiative state={state} send={send} />
+      <RollInitiative state={state} send={send} characterName={characterName} />
 
       <HpBlock state={state} send={send} />
 
@@ -104,13 +107,15 @@ export function Dashboard({
 function RollInitiative({
   state,
   send,
+  characterName,
 }: {
   state: LiveState;
   send: (mutation: LiveMutation) => Promise<void>;
+  characterName: string;
 }) {
   const router = useRouter();
   const running = state.round > 0;
-  const href = `/c/${state.characterId}/battle`;
+  const href = characterPath(state.characterId, characterName, "/battle");
 
   const className =
     "flex min-h-14 w-full items-center justify-between gap-4 rounded-lg border border-ember-dim bg-ember-deep/40 px-4 text-ember transition-colors hover:border-ember";

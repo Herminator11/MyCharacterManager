@@ -1,8 +1,13 @@
 import { notFound } from "next/navigation";
 
 import { BattleMode } from "@/components/play/BattleMode";
+import { characterIdFromParam } from "@/lib/characterUrl";
 import { LiveProvider } from "@/lib/live-context";
-import { getCharacterSpells, getLiveState } from "@/lib/server/characters";
+import {
+  getCharacter,
+  getCharacterSpells,
+  getLiveState,
+} from "@/lib/server/characters";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +20,11 @@ export const dynamic = "force-dynamic";
  */
 export default async function BattlePage({ params }: PageProps<"/c/[id]/battle">) {
   const { id } = await params;
-  const characterId = Number(id);
+  const characterId = characterIdFromParam(id);
 
   const initial = getLiveState(characterId);
-  if (!initial) notFound();
+  const character = getCharacter(characterId);
+  if (!initial || !character) notFound();
 
   const favorites = getCharacterSpells(characterId)
     .filter(({ entry }) => entry.favorite)
@@ -41,7 +47,7 @@ export default async function BattlePage({ params }: PageProps<"/c/[id]/battle">
 
   return (
     <LiveProvider initial={initial}>
-      <BattleMode favorites={favorites} />
+      <BattleMode favorites={favorites} characterName={character.name} />
     </LiveProvider>
   );
 }

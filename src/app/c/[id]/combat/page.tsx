@@ -8,6 +8,7 @@ import {
   Panel,
   SectionLabel,
 } from "@/components/ui";
+import { characterIdFromParam } from "@/lib/characterUrl";
 import {
   abilityModifier,
   attackBonus,
@@ -22,7 +23,7 @@ export const dynamic = "force-dynamic";
 
 export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const characterId = Number(id);
+  const characterId = characterIdFromParam(id);
 
   const sheet = getSheet(characterId);
   if (!sheet) notFound();

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
+import { characterPath } from "@/lib/characterUrl";
+
 import {
   Button,
   cx,
@@ -224,7 +226,7 @@ function Row({
         />
 
         <Link
-          href={`/c/${character.id}`}
+          href={characterPath(character.id, character.name)}
           className="min-w-0 flex-1 py-3.5 pr-4 transition-colors hover:text-patina"
         >
           <span className="flex items-baseline justify-between gap-4">

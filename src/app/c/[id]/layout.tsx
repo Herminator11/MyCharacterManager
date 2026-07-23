@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { HomeLink } from "@/components/Brand";
 import { StickyStats } from "@/components/StickyStats";
 import { TabBar } from "@/components/TabBar";
+import { characterIdFromParam, characterPath } from "@/lib/characterUrl";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
 import { getSheet } from "@/lib/server/characters";
@@ -15,7 +16,8 @@ export default async function CharacterLayout({
   params,
 }: LayoutProps<"/c/[id]">) {
   const { id } = await params;
-  const sheet = getSheet(Number(id));
+  const characterId = characterIdFromParam(id);
+  const sheet = getSheet(characterId);
   if (!sheet) notFound();
 
   const classes = sheet.classes
@@ -33,7 +35,7 @@ export default async function CharacterLayout({
 
             <div className="min-w-0 flex-1">
               <Link
-                href={`/c/${id}/sheet`}
+                href={characterPath(characterId, sheet.character.name, "/sheet")}
                 className="block truncate text-base leading-tight font-semibold tracking-tight hover:text-patina"
               >
                 {sheet.character.name}
@@ -70,7 +72,7 @@ export default async function CharacterLayout({
       */}
       <main className="mx-auto max-w-5xl px-4 py-4">{children}</main>
 
-      <TabBar characterId={Number(id)} />
+      <TabBar characterId={characterId} characterName={sheet.character.name} />
     </div>
   );
 }

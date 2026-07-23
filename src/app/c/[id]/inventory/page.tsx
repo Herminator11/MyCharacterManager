@@ -9,6 +9,7 @@ import {
   Panel,
   SectionLabel,
 } from "@/components/ui";
+import { characterIdFromParam } from "@/lib/characterUrl";
 import { copperToGold, totalCopper } from "@/lib/rules/derive";
 import { getCharacter, getInventory } from "@/lib/server/characters";
 
@@ -34,7 +35,7 @@ const COINS = [
 
 export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const characterId = Number(id);
+  const characterId = characterIdFromParam(id);
 
   const character = getCharacter(characterId);
   if (!character) notFound();

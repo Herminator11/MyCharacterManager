@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { characterPath } from "@/lib/characterUrl";
 import { createCharacter, deleteCharacter } from "@/lib/server/characters";
 import {
   createFolder,
@@ -33,7 +34,7 @@ export async function createCharacterAction(formData: FormData) {
   });
 
   revalidatePath("/");
-  redirect(`/c/${id}`);
+  redirect(characterPath(id, name));
 }
 
 /**

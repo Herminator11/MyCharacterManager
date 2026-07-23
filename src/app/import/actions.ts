@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { characterPath } from "@/lib/characterUrl";
 import type { ImportedCharacter } from "@/lib/import/types";
 import { parseSheet, UnknownSheetFormatError } from "@/lib/import/parseSheet";
 import { readPdfFields, SheetReadError } from "@/lib/import/readPdfFields";
@@ -56,7 +57,7 @@ export async function commitImportAction(draftJson: string) {
   const id = importCharacter(draft);
 
   revalidatePath("/");
-  redirect(`/c/${id}`);
+  redirect(characterPath(id, draft.name));
 }
 
 /* ------------------------------------------------------------------ *
@@ -83,11 +84,12 @@ export async function commitReimportAction(
   characterId: number,
   draftJson: string,
 ) {
-  if (!applyReimport(characterId, JSON.parse(draftJson))) {
+  const draft = JSON.parse(draftJson) as ImportedCharacter;
+  if (!applyReimport(characterId, draft)) {
     throw new Error("Diesen Charakter gibt es nicht mehr.");
   }
 
   revalidatePath("/");
   revalidatePath(`/c/${characterId}`, "layout");
-  redirect(`/c/${characterId}`);
+  redirect(characterPath(characterId, draft.name));
 }

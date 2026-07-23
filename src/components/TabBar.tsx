@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { characterPath } from "@/lib/characterUrl";
+
 import {
   BackpackIcon,
   BookIcon,
@@ -26,9 +28,15 @@ const TABS = [
   { segment: "notes", label: "Notizen", Icon: BookIcon },
 ] as const;
 
-export function TabBar({ characterId }: { characterId: number }) {
+export function TabBar({
+  characterId,
+  characterName,
+}: {
+  characterId: number;
+  characterName: string;
+}) {
   const pathname = usePathname();
-  const base = `/c/${characterId}`;
+  const base = characterPath(characterId, characterName);
 
   return (
     <nav

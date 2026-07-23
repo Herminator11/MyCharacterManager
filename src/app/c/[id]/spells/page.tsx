@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { CustomSpellForm } from "@/components/spells/CustomSpellForm";
 import { SpellsScreen } from "@/components/spells/SpellsScreen";
+import { characterIdFromParam } from "@/lib/characterUrl";
 import {
   getCharacterSpells,
   getClasses,
@@ -20,7 +21,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SpellsPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const characterId = Number(id);
+  const characterId = characterIdFromParam(id);
 
   const initial = getLiveState(characterId);
   if (!initial) notFound();

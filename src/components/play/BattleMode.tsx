@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
 import { ActionShape, CrossedSwordsIcon } from "@/components/icons";
 import { cx, Panel, SectionLabel } from "@/components/ui";
+import { characterPath } from "@/lib/characterUrl";
 import { useLive } from "@/lib/live-context";
 import {
   isSlotCost,
@@ -30,16 +31,23 @@ import { TurnBar } from "./TurnBar";
  * App weiß nicht, ob Action Surge im Spiel ist oder der DM eine Ausnahme
  * erlaubt; sie zeigt an, sie verbietet nicht.
  */
-export function BattleMode({ favorites }: { favorites: CastableSpell[] }) {
+export function BattleMode({
+  favorites,
+  characterName,
+}: {
+  favorites: CastableSpell[];
+  characterName: string;
+}) {
   const { state, send, connected } = useLive();
   const [casting, setCasting] = useState<CastableSpell | null>(null);
   const router = useRouter();
+  const overviewHref = characterPath(state.characterId, characterName);
 
   // Erst das Kampfende buchen, dann wechseln: die Übersicht wird auf dem
   // Server gerendert und zeigte sonst noch den laufenden Kampf.
   const finish = async () => {
     await send({ type: "battle.end" });
-    router.push(`/c/${state.characterId}`);
+    router.push(overviewHref);
   };
 
   return (
@@ -63,7 +71,7 @@ export function BattleMode({ favorites }: { favorites: CastableSpell[] }) {
           </button>
         ) : (
           <Link
-            href={`/c/${state.characterId}`}
+            href={overviewHref}
             className="text-sm text-faint transition-colors hover:text-patina"
           >
             Zur Übersicht
