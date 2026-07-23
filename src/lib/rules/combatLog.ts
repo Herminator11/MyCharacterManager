@@ -260,34 +260,6 @@ export function describeMutation(
   }
 }
 
-/**
- * Was am Kampfende ins Logbuch wandert — oder null, wenn nichts passiert
- * ist. Ein Kampf, der aus einem Fehltipper bestand, soll keine Notiz
- * hinterlassen.
- */
-export function summarize(
-  rounds: number,
-  lines: Pick<CombatLogLine, "kind" | "amount">[],
-): string | null {
-  if (lines.length === 0) return null;
-
-  const sum = (kind: CombatLogKind) =>
-    lines.filter((l) => l.kind === kind).reduce((total, l) => total + l.amount, 0);
-
-  const damage = sum("damage");
-  const healed = sum("heal");
-  const casts = lines.filter((l) => l.kind === "cast").length;
-
-  const parts = [
-    `${rounds} ${rounds === 1 ? "Runde" : "Runden"}`,
-    damage > 0 ? `${damage} Schaden genommen` : "",
-    healed > 0 ? `${healed} HP geheilt` : "",
-    casts > 0 ? `${casts} ${casts === 1 ? "Zauber" : "Zauber"} gewirkt` : "",
-  ].filter(Boolean);
-
-  return `Kampf: ${parts.join(" · ")}`;
-}
-
 function countHitDiceUsed(state: LiveState): number {
   return state.hitDice.reduce((total, entry) => total + entry.used, 0);
 }

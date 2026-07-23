@@ -312,8 +312,8 @@ function addNewNotes(characterId: number, draft: ImportedCharacter) {
     db
       .select({ title: notes.title })
       .from(notes)
-      // Nur Seiten vergleichen: Logbuch und Vermerke haben eigene Titel-
-      // konventionen und dürfen einen Import nie blockieren.
+      // Nur Seiten vergleichen: Vermerke haben eigene Titelkonventionen
+      // und dürfen einen Import nie blockieren.
       .where(and(eq(notes.characterId, characterId), eq(notes.kind, "page")))
       .all()
       .map((row) => row.title.toLowerCase()),

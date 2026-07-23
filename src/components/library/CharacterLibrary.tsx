@@ -354,8 +354,8 @@ function RowEditor({
           löschen?
         </p>
         <p className="mt-0.5 text-xs text-mute">
-          Mit allen Zaubern, Ressourcen, Notizen und dem Logbuch. Das lässt
-          sich nicht rückgängig machen.
+          Mit allen Zaubern, Ressourcen und Notizen. Das lässt sich nicht
+          rückgängig machen.
         </p>
         <div className="mt-2.5 grid grid-cols-2 gap-2">
           <Button size="sm" onClick={() => setConfirming(false)}>

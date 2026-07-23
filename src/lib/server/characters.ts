@@ -478,22 +478,6 @@ export function getNotes(characterId: number) {
 }
 
 /**
- * Das Logbuch: was passiert ist, neueste zuerst.
- *
- * Getrennt von den Seiten, weil es einen anderen Lebenslauf hat — ein
- * Eintrag wird hingeworfen und nie wieder angefasst, eine Seite wächst.
- */
-export function getLogEntries(characterId: number, limit?: number) {
-  const query = db
-    .select()
-    .from(notes)
-    .where(and(eq(notes.characterId, characterId), eq(notes.kind, "log")))
-    .orderBy(desc(notes.createdAt), desc(notes.id));
-
-  return limit ? query.limit(limit).all() : query.all();
-}
-
-/**
  * Was gerade gilt: Fluch, Pakt, Segen, die Vergiftung über drei Tage.
  *
  * Das sind keine 5e-Conditions — die haben Regeltext und einen Katalog.

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
 import { PinnedNotes } from "@/components/notes/PinnedNotes";
-import { QuickLog } from "@/components/notes/QuickLog";
 import { Dashboard } from "@/components/play/Dashboard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AbilityPanel } from "@/components/sheet/AbilityPanel";
@@ -10,17 +9,12 @@ import { LiveProvider } from "@/lib/live-context";
 import { CLASSES } from "@/lib/rules/classes";
 import {
   getLiveState,
-  getLogEntries,
   getPins,
   getSheet,
   listConditions,
 } from "@/lib/server/characters";
 
-import {
-  addLogEntryAction,
-  addPinAction,
-  resolvePinAction,
-} from "./notes/actions";
+import { addPinAction, resolvePinAction } from "./notes/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -29,10 +23,10 @@ export const dynamic = "force-dynamic";
  *
  * Sie zeigt den Charakter, sie bearbeitet ihn nicht. Änderbar ist hier nur,
  * was sich am Spieltisch von Minute zu Minute ändert — Trefferpunkte,
- * Zauberplätze, Ressourcen, Conditions, der Zug — dazu Vermerke und
- * Logbuch, die beide Notizen sind und keine Werte. Alles andere steht im
- * Bogen unter `/c/[id]/sheet`, und zwar vollständig an einer Stelle: sonst
- * sucht man die Bewegungsrate erst hier, dann dort.
+ * Zauberplätze, Ressourcen, Conditions, der Zug — dazu Vermerke, die
+ * Notizen sind und keine Werte. Alles andere steht im Bogen unter
+ * `/c/[id]/sheet`, und zwar vollständig an einer Stelle: sonst sucht man
+ * die Bewegungsrate erst hier, dann dort.
  */
 
 export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
@@ -105,20 +99,6 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
             <AbilityPanel
               abilities={abilities}
               editHref={characterPath(characterId, sheet.character.name, "/sheet#attribute")}
-            />
-
-            {/* Steht in der Nachschlage-Spalte, nicht in der Kampf-Spalte:
-                festhalten tut man zwischen den Würfen, nicht mittendrin. */}
-            <QuickLog
-              recent={getLogEntries(characterId, 3).map((entry) => ({
-                id: entry.id,
-                body: entry.body,
-                createdAt: entry.createdAt,
-              }))}
-              add={async (body: string) => {
-                "use server";
-                await addLogEntryAction(characterId, body);
-              }}
             />
           </div>
 

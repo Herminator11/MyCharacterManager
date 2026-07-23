@@ -20,8 +20,8 @@ import type { SheetView } from "@/lib/server/characters";
  *
  * Nichts davon ist hier änderbar. Was zum Charakter gehört, wird im Bogen
  * geändert; auf dieser Seite ändert sich nur, was der Kampf ändert.
- * Ausgenommen bleiben die Vermerke und das Logbuch — das sind Notizen, keine
- * Werte, und sie entstehen mitten im Spiel.
+ * Ausgenommen bleiben die Vermerke — das sind Notizen, keine Werte, und sie
+ * entstehen mitten im Spiel.
  */
 export function ProfileHeader({
   sheet,

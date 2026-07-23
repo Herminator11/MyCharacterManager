@@ -36,7 +36,7 @@ export type ConfigSource = "auto" | "manual";
 export type SpellSource = "srd" | "custom" | "imported";
 
 /** Wozu ein Notizeintrag da ist — siehe Kommentar an der Spalte `kind`. */
-export type NoteKind = "page" | "log" | "pin";
+export type NoteKind = "page" | "pin";
 
 /**
  * Woher eine Spezies stammt.
@@ -460,8 +460,7 @@ export const attacks = sqliteTable(
  * Zauber später aus der Liste fliegt oder umbenannt wird.
  *
  * Lebt nur bis zum nächsten „Roll Initiative…“ — es ist ein Mitschrieb für
- * die laufende Begegnung, kein Archiv. Was bleiben soll, steht im Logbuch
- * unter Notizen; die Zusammenfassung landet beim Kampfende von selbst dort.
+ * die laufende Begegnung, kein Archiv.
  */
 export const combatLog = sqliteTable(
   "combat_log",
@@ -619,10 +618,9 @@ export const notes = sqliteTable(
     title: text("title").notNull().default("Neue Notiz"),
     body: text("body").notNull().default(""),
     /**
-     * Wozu der Eintrag da ist — drei Dinge mit sehr verschiedenem Lebenslauf:
+     * Wozu der Eintrag da ist — zwei Dinge mit sehr verschiedenem Lebenslauf:
      *
      * `page` — ausformulierte Seite, wird überarbeitet.
-     * `log`  — was passiert ist. Chronologisch, wächst an, darf ins Archiv.
      * `pin`  — was gerade gilt: Fluch, Pakt, Segen. Muss sichtbar sein,
      *          nicht auffindbar, und steht deshalb auf der Charakterseite.
      */

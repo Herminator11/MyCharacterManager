@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "@/db";
-import { characterClasses, characters, notes, spellPoolSlots } from "@/db/schema";
+import { characterClasses, characters, spellPoolSlots } from "@/db/schema";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { getClass } from "@/lib/rules/classes";
 import { deathStatus } from "@/lib/rules/hp";
@@ -631,36 +631,6 @@ describe("Kampflog", () => {
     const state = send({ type: "battle.start" });
     expect(state.log).toHaveLength(0);
     expect(state.round).toBe(1);
-  });
-
-  it("hinterlässt am Kampfende eine Zeile im Logbuch", () => {
-    send({ type: "battle.start" });
-    send({ type: "hp.delta", amount: -6 });
-    send({ type: "hp.delta", amount: 4 });
-    send({ type: "turn.end" });
-    send({ type: "battle.end" });
-
-    const entries = db
-      .select()
-      .from(notes)
-      .where(eq(notes.characterId, id))
-      .all()
-      .filter((note) => note.kind === "log");
-
-    expect(entries).toHaveLength(1);
-    expect(entries[0].body).toBe(
-      "Kampf: 2 Runden · 6 Schaden genommen · 4 HP geheilt",
-    );
-  });
-
-  it("hinterlässt nichts, wenn der Kampf leer blieb", () => {
-    send({ type: "battle.start" });
-    const state = send({ type: "battle.end" });
-
-    expect(state.round).toBe(0);
-    expect(db.select().from(notes).where(eq(notes.characterId, id)).all()).toHaveLength(
-      0,
-    );
   });
 
   it("beendet den Kampf mit unverbrauchtem Zug", () => {

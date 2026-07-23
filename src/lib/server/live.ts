@@ -9,7 +9,6 @@ import {
   characters,
   combatLog,
   concentration,
-  notes,
   resources,
   spellPools,
   spellPoolSlots,
@@ -17,7 +16,7 @@ import {
 } from "@/db/schema";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { isSlotCost, type ActionSlot } from "@/lib/rules/actions";
-import { describeMutation, summarize } from "@/lib/rules/combatLog";
+import { describeMutation } from "@/lib/rules/combatLog";
 import {
   applyHpDelta,
   setHp,
@@ -166,8 +165,7 @@ function apply(characterId: number, mutation: LiveMutation) {
 
     case "battle.start":
       // Das Log gehört dem laufenden Kampf. Beim nächsten "Roll
-      // Initiative…" fängt es leer an — was bleiben soll, steht schon als
-      // Zusammenfassung im Logbuch.
+      // Initiative…" fängt es leer an.
       db.delete(combatLog)
         .where(eq(combatLog.characterId, characterId))
         .run();
@@ -350,24 +348,9 @@ function record(
  * Kampf beenden.
  *
  * Das Log selbst bleibt stehen, damit man nach der Begegnung noch einmal
- * hineinsehen kann. Was dauerhaft bleiben soll, wandert als eine Zeile ins
- * Logbuch — dorthin, wo auch die von Hand notierten Ereignisse stehen.
+ * hineinsehen kann.
  */
 function endBattle(characterId: number) {
-  const rounds = getEncounterRound(characterId);
-  const lines = db
-    .select()
-    .from(combatLog)
-    .where(eq(combatLog.characterId, characterId))
-    .all();
-
-  const summary = summarize(Math.max(1, rounds), lines);
-  if (summary) {
-    db.insert(notes)
-      .values({ characterId, kind: "log", title: "", body: summary })
-      .run();
-  }
-
   db.update(characters)
     .set({
       encounterRound: 0,

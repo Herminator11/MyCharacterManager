@@ -27,23 +27,6 @@ export async function addNoteAction(characterId: number) {
   revalidatePath(`/c/${characterId}/notes`);
 }
 
-/**
- * Ein Logbucheintrag. Nur Text — Titel und Gliederung sind genau die
- * Hürde, an der man mitten in der Szene aufgibt und doch wieder zum Zettel
- * greift. Das Datum setzt die Datenbank.
- */
-export async function addLogEntryAction(characterId: number, body: string) {
-  const text = body.trim();
-  if (!text) return;
-
-  db.insert(notes)
-    .values({ characterId, kind: "log", title: "", body: text })
-    .run();
-
-  // Auch die Charakterseite: dort steht der jüngste Eintrag.
-  revalidatePath(`/c/${characterId}`, "layout");
-}
-
 /** Ein Vermerk: kurzer Name, optional ein Satz dazu. */
 export async function addPinAction(characterId: number, formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
@@ -61,26 +44,12 @@ export async function addPinAction(characterId: number, formData: FormData) {
   revalidatePath(`/c/${characterId}`, "layout");
 }
 
-/**
- * Einen Vermerk aufheben.
- *
- * Er wandert ins Logbuch statt gelöscht zu werden: dass ein Fluch endete,
- * ist selbst ein Ereignis, und die Frage "seit wann sind wir den los?"
- * kommt garantiert.
- */
+/** Einen Vermerk aufheben. */
 export async function resolvePinAction(characterId: number, noteId: number) {
   const pin = db.select().from(notes).where(eq(notes.id, noteId)).get();
   if (!pin || pin.characterId !== characterId) return;
 
-  db.update(notes)
-    .set({
-      kind: "log",
-      title: "",
-      body: `Beendet: ${pin.title}${pin.body ? ` — ${pin.body}` : ""}`,
-      createdAt: Math.floor(Date.now() / 1000),
-    })
-    .where(eq(notes.id, noteId))
-    .run();
+  db.delete(notes).where(eq(notes.id, noteId)).run();
 
   revalidatePath(`/c/${characterId}`, "layout");
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { LiveState } from "@/lib/live-types";
 
-import { describeMutation, summarize } from "./combatLog";
+import { describeMutation } from "./combatLog";
 
 /**
  * Das Kampflog übersetzt zwei Zustände in einen Satz. Diese Tests halten
@@ -236,31 +236,5 @@ describe("Conditions und Ressourcen", () => {
       describeMutation({ type: "resource.set", resourceId: 3, current: 1 }, spent, BASE)
         ?.text,
     ).toBe("Hexblade's Curse zurückgelegt");
-  });
-});
-
-describe("Zusammenfassung fürs Logbuch", () => {
-  it("zählt Schaden, Heilung und Zauber zusammen", () => {
-    expect(
-      summarize(3, [
-        { kind: "damage", amount: 7 },
-        { kind: "damage", amount: 5 },
-        { kind: "heal", amount: 9 },
-        { kind: "cast", amount: 0 },
-        { kind: "cast", amount: 0 },
-        { kind: "condition", amount: 0 },
-      ]),
-    ).toBe("Kampf: 3 Runden · 12 Schaden genommen · 9 HP geheilt · 2 Zauber gewirkt");
-  });
-
-  it("lässt weg, was nicht vorkam", () => {
-    expect(summarize(1, [{ kind: "cast", amount: 0 }])).toBe(
-      "Kampf: 1 Runde · 1 Zauber gewirkt",
-    );
-  });
-
-  it("hinterlässt nichts, wenn nichts passiert ist", () => {
-    // Ein Kampf, der aus einem Fehltipper bestand, gehört nicht ins Logbuch.
-    expect(summarize(1, [])).toBeNull();
   });
 });
