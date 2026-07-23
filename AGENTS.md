@@ -94,5 +94,7 @@ eigenen SSE-Stream.
   nachgeladen.
 - **Geändert wird im Bogen** (`/c/[id]/sheet`), die Übersicht
   (`/c/[id]`) zeigt nur an — mit Ausnahme der Live-Werte (HP, Slots,
-  Conditions, Zug) sowie Vermerken und Logbuch, die im Kampf selbst
-  entstehen.
+  Conditions, Zug) sowie Vermerken, die im Kampf selbst entstehen. Was
+  zum Charakter gehört (Fähigkeiten, Vorgeschichte), steht im Bogen; was
+  in der Kampagne passiert (Notizseiten, Kampagnen-Log), steht unter
+  Notizen.

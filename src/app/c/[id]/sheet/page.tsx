@@ -35,6 +35,7 @@ import {
   createSpeciesAction,
   removeClassAction,
   revertSpeciesBonusesAction,
+  saveBackgroundAction,
   saveBasicsAction,
   setClassLevelAction,
   setProficiencyAction,
@@ -52,9 +53,9 @@ export const dynamic = "force-dynamic";
  * ein paar kurze Wege, spart aber die Frage, die jeden dieser Wege teurer
  * machte als er war: „wo war das nochmal änderbar?“
  *
- * Der Preis ist eine lange Seite. Deshalb die Sprungmarken oben: sieben
- * Abschnitte in fester Reihenfolge, damit man beim zweiten Mal nicht mehr
- * sucht, sondern zielt.
+ * Der Preis ist eine lange Seite. Deshalb die Sprungmarken oben: die
+ * Abschnitte stehen in fester Reihenfolge, damit man beim zweiten Mal
+ * nicht mehr sucht, sondern zielt.
  *
  * Zwei Arten zu speichern, absichtlich unterschieden:
  * sofort, wo eine einzelne Geste vollständig ist (Portrait wählen, Level
@@ -68,6 +69,7 @@ const SECTIONS = [
   { id: "spezies", label: "Spezies" },
   { id: "klassen", label: "Klassen" },
   { id: "faehigkeiten", label: "Fähigkeiten" },
+  { id: "vorgeschichte", label: "Vorgeschichte" },
   { id: "grunddaten", label: "Grunddaten" },
   { id: "attribute", label: "Attribute" },
   { id: "werte", label: "Werte" },
@@ -408,6 +410,29 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           </Button>
         </form>
       </Panel>
+
+      <form
+        action={async (formData: FormData) => {
+          "use server";
+          await saveBackgroundAction(characterId, formData);
+        }}
+        className="space-y-3"
+      >
+        <Panel id="vorgeschichte" className="scroll-mt-24">
+          <SectionLabel>Vorgeschichte</SectionLabel>
+          <textarea
+            name="backstory"
+            rows={8}
+            defaultValue={character.backstory}
+            placeholder="Woher kommt dein Charakter?"
+            className="w-full rounded-md border border-edge bg-ink px-3 py-2.5 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
+          />
+        </Panel>
+
+        <Button type="submit" variant="solid" size="lg" className="w-full">
+          Vorgeschichte speichern
+        </Button>
+      </form>
 
       {/* Ein Formular über drei Abschnitte: sie hängen zusammen. CON
           verschiebt die maximalen Trefferpunkte, DEX die Initiative — sie

@@ -4,23 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { characters, notes } from "@/db/schema";
-
-export async function saveBackgroundAction(
-  characterId: number,
-  formData: FormData,
-) {
-  // Nur was das Formular tatsächlich zeigt: Persönlichkeitsmerkmale,
-  // Ideale, Bindungen und Makel stehen nicht mehr darin und dürfen hier
-  // nicht mitgeschrieben werden — sonst leerte jedes Speichern die Werte,
-  // die der Import aus dem Bogen geholt hat.
-  db.update(characters)
-    .set({ backstory: String(formData.get("backstory") ?? "").trim() })
-    .where(eq(characters.id, characterId))
-    .run();
-
-  revalidatePath(`/c/${characterId}/notes`);
-}
+import { notes } from "@/db/schema";
 
 export async function addNoteAction(characterId: number) {
   db.insert(notes).values({ characterId, kind: "page" }).run();

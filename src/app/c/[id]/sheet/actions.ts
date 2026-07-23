@@ -23,6 +23,24 @@ function refresh(characterId: number) {
   revalidatePath(`/c/${characterId}`, "layout");
 }
 
+/**
+ * Nur die Vorgeschichte. Persönlichkeitsmerkmale, Ideale, Bindungen und
+ * Makel stehen bewusst nicht in diesem Formular und dürfen hier nicht
+ * mitgeschrieben werden — sonst leerte jedes Speichern die Werte, die der
+ * Import aus dem Bogen geholt hat.
+ */
+export async function saveBackgroundAction(
+  characterId: number,
+  formData: FormData,
+) {
+  db.update(characters)
+    .set({ backstory: String(formData.get("backstory") ?? "").trim() })
+    .where(eq(characters.id, characterId))
+    .run();
+
+  revalidatePath(`/c/${characterId}/sheet`);
+}
+
 /** Grunddaten und Attribute in einem Rutsch. */
 export async function saveBasicsAction(
   characterId: number,
