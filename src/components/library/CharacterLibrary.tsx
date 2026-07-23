@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
-import { ChevronDownIcon, PlusIcon, TrashIcon } from "@/components/icons";
+import { AddIcon, ChevronDownIcon, TrashIcon } from "@/components/icons";
 import { Portrait } from "@/components/profile/Portrait";
 import { characterPath } from "@/lib/characterUrl";
 
@@ -81,7 +81,7 @@ export function CharacterLibrary({
             aria-pressed={addingFolder}
             className="inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina"
           >
-            <PlusIcon />
+            <AddIcon />
             Ordner
           </button>
           <EditToggle editing={editing} onClick={() => setEditing(!editing)} />

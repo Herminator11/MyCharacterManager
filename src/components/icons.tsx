@@ -74,6 +74,17 @@ export function ChevronDownIcon({ className }: IconProps) {
   );
 }
 
+/** Ein schlichtes Kreuz fürs Hinzufügen — dünn und neutral, anders als
+ * das satte `PlusIcon`, das als Heilungszeichen reserviert bleibt. */
+export function AddIcon({ className }: IconProps) {
+  return (
+    <Icon className={className} strokeWidth={1.8}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </Icon>
+  );
+}
+
 /** Der Papierkorb — für endgültiges Löschen, nie für ein bloßes Entfernen. */
 export function TrashIcon({ className }: IconProps) {
   return (
