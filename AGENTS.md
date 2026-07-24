@@ -92,6 +92,12 @@ eigenen SSE-Stream.
 - **Vor jedem Commit:** `npm test` und `npm run typecheck`.
 - Neue UI-Zeichen gehören nach `src/components/icons.tsx`, nichts wird
   nachgeladen.
+- **Dieselbe Aktion trägt überall dasselbe Icon** (Löschen immer der
+  Papierkorb, Hinzufügen immer das Plus, …) — Wiedererkennung statt
+  Wortsuche (Nielsen: "Recognition rather than recall"). Ein Icon ohne
+  Textlabel ist nur erlaubt, wenn es durch Konvention eindeutig ist
+  (Papierkorb, Stift, Lupe); ist die Bedeutung nicht auf den ersten
+  Blick klar, bekommt es ein Label dazu.
 - **Geändert wird im Bogen** (`/c/[id]/sheet`), die Übersicht
   (`/c/[id]`) zeigt nur an — mit Ausnahme der Live-Werte (HP, Slots,
   Conditions, Zug) sowie Vermerken, die im Kampf selbst entstehen. Was
