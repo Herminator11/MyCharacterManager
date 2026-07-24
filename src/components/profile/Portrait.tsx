@@ -3,9 +3,10 @@ import { cx } from "@/components/ui";
 /**
  * Das Portrait als reine Anzeige.
  *
- * Eigene Komponente, weil es an zwei Stellen mit demselben Aussehen steht:
- * auf der Übersicht nur zum Ansehen, im Bogen als Fläche zum Wechseln. Ein
- * Bild, das je nach Seite anders gerahmt ist, wirkt wie zwei Bilder.
+ * Eigene Komponente, weil dieselbe Fläche an mehreren Stellen gebraucht
+ * wird: in der Charakterliste rein zum Ansehen, im Kurzüberblick von
+ * Übersicht und Bogen als Kern von `PortraitUpload`. Ein Bild, das je nach
+ * Seite anders gerahmt ist, wirkt wie zwei Bilder.
  *
  * Ohne Datei steht hier die Initiale statt eines leeren Kastens — so hat die
  * Charakterkarte auch vor dem ersten Upload eine erkennbare Form.

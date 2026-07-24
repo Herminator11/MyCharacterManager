@@ -1,7 +1,7 @@
 import { ClassIcon } from "@/components/icons";
 import { CombatStats } from "@/components/profile/CombatStats";
 import { KeyStat } from "@/components/profile/KeyStat";
-import { Portrait } from "@/components/profile/Portrait";
+import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
@@ -16,8 +16,16 @@ import type { SheetView } from "@/lib/server/characters";
  * Abschnitt, der ihn ändert, statt hier ein zweites Formular für dieselbe
  * Zahl zu öffnen. Live-Werte (Inspiration, Vermerke) fehlen bewusst: die
  * entstehen im Kampf und gehören auf die Übersicht, nicht in den Bogen.
+ * Das Portrait ist die eine Ausnahme, die direkt hier wechselbar ist —
+ * dafür braucht es unten im Bogen keinen eigenen Abschnitt mehr.
  */
-export function SheetSummary({ sheet }: { sheet: NonNullable<SheetView> }) {
+export function SheetSummary({
+  sheet,
+  uploadPortrait,
+}: {
+  sheet: NonNullable<SheetView>;
+  uploadPortrait: (formData: FormData) => Promise<{ error?: string } | void>;
+}) {
   const { character } = sheet;
 
   const subtitle = [
@@ -28,17 +36,12 @@ export function SheetSummary({ sheet }: { sheet: NonNullable<SheetView> }) {
 
   return (
     <Panel className="flex flex-wrap items-start gap-4">
-      <a
-        href="#bild"
-        className="shrink-0 transition-opacity hover:opacity-80"
-        aria-label="Zum Abschnitt Bild"
-      >
-        <Portrait
-          characterId={character.id}
-          name={character.name}
-          hasPortrait={Boolean(character.portraitFile)}
-        />
-      </a>
+      <PortraitUpload
+        characterId={character.id}
+        name={character.name}
+        hasPortrait={Boolean(character.portraitFile)}
+        upload={uploadPortrait}
+      />
 
       <div className="flex min-w-[15rem] flex-1 flex-col justify-between gap-3">
         <div className="min-w-0">

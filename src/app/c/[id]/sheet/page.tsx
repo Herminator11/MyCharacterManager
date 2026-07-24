@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { BackgroundEditor } from "@/components/sheet/BackgroundEditor";
 import { FeatureEditor } from "@/components/sheet/FeatureEditor";
 import { ProficiencyToggle } from "@/components/sheet/ProficiencyToggle";
@@ -51,10 +50,12 @@ export const dynamic = "force-dynamic";
 /**
  * Der Bogen: die einzige Stelle, an der der Charakter geändert wird.
  *
- * Die Übersicht zeigt nur an — vom Portrait über die AC bis zum letzten
- * Fertigkeitshaken läuft alles hier zusammen. Das kostet auf der Übersicht
- * ein paar kurze Wege, spart aber die Frage, die jeden dieser Wege teurer
- * machte als er war: „wo war das nochmal änderbar?“
+ * Die Übersicht zeigt nur an — von der AC bis zum letzten Fertigkeitshaken
+ * läuft alles hier zusammen. Das kostet auf der Übersicht ein paar kurze
+ * Wege, spart aber die Frage, die jeden dieser Wege teurer machte als er
+ * war: „wo war das nochmal änderbar?“ Das Portrait ist die eine bewusste
+ * Ausnahme — es hängt an keinem anderen Wert und lässt sich deshalb direkt
+ * im Kurzüberblick oben wechseln, hier wie auf der Übersicht.
  *
  * Der Preis ist eine lange Seite. Deshalb die Sprungmarken oben: die
  * Abschnitte stehen in fester Reihenfolge, damit man beim zweiten Mal
@@ -62,14 +63,13 @@ export const dynamic = "force-dynamic";
  *
  * Zwei Arten zu speichern, absichtlich unterschieden:
  * sofort, wo eine einzelne Geste vollständig ist oder ein Feld für sich
- * steht (Portrait wählen, Level stellen, Haken setzen, Fähigkeiten und
- * Vorgeschichte) — und per Knopf, wo mehrere Felder zusammen einen Sinn
- * ergeben und ein halb ausgefülltes Formular Unsinn wäre.
+ * steht (Level stellen, Haken setzen, Fähigkeiten und Vorgeschichte) — und
+ * per Knopf, wo mehrere Felder zusammen einen Sinn ergeben und ein halb
+ * ausgefülltes Formular Unsinn wäre.
  */
 
 /** Reihenfolge und Beschriftung der Sprungmarken — und der Abschnitte. */
 const SECTIONS = [
-  { id: "bild", label: "Bild" },
   { id: "spezies", label: "Spezies" },
   { id: "klassen", label: "Klassen" },
   { id: "faehigkeiten", label: "Fähigkeiten" },
@@ -97,7 +97,13 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
       {/* Derselbe Blick wie oben auf der Übersicht, damit man nicht erst
           hinscrollen muss, um zu sehen, was gerade gilt — jeder Teil
           verlinkt auf den Abschnitt, der ihn ändert. */}
-      <SheetSummary sheet={sheet} />
+      <SheetSummary
+        sheet={sheet}
+        uploadPortrait={async (formData: FormData) => {
+          "use server";
+          return uploadPortraitAction(characterId, formData);
+        }}
+      />
 
       {/* Waagerecht scrollbar statt umbrechend: sieben Marken passen am
           Handy in keine Zeile, und eine zweite Zeile Navigation über einem
@@ -123,25 +129,6 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
       {/* scroll-mt an jedem Abschnitt: die klebende Kopfleiste des Layouts
           liegt sonst genau auf der Überschrift, zu der man gerade
           gesprungen ist. */}
-      <Panel id="bild" className="scroll-mt-24">
-        <SectionLabel>Bild</SectionLabel>
-        <div className="flex items-center gap-4">
-          <PortraitUpload
-            characterId={characterId}
-            name={character.name}
-            hasPortrait={Boolean(character.portraitFile)}
-            upload={async (formData: FormData) => {
-              "use server";
-              return uploadPortraitAction(characterId, formData);
-            }}
-          />
-          <p className="text-xs text-faint">
-            Antippen wählt eine Datei. Ohne Bild steht auf der Übersicht die
-            Initiale — die Karte hat dann trotzdem eine erkennbare Form.
-          </p>
-        </div>
-      </Panel>
-
       <SpeciesPanel
         id="spezies"
         options={listSpecies().map((s) => ({

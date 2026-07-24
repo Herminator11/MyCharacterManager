@@ -4,7 +4,7 @@ import { PROFILE_ANCHOR_ID } from "@/components/StickyStats";
 import { CombatStats } from "@/components/profile/CombatStats";
 import { InspirationToggle } from "@/components/profile/InspirationToggle";
 import { KeyStat } from "@/components/profile/KeyStat";
-import { Portrait } from "@/components/profile/Portrait";
+import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
@@ -22,16 +22,19 @@ import type { SheetView } from "@/lib/server/characters";
  * Nichts davon ist hier änderbar. Was zum Charakter gehört, wird im Bogen
  * geändert; auf dieser Seite ändert sich nur, was der Kampf ändert.
  * Ausgenommen bleiben die Vermerke — das sind Notizen, keine Werte, und sie
- * entstehen mitten im Spiel.
+ * entstehen mitten im Spiel — und das Portrait, das an keinem anderen Wert
+ * hängt und deshalb hier wie im Bogen direkt wechselbar ist.
  */
 export function ProfileHeader({
   sheet,
   pinCount,
   addPin,
+  uploadPortrait,
 }: {
   sheet: NonNullable<SheetView>;
   pinCount: number;
   addPin: (formData: FormData) => Promise<void>;
+  uploadPortrait: (formData: FormData) => Promise<{ error?: string } | void>;
 }) {
   const { character } = sheet;
 
@@ -47,11 +50,11 @@ export function ProfileHeader({
 
   return (
     <Panel className="relative flex flex-wrap items-start gap-4 pr-14">
-      <Portrait
+      <PortraitUpload
         characterId={character.id}
         name={character.name}
         hasPortrait={Boolean(character.portraitFile)}
-        className="shrink-0"
+        upload={uploadPortrait}
       />
 
       {/* Mindestbreite, damit die Instrumente rechts lieber in eine eigene

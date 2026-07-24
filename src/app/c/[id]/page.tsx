@@ -15,6 +15,7 @@ import {
 } from "@/lib/server/characters";
 
 import { addPinAction, resolvePinAction } from "./notes/actions";
+import { uploadPortraitAction } from "./portrait-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,10 @@ export default async function PlayPage({ params }: PageProps<"/c/[id]">) {
           addPin={async (formData: FormData) => {
             "use server";
             await addPinAction(characterId, formData);
+          }}
+          uploadPortrait={async (formData: FormData) => {
+            "use server";
+            return uploadPortraitAction(characterId, formData);
           }}
         />
 

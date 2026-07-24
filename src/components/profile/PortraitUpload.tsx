@@ -6,12 +6,15 @@ import { Portrait } from "@/components/profile/Portrait";
 import { cx } from "@/components/ui";
 
 /**
- * Portrait mit Klick-zum-Wechseln — steht nur im Bogen.
+ * Portrait mit Klick-zum-Wechseln — steht im Kurzüberblick von Übersicht
+ * und Bogen.
  *
- * Die Übersicht zeigt dasselbe Bild über `Portrait`, ohne Knopf: geändert
- * wird an einer Stelle, und das ist der Bogen.
+ * Bewusste Ausnahme von "geändert wird im Bogen": das Bild ist an keine
+ * andere Eingabe gekoppelt und sein Ergebnis sieht man nur an sich selbst
+ * — anders als bei AC oder Attributen gibt es keinen Wert, der aus ihm
+ * abgeleitet würde. Ein zweiter Weg dorthin kostet hier keine Konsistenz.
  *
- * Speichert sofort statt über den Speichern-Knopf darunter. Eine Datei
+ * Speichert sofort statt über einen Speichern-Knopf. Eine Datei
  * auszuwählen ist bereits die Bestätigung — ein zweiter Schritt für etwas,
  * das man am Ergebnis sofort sieht, wäre nur eine Falle.
  */
