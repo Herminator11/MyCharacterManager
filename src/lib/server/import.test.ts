@@ -43,6 +43,13 @@ describe("Charakter", () => {
     expect(sheet.scores.cha).toBe(20);
   });
 
+  it("markiert den Charakter als aus dem PDF importiert", () => {
+    // Grundlage für die Sperre am "Boni übernehmen"-Knopf: die Attribute
+    // oben sind bereits Endwerte, Rassenboni fast immer schon eingerechnet.
+    const sheet = getSheet(id)!;
+    expect(sheet.character.importedFromPdf).toBe(true);
+  });
+
   it("legt beide Klassen mit Unterklasse an", () => {
     const sheet = getSheet(id)!;
     expect(

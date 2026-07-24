@@ -127,6 +127,18 @@ export const characters = sqliteTable("characters", {
    * Hand geändert wurde.
    */
   speciesBonusesFrom: text("species_bonuses_from").notNull().default(""),
+  /**
+   * Kommt der Charakter aus dem PDF-Import? Dann stecken die Rassenboni
+   * fast immer schon in den Attributen, auch wenn `species_bonuses_from`
+   * das nicht sagt — der Import ordnet nur die Spezies zu, ohne sie als
+   * "übernommen" zu markieren, weil er nicht weiß, ob der Bogen sie
+   * wirklich schon eingerechnet hat. "Boni übernehmen" bekäme sie sonst
+   * ein zweites Mal addiert, unbemerkt. Steht hier `true`, tritt der
+   * direkte Knopf zurück hinter eine bewusste Zusatzbestätigung.
+   */
+  importedFromPdf: integer("imported_from_pdf", { mode: "boolean" })
+    .notNull()
+    .default(false),
   background: text("background").notNull().default(""),
   alignment: text("alignment").notNull().default(""),
   xp: integer("xp").notNull().default(0),

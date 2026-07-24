@@ -159,6 +159,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           character.speciesBonusesFrom === character.speciesKey
         }
         appliedFrom={getSpecies(character.speciesBonusesFrom)}
+        importedFromPdf={character.importedFromPdf}
         onApply={async () => {
           "use server";
           await applySpeciesBonusesAction(characterId);

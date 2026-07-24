@@ -27,6 +27,7 @@ export function SpeciesPicker({
   current,
   applyHint,
   applied,
+  importedFromPdf,
   onSelect,
   onApply,
   onRevert,
@@ -40,6 +41,14 @@ export function SpeciesPicker({
   applyHint: string;
   /** Steht schon in den Werten — dann gibt es nur noch das Zurücknehmen. */
   applied: boolean;
+  /**
+   * Der Bogen kam aus dem PDF-Import — die Boni stecken dann fast immer
+   * schon in den Attributen, ohne dass `species_bonuses_from` das sagt.
+   * Der direkte Knopf tritt deshalb zurück hinter eine bewusste
+   * Zusatzbestätigung, statt ein zweites Addieren als Standardweg
+   * anzubieten.
+   */
+  importedFromPdf: boolean;
   onSelect: (key: string) => Promise<void>;
   onApply: () => Promise<void>;
   onRevert: () => Promise<void>;
@@ -106,18 +115,42 @@ export function SpeciesPicker({
       ) : applyHint ? (
         <div className="rounded-md border border-edge bg-ink px-3 py-3">
           <p className="text-xs text-mute">{applyHint}</p>
-          <Button
-            variant="outline"
-            disabled={pending}
-            onClick={() => startTransition(() => onApply())}
-            className="mt-2.5 w-full"
-          >
-            {pending ? "Übernimmt…" : "Boni übernehmen"}
-          </Button>
-          <p className="mt-2 text-xs text-faint">
-            Aus einem PDF importierte Bögen haben die Boni fast immer schon
-            eingerechnet — dann ist hier nichts zu tun.
-          </p>
+          {importedFromPdf ? (
+            // Kein Knopf als Standardweg: der Bogen kam aus dem Import, die
+            // Boni stecken fast immer schon drin. Wer sie trotzdem
+            // übernehmen will — etwa weil dieser eine Bogen sie tatsächlich
+            // nicht eingerechnet hatte —, bekommt den Weg dorthin, nur nicht
+            // als erstes, was ins Auge fällt.
+            <>
+              <p className="mt-2.5 text-xs text-brass">
+                Dieser Charakter stammt aus dem PDF-Import — die Boni stecken
+                deshalb vermutlich schon in den Attributen.
+              </p>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => startTransition(() => onApply())}
+                className="mt-2 text-xs text-faint underline-offset-4 hover:text-patina hover:underline"
+              >
+                {pending ? "Übernimmt…" : "Trotzdem übernehmen"}
+              </button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                disabled={pending}
+                onClick={() => startTransition(() => onApply())}
+                className="mt-2.5 w-full"
+              >
+                {pending ? "Übernimmt…" : "Boni übernehmen"}
+              </Button>
+              <p className="mt-2 text-xs text-faint">
+                Aus einem PDF importierte Bögen haben die Boni fast immer
+                schon eingerechnet — dann ist hier nichts zu tun.
+              </p>
+            </>
+          )}
         </div>
       ) : null}
     </div>

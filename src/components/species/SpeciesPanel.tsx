@@ -32,6 +32,7 @@ export function SpeciesPanel({
   suggestion,
   applied,
   appliedFrom,
+  importedFromPdf,
   onSelect,
   onApply,
   onRevert,
@@ -58,6 +59,8 @@ export function SpeciesPanel({
    * neben CON auch CHA gesprungen ist.
    */
   appliedFrom: SpeciesDef | null;
+  /** Kam der Bogen aus dem PDF-Import — siehe `SpeciesPicker`. */
+  importedFromPdf: boolean;
   onSelect: (key: string) => Promise<void>;
   onApply: () => Promise<void>;
   onRevert: () => Promise<void>;
@@ -84,6 +87,7 @@ export function SpeciesPanel({
         current={current?.key ?? ""}
         applyHint={applyHint(current, scores, appliedFrom)}
         applied={applied}
+        importedFromPdf={importedFromPdf}
         onSelect={onSelect}
         onApply={onApply}
         onRevert={onRevert}

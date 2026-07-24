@@ -38,6 +38,7 @@ export function importCharacter(draft: ImportedCharacter): number {
         // nicht: eine falsche Spezies behauptete Boni, die der Charakter
         // nie hatte, und die Werte auf dem Bogen sind bereits Endwerte.
         speciesKey: findSpeciesByName(draft.race)?.key ?? "",
+        importedFromPdf: true,
         background: draft.background,
         alignment: draft.alignment,
         xp: draft.xp,

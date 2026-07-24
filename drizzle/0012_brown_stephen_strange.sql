@@ -1,0 +1,1 @@
+ALTER TABLE `characters` ADD `imported_from_pdf` integer DEFAULT false NOT NULL;

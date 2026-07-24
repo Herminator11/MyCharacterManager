@@ -169,6 +169,10 @@ export function applyReimport(
         name: draft.name,
         race: draft.race,
         speciesKey: findSpeciesByName(draft.race)?.key ?? "",
+        // Ab jetzt stecken die Werte aus einem PDF-Bogen drin, egal wie der
+        // Charakter ursprünglich angelegt wurde — dieselbe Absicherung wie
+        // beim Erstimport gilt deshalb ab hier auch.
+        importedFromPdf: true,
         background: draft.background,
         alignment: draft.alignment,
         xp: draft.xp,

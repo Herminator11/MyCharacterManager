@@ -150,6 +150,18 @@ describe("Bauplan wird ersetzt", () => {
   it("hebt das HP-Maximum", () => {
     expect(getLiveState(id)!.hpMax).toBe(52);
   });
+
+  it("markiert den Charakter als aus dem PDF importiert", () => {
+    // Auch wenn er ursprünglich von Hand angelegt wurde: ab dem Re-Import
+    // stecken die Attribute aus einem PDF-Bogen drin, und dieselbe Sperre
+    // am "Boni übernehmen"-Knopf soll greifen wie beim Erstimport.
+    db.update(characters)
+      .set({ importedFromPdf: false })
+      .where(eq(characters.id, id))
+      .run();
+    applyReimport(id, leveledUp());
+    expect(getSheet(id)!.character.importedFromPdf).toBe(true);
+  });
 });
 
 describe("Spielstand bleibt", () => {
