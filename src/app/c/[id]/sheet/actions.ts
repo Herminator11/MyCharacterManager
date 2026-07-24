@@ -249,7 +249,10 @@ export async function setProficiencyAction(
     })
     .run();
 
-  revalidatePath(`/c/${characterId}/sheet`);
+  // Layout-weit statt nur "/sheet": die Fertigkeiten- und Rettungswurf-Boni
+  // stehen auch im AbilityPanel der Übersicht, sonst zeigt sie nach einem
+  // Toggle hier eine Weile den alten Bonus.
+  revalidatePath(`/c/${characterId}`, "layout");
 }
 
 export async function addClassAction(characterId: number, formData: FormData) {

@@ -3,6 +3,7 @@ import { PinButton } from "@/components/notes/PinButton";
 import { PROFILE_ANCHOR_ID } from "@/components/StickyStats";
 import { CombatStats } from "@/components/profile/CombatStats";
 import { InspirationToggle } from "@/components/profile/InspirationToggle";
+import { KeyStat } from "@/components/profile/KeyStat";
 import { Portrait } from "@/components/profile/Portrait";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
@@ -135,27 +136,5 @@ export function ProfileHeader({
           darunter verschwindet. */}
       <PinButton count={pinCount} add={addPin} />
     </Panel>
-  );
-}
-
-function KeyStat({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: React.ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div>
-      <dd className="text-lg leading-none font-semibold tabular-nums">
-        {value}
-        {hint ? (
-          <span className="ml-1 text-xs font-normal text-faint">{hint}</span>
-        ) : null}
-      </dd>
-      <dt className="label mt-1 text-[0.5625rem]">{label}</dt>
-    </div>
   );
 }

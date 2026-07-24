@@ -4,6 +4,7 @@ import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { BackgroundEditor } from "@/components/sheet/BackgroundEditor";
 import { FeatureEditor } from "@/components/sheet/FeatureEditor";
 import { ProficiencyToggle } from "@/components/sheet/ProficiencyToggle";
+import { SheetSummary } from "@/components/sheet/SheetSummary";
 import { SpeciesPanel } from "@/components/species/SpeciesPanel";
 import {
   Button,
@@ -93,6 +94,11 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
+      {/* Derselbe Blick wie oben auf der Übersicht, damit man nicht erst
+          hinscrollen muss, um zu sehen, was gerade gilt — jeder Teil
+          verlinkt auf den Abschnitt, der ihn ändert. */}
+      <SheetSummary sheet={sheet} />
+
       {/* Waagerecht scrollbar statt umbrechend: sieben Marken passen am
           Handy in keine Zeile, und eine zweite Zeile Navigation über einem
           Formular ist mehr Leiste als Inhalt. */}
