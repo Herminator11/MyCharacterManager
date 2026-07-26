@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { AddIcon } from "@/components/icons";
 import { CombatLogRow } from "@/components/play/CombatLog";
 import { Button, Panel, SectionLabel } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
@@ -75,7 +76,10 @@ export default async function CampaignLogPage({
             aria-label="Ereignis festhalten"
             className="min-h-12 min-w-0 flex-1 rounded-md border border-edge bg-ink px-3 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
           />
-          <Button type="submit">Notieren</Button>
+          <Button type="submit">
+            <AddIcon />
+            Notieren
+          </Button>
         </form>
       </Panel>
 
