@@ -238,13 +238,17 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
 
 /**
  * „Level 5 Custom Lineage Wizard, School of Necromancy“ in Rasse, Klasse,
- * Level und Subklasse zerlegen.
+ * Level und Subklasse zerlegen — oder, bei Multiclass, „Level 9 Human
+ * Sorcerer, Shadow Magic (4) / Warlock, The Fiend (5)“: die führende
+ * „Level N“-Zeile ist dann nur die Summe, jedes Segment hinter dem „/“
+ * trägt sein eigenes Level in Klammern am Ende.
  *
  * Die Klasse ist das am weitesten rechts stehende Wort vor dem Komma, das
  * eine bekannte Klasse benennt — alles davor ist die Rasse (kann mehrere
  * Wörter haben: „Custom Lineage“, „Hill Dwarf“), alles nach dem Komma die
  * Subklasse. Von rechts gesucht, damit ein klassenähnliches Wort im
- * Rassennamen nicht fälschlich die Klasse wird.
+ * Rassennamen nicht fälschlich die Klasse wird. Die Rasse steht nur vor der
+ * ersten Klasse.
  */
 function parseBuild(
   build: string,
@@ -260,9 +264,52 @@ function parseBuild(
     return { race: "", classes: [] };
   }
 
-  const level = Number(match[1]);
-  const [classPartRaw, ...subclassParts] = match[2].split(/,\s*/);
+  const totalLevel = Number(match[1]);
+  const segments = match[2].split(/\s*\/\s*/).filter(Boolean);
+
+  if (segments.length <= 1) {
+    return parseClassSegment(match[2], totalLevel, true, warnings);
+  }
+
+  let race = "";
+  const classes: ImportedClass[] = [];
+  segments.forEach((segment, index) => {
+    const levelMatch = segment.match(/\((\d+)\)\s*$/);
+    if (!levelMatch) {
+      warnings.push(
+        `Für „${segment.trim()}“ stand kein eigenes Level im Bogen; ich habe 1 eingesetzt.`,
+      );
+    }
+    const level = levelMatch ? Number(levelMatch[1]) : 1;
+    const withoutLevel = levelMatch
+      ? segment.slice(0, levelMatch.index).trim()
+      : segment.trim();
+
+    const result = parseClassSegment(withoutLevel, level, index === 0, warnings);
+    if (index === 0) race = result.race;
+    classes.push(...result.classes);
+  });
+
+  return { race, classes };
+}
+
+/**
+ * Ein Segment einer `details_build`-Zeile: „{Rasse} {Klasse}, {Unterklasse}“
+ * bei der ersten Klasse, „{Klasse}, {Unterklasse}“ bei jeder weiteren (keine
+ * Rasse mehr davor).
+ */
+function parseClassSegment(
+  rest: string,
+  level: number,
+  withRace: boolean,
+  warnings: string[],
+): { race: string; classes: ImportedClass[] } {
+  const [classPartRaw, ...subclassParts] = rest.split(/,\s*/);
   const subclass = subclassParts.join(", ").trim();
+
+  if (!withRace) {
+    return { race: "", classes: [buildClass(classPartRaw.trim(), level, subclass, warnings)] };
+  }
 
   const tokens = classPartRaw.trim().split(/\s+/);
   let classIndex = -1;

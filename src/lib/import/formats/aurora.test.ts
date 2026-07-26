@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { detectFormat, parseSheet } from "@/lib/import/parseSheet";
 import type { FieldMap } from "@/lib/import/types";
 import erisFields from "@/test/fixtures/eris-sheet-fields.json";
+import kaelFields from "@/test/fixtures/kael-multiclass-aurora-fields.json";
 
 /**
  * Getestet gegen die Feldwerte eines echten, ausgefüllten Aurora-Bogens
@@ -11,6 +12,14 @@ import erisFields from "@/test/fixtures/eris-sheet-fields.json";
  */
 
 const eris = () => parseSheet(erisFields as FieldMap);
+
+/**
+ * Zweite Fixture, eigens für Multiclass: Kael, Sorcerer (Shadow Magic) 4 /
+ * Warlock (The Fiend) 5. `details_build` lautet hier „Level 9 Human
+ * Sorcerer, Shadow Magic (4) / Warlock, The Fiend (5)“ — die führende Zahl
+ * ist nur die Summe, jede Klasse trägt ihr eigenes Level in Klammern.
+ */
+const kael = () => parseSheet(kaelFields as FieldMap);
 
 /** Kleinstmöglicher Bogen, der noch als Aurora-Format erkannt wird. */
 const minimal = (extra: FieldMap = {}): FieldMap => ({
@@ -143,6 +152,50 @@ describe("Klasse und Rasse aus details_build", () => {
     expect(
       eris().warnings.some((w) => w.includes("Trefferwürfel")),
     ).toBe(false);
+  });
+});
+
+describe("Multiclass in details_build", () => {
+  it("zerlegt beide Klassen mit je eigenem Level, nicht nur die erste", () => {
+    const result = kael();
+    expect(result.race).toBe("Human");
+    expect(result.classes).toEqual([
+      {
+        classKey: "sorcerer",
+        rawName: "Sorcerer",
+        level: 4,
+        subclass: "Shadow Magic",
+        hitDie: 6,
+        known: true,
+      },
+      {
+        classKey: "warlock",
+        rawName: "Warlock",
+        level: 5,
+        subclass: "The Fiend",
+        hitDie: 8,
+        known: true,
+      },
+    ]);
+  });
+
+  it("meldet die Trefferwürfel nicht neu, weil der Bogen sie für beide Klassen kombiniert nennt", () => {
+    // details_hd steht als „4d6/5d8“ — passt zu Sorcerer 4 + Warlock 5.
+    expect(kael().warnings.some((w) => w.includes("Trefferwürfel"))).toBe(false);
+  });
+
+  it("erkennt eine dritte Klasse ohne Rasse davor genauso", () => {
+    const result = parseSheet({
+      details_character_name: "Test",
+      details_build:
+        "Level 12 Elf Fighter, Champion (6) / Rogue, Thief (4) / Wizard (2)",
+    } as FieldMap);
+    expect(result.race).toBe("Elf");
+    expect(result.classes.map((c) => [c.classKey, c.level, c.subclass])).toEqual([
+      ["fighter", 6, "Champion"],
+      ["rogue", 4, "Thief"],
+      ["wizard", 2, ""],
+    ]);
   });
 });
 
