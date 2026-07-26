@@ -11,9 +11,9 @@ import { characterPath } from "@/lib/characterUrl";
 import { useLive } from "@/lib/live-context";
 import type { LiveMutation } from "@/lib/live-types";
 import {
-  isSlotCost,
   parseActionCost,
   type ActionCost,
+  type ActionSlot,
 } from "@/lib/rules/actions";
 import { formatModifier } from "@/lib/rules/derive";
 
@@ -53,6 +53,7 @@ export function BattleMode({
 }) {
   const { state, send, connected } = useLive();
   const [casting, setCasting] = useState<CastableSpell | null>(null);
+  const [expandedSlot, setExpandedSlot] = useState<ActionSlot | null>(null);
   const router = useRouter();
   const overviewHref = characterPath(state.characterId, characterName);
 
@@ -115,7 +116,40 @@ export function BattleMode({
         onClear={() => send({ type: "concentration.clear" })}
       />
 
-      <TurnBar state={state} send={send} />
+      <TurnBar
+        state={state}
+        send={send}
+        expanded={expandedSlot}
+        onToggle={setExpandedSlot}
+      />
+
+      {/* Was zum aufgeklappten Konto passt — Zauber und Waffen, die genau
+          das kosten, und nur die, die gerade auch wirklich frei sind. Ein
+          Tipp auf "Aktion" beantwortet direkt "was kann ich noch", statt
+          erst auf einen anderen Reiter zu schicken. */}
+      <TurnOptions
+        slot={expandedSlot}
+        favorites={favorites}
+        attacks={attacks}
+        state={state}
+        onPickSpell={(spell) => {
+          setCasting(spell);
+          setExpandedSlot(null);
+        }}
+        onQuickCast={(spell) => {
+          send(quickCastMutation(spell, state));
+          setExpandedSlot(null);
+        }}
+        onAttack={() => {
+          send({ type: "turn.set", slot: "action", used: true });
+          setExpandedSlot(null);
+        }}
+        onMarkUsed={() => {
+          if (!expandedSlot) return;
+          send({ type: "turn.set", slot: expandedSlot, used: true });
+          setExpandedSlot(null);
+        }}
+      />
 
       {/* Was gerade gilt, gehört hierher, nicht nur auf die Übersicht —
           Frightened oder Poisoned ändert sich am häufigsten mitten im
@@ -125,15 +159,6 @@ export function BattleMode({
         options={conditions}
         onToggle={(key, active) => send({ type: "condition.set", key, active })}
       />
-
-      <FavoriteSpells
-        favorites={favorites}
-        state={state}
-        onPick={setCasting}
-        onQuickCast={(spell) => send(quickCastMutation(spell, state))}
-      />
-
-      <Attacks attacks={attacks} />
 
       <HpBlock state={state} send={send} />
 
@@ -162,129 +187,116 @@ export function BattleMode({
   );
 }
 
-function FavoriteSpells({
+/**
+ * Was zum aufgeklappten Konto der Zugleiste gehört: Zauber mit genau
+ * dieser Wirkzeit (und noch einem freien Slot), dazu — nur bei Aktion —
+ * die Waffen, weil ein Angriff in 5e die Aktion selbst ist. Vorher
+ * standen Zauber immer sichtbar in einem eigenen Block und Waffen nur
+ * auf dem Angriffe-Tab; beides zeigte alles auf einmal, statt zu
+ * beantworten, was gerade zum offenen Konto passt.
+ */
+function TurnOptions({
+  slot,
   favorites,
+  attacks,
   state,
-  onPick,
+  onPickSpell,
   onQuickCast,
+  onAttack,
+  onMarkUsed,
 }: {
+  slot: ActionSlot | null;
   favorites: CastableSpell[];
+  attacks: BattleAttack[];
   state: ReturnType<typeof useLive>["state"];
-  onPick: (spell: CastableSpell) => void;
+  onPickSpell: (spell: CastableSpell) => void;
   onQuickCast: (spell: CastableSpell) => void;
+  onAttack: () => void;
+  onMarkUsed: () => void;
 }) {
-  return (
-    <Panel>
-      <SectionLabel
-        right={
-          <span className="text-[0.6875rem] text-faint">
-            Stern auf der Zauberseite
-          </span>
-        }
-      >
-        Deine Zauber
-      </SectionLabel>
+  if (!slot) return null;
 
-      {favorites.length === 0 ? (
+  const readySpells = favorites.filter((spell) => {
+    if (parseActionCost(spell.castingTime) !== slot) return false;
+    return (
+      spell.level === 0 ||
+      state.pools.some((pool) =>
+        pool.slots.some((s) => s.level >= spell.level && s.used < s.total),
+      )
+    );
+  });
+
+  // Ein Angriff kostet in 5e die Aktion selbst — Reaktion und Bonusaktion
+  // kennen keine eigene Waffenkosten, die die App nachhalten könnte.
+  const readyAttacks = slot === "action" ? attacks : [];
+
+  const empty = readySpells.length === 0 && readyAttacks.length === 0;
+
+  return (
+    <div className="-mt-1 space-y-2 rounded-lg border border-edge bg-ink px-3.5 py-3">
+      {empty ? (
         <p className="text-sm text-faint">
-          Noch keine Favoriten. Markiere unter Zauber die Handvoll, die du
-          wirklich wirfst — sie liegen dann hier bereit.
+          Nichts hinterlegt, das {COST_LABEL[slot]} kostet.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {favorites.map((spell) => {
-            const cost = parseActionCost(spell.castingTime);
-            // Blass, wenn das Konto weg ist oder kein Slot mehr passt —
-            // dieselbe Sprache wie in Baldur's Gate, nur ohne Sperre.
-            const slotFree =
-              spell.level === 0 ||
-              state.pools.some((pool) =>
-                pool.slots.some(
-                  (s) => s.level >= spell.level && s.used < s.total,
-                ),
-              );
-            const turnFree = !isSlotCost(cost) || !state.turn[cost];
-            const ready = slotFree && turnFree;
-
-            return (
-              <div
-                key={spell.id}
-                className={cx(
-                  "min-h-14 rounded-md border border-edge bg-panel-2 transition-all hover:border-patina",
-                  !ready && "opacity-45",
-                )}
+        <div className="space-y-1.5">
+          {readySpells.map((spell) => (
+            <div
+              key={spell.id}
+              className="flex items-center justify-between gap-2 rounded-md border border-edge bg-panel-2 py-1 pr-1.5 pl-3"
+            >
+              <button
+                type="button"
+                onClick={() => onPickSpell(spell)}
+                className="min-w-0 flex-1 text-left"
               >
-                {/* Der Play-Knopf wirkt sofort (Mindestgrad, erster freier
-                    Pool) — für alles andere (Hochwirken, Pool wählen,
-                    Beschreibung) bleibt der Rest der Kachel der Weg zum
-                    Cast-Sheet. Zwei Knöpfe statt einem verschachtelten. */}
-                <button
-                  type="button"
-                  onClick={() => onPick(spell)}
-                  className="block w-full px-3 pt-2 text-left"
-                >
-                  <span className="truncate block text-sm font-medium">
-                    {spell.name}
-                  </span>
-                </button>
-                <div className="flex items-center justify-between gap-2 py-1 pr-1.5 pl-3">
-                  <button
-                    type="button"
-                    onClick={() => onPick(spell)}
-                    className="min-w-0 flex-1 text-left text-xs text-faint"
-                  >
-                    {spell.level === 0 ? "Cantrip" : `Grad ${spell.level}`}
-                    {spell.concentration ? " · K" : ""}
-                  </button>
-                  <span className="flex shrink-0 items-center gap-1">
-                    <CostBadge cost={cost} />
-                    <button
-                      type="button"
-                      onClick={() => onQuickCast(spell)}
-                      aria-label={`${spell.name} direkt wirken`}
-                      title="Direkt wirken"
-                      className="flex size-6 items-center justify-center rounded text-patina transition-colors hover:bg-patina-deep"
-                    >
-                      <PlayIcon className="size-3.5" />
-                    </button>
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+                <span className="truncate block text-sm font-medium">
+                  {spell.name}
+                </span>
+                <span className="text-xs text-faint">
+                  {spell.level === 0 ? "Cantrip" : `Grad ${spell.level}`}
+                  {spell.concentration ? " · K" : ""}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onQuickCast(spell)}
+                aria-label={`${spell.name} direkt wirken`}
+                title="Direkt wirken"
+                className="flex size-7 shrink-0 items-center justify-center rounded text-patina transition-colors hover:bg-patina-deep"
+              >
+                <PlayIcon className="size-3.5" />
+              </button>
+            </div>
+          ))}
+
+          {readyAttacks.map((attack) => (
+            <button
+              key={attack.id}
+              type="button"
+              onClick={onAttack}
+              className="flex w-full items-center justify-between gap-3 rounded-md border border-edge bg-panel-2 px-3 py-2 text-left transition-colors hover:border-patina"
+            >
+              <span className="truncate text-sm font-medium">{attack.name}</span>
+              <span className="shrink-0 text-right">
+                <span className="font-numeral text-sm font-semibold text-patina">
+                  {formatModifier(attack.bonus)}
+                </span>
+                <span className="ml-2 text-xs text-mute">{attack.damageLine}</span>
+              </span>
+            </button>
+          ))}
         </div>
       )}
-    </Panel>
-  );
-}
 
-/**
- * Waffen — reine Anzeige, keine Mutation. Vorher stand Treffer-/
- * Schadensbonus nur auf dem Angriffe-Tab: für die Zahl mitten im Kampf
- * musste man den Kampfmodus verlassen und danach den Schaden von dort
- * aus separat in den HP-Block eintippen. Geändert wird die Waffe weiter
- * im Angriffe-Tab — hier reicht die Zahl, die man gleich braucht.
- */
-function Attacks({ attacks }: { attacks: BattleAttack[] }) {
-  if (attacks.length === 0) return null;
-
-  return (
-    <Panel>
-      <SectionLabel>Angriffe</SectionLabel>
-      <ul className="divide-y divide-edge">
-        {attacks.map((attack) => (
-          <li key={attack.id} className="flex items-center justify-between gap-3 py-2">
-            <span className="truncate text-sm font-medium">{attack.name}</span>
-            <span className="shrink-0 text-right">
-              <span className="font-numeral text-base font-semibold text-patina">
-                {formatModifier(attack.bonus)}
-              </span>
-              <span className="ml-2 text-xs text-mute">{attack.damageLine}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Panel>
+      <button
+        type="button"
+        onClick={onMarkUsed}
+        className="text-xs text-faint transition-colors hover:text-patina"
+      >
+        Ohne Auswahl als verbraucht markieren
+      </button>
+    </div>
   );
 }
 
