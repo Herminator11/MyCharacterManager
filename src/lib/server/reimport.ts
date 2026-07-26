@@ -198,7 +198,6 @@ export function applyReimport(
     replaceProficiencies(characterId, draft);
     replaceAttacks(characterId, draft);
     addNewSpells(characterId, draft);
-    addNewNotes(characterId, draft);
     addNewFeatures(characterId, draft);
 
     // Zauberplätze und Klassenressourcen neu ableiten. Verbrauch bleibt
@@ -308,27 +307,6 @@ function addNewSpells(characterId: number, draft: ImportedCharacter) {
 
   if (fresh.length > 0) {
     linkSpellsFromCatalog(characterId, { ...draft, spells: fresh });
-  }
-}
-
-/** Notizen nur anlegen, wenn es sie noch nicht gibt — nie überschreiben. */
-function addNewNotes(characterId: number, draft: ImportedCharacter) {
-  const existing = new Set(
-    db
-      .select({ title: notes.title })
-      .from(notes)
-      // Nur Seiten vergleichen: Vermerke haben eigene Titelkonventionen
-      // und dürfen einen Import nie blockieren.
-      .where(and(eq(notes.characterId, characterId), eq(notes.kind, "page")))
-      .all()
-      .map((row) => row.title.toLowerCase()),
-  );
-
-  for (const note of draft.notes) {
-    if (existing.has(note.title.toLowerCase())) continue;
-    db.insert(notes)
-      .values({ characterId, title: note.title, body: note.body })
-      .run();
   }
 }
 

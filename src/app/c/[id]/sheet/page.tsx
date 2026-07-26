@@ -37,6 +37,7 @@ import {
   createSpeciesAction,
   removeClassAction,
   revertSpeciesBonusesAction,
+  saveAppearanceAction,
   saveBackgroundAction,
   saveBasicsAction,
   setClassLevelAction,
@@ -73,6 +74,7 @@ const SECTIONS = [
   { id: "spezies", label: "Spezies" },
   { id: "klassen", label: "Klassen" },
   { id: "faehigkeiten", label: "Fähigkeiten" },
+  { id: "aussehen", label: "Aussehen" },
   { id: "vorgeschichte", label: "Vorgeschichte" },
   { id: "grunddaten", label: "Grunddaten" },
   { id: "attribute", label: "Attribute" },
@@ -368,6 +370,19 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             Hinzufügen
           </Button>
         </form>
+      </Panel>
+
+      <Panel id="aussehen" className="scroll-mt-24">
+        <SectionLabel>Aussehen</SectionLabel>
+        <BackgroundEditor
+          defaultValue={character.appearance}
+          placeholder="Größe, Gewicht, Augen-, Haut- und Haarfarbe…"
+          ariaLabel="Aussehen"
+          save={async (appearance: string) => {
+            "use server";
+            await saveAppearanceAction(characterId, appearance);
+          }}
+        />
       </Panel>
 
       <Panel id="vorgeschichte" className="scroll-mt-24">

@@ -38,6 +38,16 @@ export async function saveBackgroundAction(characterId: number, backstory: strin
   revalidatePath(`/c/${characterId}/sheet`);
 }
 
+/** Größe, Gewicht, Augen-, Haut- und Haarfarbe — reiner Beschreibungstext. */
+export async function saveAppearanceAction(characterId: number, appearance: string) {
+  db.update(characters)
+    .set({ appearance: appearance.trim() })
+    .where(eq(characters.id, characterId))
+    .run();
+
+  revalidatePath(`/c/${characterId}/sheet`);
+}
+
 /** Grunddaten und Attribute in einem Rutsch. */
 export async function saveBasicsAction(
   characterId: number,

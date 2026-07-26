@@ -148,12 +148,12 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
     );
   }
 
-  /* --- Notizen --- */
-
-  const notes: { title: string; body: string }[] = [];
+  /* --- Fähigkeiten --- */
 
   // Ein einziges Freitextfeld ohne jede Gliederung — anders als bei Aurora
   // gibt es hier keine einzelnen Merkmale zu trennen, nur einen Block.
+  // Landet wie die übrigen Blöcke unten als Fähigkeit im Bogen: sie gehören
+  // zum Charakter, nicht zur Kampagne, und dafür gibt es schon eine Ablage.
   const features: { name: string; description: string }[] = [];
   const featTraits = clean(text(fields, "Feat+Traits"));
   if (featTraits) {
@@ -162,20 +162,22 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
 
   const proficiencies = clean(text(fields, "ProficienciesLang"));
   if (proficiencies) {
-    notes.push({ title: "Übungen & Sprachen", body: proficiencies });
+    features.push({ name: "Übungen & Sprachen", description: proficiencies });
   }
 
   const attacksNote = clean(text(fields, "AttacksSpellcasting"));
   if (attacksNote) {
-    notes.push({ title: "Angriffe & Zauberwirken", body: attacksNote });
+    features.push({ name: "Angriffe & Zauberwirken", description: attacksNote });
   }
 
   const allies = clean(text(fields, "Allies"));
   const faction = clean(text(fields, "FactionName"));
   if (allies || faction) {
-    notes.push({
-      title: "Verbündete & Organisationen",
-      body: [faction ? `**${faction}**` : "", allies].filter(Boolean).join("\n\n"),
+    features.push({
+      name: "Verbündete & Organisationen",
+      description: [faction ? `**${faction}**` : "", allies]
+        .filter(Boolean)
+        .join("\n\n"),
     });
   }
 
@@ -249,13 +251,14 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
     },
     items,
 
+    // Dieses Format hat kein eigenes Feld für Größe, Augen- oder Haarfarbe.
+    appearance: "",
     personality: clean(text(fields, "PersonalityTraits ")),
     ideals: clean(text(fields, "Ideals")),
     bonds: clean(text(fields, "Bonds")),
     flaws: clean(text(fields, "Flaws")),
     backstory: clean(text(fields, "Backstory")),
 
-    notes,
     features,
     warnings,
   };

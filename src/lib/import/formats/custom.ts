@@ -191,15 +191,13 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
     });
   }
 
-  const notes: { title: string; body: string }[] = [];
-
   const extraTraits = text(fields, "Back_Additional Features & Traits");
   const racialTraits = text(fields, "Front_Racial Traits");
   const languages = text(fields, "Front_Languages");
   if (extraTraits || racialTraits || languages) {
-    notes.push({
-      title: "Merkmale & Sprachen",
-      body: [
+    features.push({
+      name: "Merkmale & Sprachen",
+      description: [
         racialTraits ? `**Rassenmerkmale:** ${clean(racialTraits)}` : "",
         languages ? `**Sprachen:** ${languages}` : "",
         extraTraits ? clean(extraTraits) : "",
@@ -289,13 +287,14 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
     },
     items,
 
+    // Dieses Format hat kein eigenes Feld für Größe, Augen- oder Haarfarbe.
+    appearance: "",
     personality: clean(text(fields, "Back_Personality Traits")),
     ideals: clean(text(fields, "Back_Ideals")),
     bonds: clean(text(fields, "Back_Bonds")),
     flaws: clean(text(fields, "Back_Flaws")),
     backstory: clean(text(fields, "Back_Background")),
 
-    notes,
     features,
     warnings,
   };

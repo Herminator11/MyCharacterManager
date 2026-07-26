@@ -240,12 +240,10 @@ describe("Ausrüstung und Notizen", () => {
     });
   });
 
-  it("legt Sprachen als Notizseite, Merkmale als Fähigkeit an", () => {
-    const titles = sheet().notes.map((n) => n.title);
+  it("legt Sprachen und Merkmale als Fähigkeiten an", () => {
+    const titles = sheet().features.map((f) => f.name);
     expect(titles).toContain("Übungen & Sprachen");
-    expect(sheet().features.map((f) => f.name)).toContain(
-      "Merkmale & Fähigkeiten",
-    );
+    expect(titles).toContain("Merkmale & Fähigkeiten");
   });
 });
 

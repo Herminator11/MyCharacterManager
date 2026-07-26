@@ -36,7 +36,7 @@ export type ConfigSource = "auto" | "manual";
 export type SpellSource = "srd" | "custom" | "imported";
 
 /** Wozu ein Notizeintrag da ist — siehe Kommentar an der Spalte `kind`. */
-export type NoteKind = "page" | "pin" | "feature" | "log";
+export type NoteKind = "pin" | "feature" | "log";
 
 /**
  * Woher eine Spezies stammt.
@@ -223,6 +223,12 @@ export const characters = sqliteTable("characters", {
   speed: integer("speed").notNull().default(30),
 
   // Hintergrund (Freitext)
+  /**
+   * Größe, Gewicht, Augen-, Haut- und Haarfarbe — was auf dem Bogen stand.
+   * Eigenes Feld statt einer Notizseite: die Notizen sind das Kampagnen-Log,
+   * das Aussehen ändert sich mit der Kampagne so gut wie nie.
+   */
+  appearance: text("appearance").notNull().default(""),
   personality: text("personality").notNull().default(""),
   ideals: text("ideals").notNull().default(""),
   bonds: text("bonds").notNull().default(""),
@@ -638,9 +644,10 @@ export const notes = sqliteTable(
     title: text("title").notNull().default("Neue Notiz"),
     body: text("body").notNull().default(""),
     /**
-     * Wozu der Eintrag da ist — vier Dinge mit sehr verschiedenem Lebenslauf:
+     * Wozu der Eintrag da ist — drei Dinge mit sehr verschiedenem Lebenslauf.
+     * Kein Default: jede Einfügestelle nennt die Art bewusst, damit nie ein
+     * Eintrag ohne erkennbare Zuständigkeit entsteht.
      *
-     * `page`    — ausformulierte Seite, wird überarbeitet.
      * `pin`     — was gerade gilt: Fluch, Pakt, Segen. Muss sichtbar sein,
      *             nicht auffindbar, und steht deshalb auf der Charakterseite.
      * `feature` — Klassenmerkmal, Rassenmerkmal oder Feat, selbst
@@ -650,7 +657,7 @@ export const notes = sqliteTable(
      *             an, rein manuell — anders als das frühere Logbuch
      *             schreibt hier nichts automatisch mit.
      */
-    kind: text("kind").$type<NoteKind>().notNull().default("page"),
+    kind: text("kind").$type<NoteKind>().notNull(),
     createdAt: integer("created_at").notNull().default(now),
     updatedAt: integer("updated_at").notNull().default(now),
   },

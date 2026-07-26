@@ -2,13 +2,17 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 
-/** Freitext, der wie die Notizseiten automatisch speichert — kein Knopf. */
+/** Freitext, der automatisch speichert — kein Knopf. */
 export function BackgroundEditor({
   defaultValue,
   save,
+  placeholder = "Woher kommt dein Charakter?",
+  ariaLabel = "Vorgeschichte",
 }: {
   defaultValue: string;
-  save: (backstory: string) => Promise<void>;
+  save: (value: string) => Promise<void>;
+  placeholder?: string;
+  ariaLabel?: string;
 }) {
   const [value, setValue] = useState(defaultValue);
   const saved = useRef(defaultValue);
@@ -32,8 +36,8 @@ export function BackgroundEditor({
       onChange={(event) => setValue(event.target.value)}
       onBlur={flush}
       rows={8}
-      placeholder="Woher kommt dein Charakter?"
-      aria-label="Vorgeschichte"
+      placeholder={placeholder}
+      aria-label={ariaLabel}
       className="w-full rounded-md border border-edge bg-ink px-3 py-2.5 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
     />
   );

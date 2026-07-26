@@ -12,7 +12,6 @@ import {
   getFeatures,
   getInventory,
   getLiveState,
-  getNotes,
   getSheet,
   listCharacters,
 } from "./characters";
@@ -186,8 +185,8 @@ describe("Angriffe und Ausrüstung", () => {
 });
 
 describe("Notizen", () => {
-  it("legt Merkmale & Sprachen als Seite, Klassenfeatures als Fähigkeiten an", () => {
-    expect(getNotes(id).map((n) => n.title)).toContain("Merkmale & Sprachen");
+  it("legt Merkmale & Sprachen und Klassenfeatures als Fähigkeiten an", () => {
+    expect(getFeatures(id).map((f) => f.title)).toContain("Merkmale & Sprachen");
     expect(getFeatures(id).length).toBeGreaterThan(0);
   });
 });

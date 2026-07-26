@@ -67,6 +67,7 @@ export function importCharacter(draft: ImportedCharacter): number {
         gp: draft.currency.gp,
         pp: draft.currency.pp,
 
+        appearance: draft.appearance,
         personality: draft.personality,
         ideals: draft.ideals,
         bonds: draft.bonds,
@@ -138,12 +139,6 @@ export function importCharacter(draft: ImportedCharacter): number {
           description: item.description,
           sortOrder: index,
         })
-        .run();
-    });
-
-    draft.notes.forEach((note) => {
-      db.insert(notes)
-        .values({ characterId: id, title: note.title, body: note.body })
         .run();
     });
 

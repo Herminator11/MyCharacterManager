@@ -9,20 +9,19 @@ import {
   deleteCharacter,
   getCampaignLog,
   getFeatures,
-  getNotes,
   getPins,
   listCharacters,
 } from "./characters";
 
 /**
- * Notizseiten, Vermerke, Fähigkeiten und Kampagnen-Log liegen in derselben
- * Tabelle und dürfen sich trotzdem nie ins Gehege kommen — sonst taucht ein
- * Vermerk zwischen den Hintergrundtexten auf oder eine Fähigkeit im Log.
+ * Vermerke, Fähigkeiten und Kampagnen-Log liegen in derselben Tabelle und
+ * dürfen sich trotzdem nie ins Gehege kommen — sonst taucht ein Vermerk
+ * zwischen den Fähigkeiten auf oder eine Fähigkeit im Log.
  */
 
 let id: number;
 
-const add = (kind: "page" | "pin" | "feature" | "log", title: string, body = "") =>
+const add = (kind: "pin" | "feature" | "log", title: string, body = "") =>
   db
     .insert(notes)
     .values({ characterId: id, kind, title, body })
@@ -35,21 +34,14 @@ beforeEach(() => {
 });
 
 describe("Notizarten auseinanderhalten", () => {
-  it("hält Seiten, Vermerke, Fähigkeiten und Log getrennt", () => {
-    add("page", "Vorgeschichte");
+  it("hält Vermerke, Fähigkeiten und Log getrennt", () => {
     add("pin", "Fluch der Krähe");
     add("feature", "Sneak Attack", "3d6 einmal pro Zug");
     add("log", "", "Turm gefunden");
 
-    expect(getNotes(id).map((n) => n.title)).toEqual(["Vorgeschichte"]);
     expect(getPins(id).map((n) => n.title)).toEqual(["Fluch der Krähe"]);
     expect(getFeatures(id).map((n) => n.title)).toEqual(["Sneak Attack"]);
     expect(getCampaignLog(id).map((n) => n.body)).toEqual(["Turm gefunden"]);
-  });
-
-  it("gibt neu angelegten Notizen die Art „page“", () => {
-    db.insert(notes).values({ characterId: id, title: "Ohne Art" }).run();
-    expect(getNotes(id).map((n) => n.title)).toContain("Ohne Art");
   });
 
   it("zeigt den jüngsten Log-Eintrag zuerst", () => {

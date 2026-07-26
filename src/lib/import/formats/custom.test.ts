@@ -255,9 +255,9 @@ describe("Notizen", () => {
   });
 
   it("sammelt Sprachen und Merkmale", () => {
-    const traits = kael().notes.find((n) => n.title === "Merkmale & Sprachen");
-    expect(traits!.body).toContain("Common, Abyssal, Infernal, Primordial");
-    expect(traits!.body).toContain("Superior Darkvision");
+    const traits = kael().features.find((f) => f.name === "Merkmale & Sprachen");
+    expect(traits!.description).toContain("Common, Abyssal, Infernal, Primordial");
+    expect(traits!.description).toContain("Superior Darkvision");
   });
 });
 

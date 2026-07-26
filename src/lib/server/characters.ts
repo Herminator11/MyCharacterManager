@@ -467,16 +467,6 @@ export function getInventory(characterId: number) {
     .all();
 }
 
-/** Die ausformulierten Seiten — das, was man überarbeitet. */
-export function getNotes(characterId: number) {
-  return db
-    .select()
-    .from(notes)
-    .where(and(eq(notes.characterId, characterId), eq(notes.kind, "page")))
-    .orderBy(asc(notes.updatedAt))
-    .all();
-}
-
 /**
  * Fähigkeiten: Klassenmerkmale, Rassenmerkmale, Feats — was man selbst
  * nachschlagen will. Kein Katalog, keine Ableitung aus Klasse oder Level;

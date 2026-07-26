@@ -71,13 +71,14 @@ export type ImportedCharacter = {
   currency: { cp: number; sp: number; ep: number; gp: number; pp: number };
   items: { name: string; description: string }[];
 
+  /** Größe, Gewicht, Augen-, Haut- und Haarfarbe — soweit der Bogen sie hergibt. */
+  appearance: string;
   personality: string;
   ideals: string;
   bonds: string;
   flaws: string;
   backstory: string;
 
-  notes: { title: string; body: string }[];
   /** Klassenmerkmale, Rassenmerkmale, Feats — landet im Bogen, nicht bei den Notizen. */
   features: { name: string; description: string }[];
 

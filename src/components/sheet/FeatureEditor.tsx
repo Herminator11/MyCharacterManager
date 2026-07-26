@@ -8,7 +8,7 @@ import { inputClass } from "@/components/ui";
 export type Feature = { id: number; title: string; body: string };
 
 /**
- * Name und Beschreibung speichern automatisch, wie bei den Notizseiten.
+ * Name und Beschreibung speichern automatisch — kein Knopf.
  * Der Name ist dabei standardmäßig nur Text — ein Doppelklick macht ihn
  * zum Eingabefeld. Ein einzelner Klick soll beim Lesen nicht aus Versehen
  * den Titel zum Bearbeiten öffnen.

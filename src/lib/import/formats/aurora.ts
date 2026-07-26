@@ -153,14 +153,8 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
     );
   }
 
-  /* --- Notizen --- */
-
-  const notes: { title: string; body: string }[] = [];
-
   const features = collectFeatures(fields);
-
-  const looks = describeAppearance(fields);
-  if (looks) notes.push({ title: "Äußeres", body: looks });
+  const appearance = describeAppearance(fields);
 
   /* --- Ausrüstung --- */
 
@@ -226,7 +220,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
     flaws: "",
     backstory: clean(text(fields, "background_story")),
 
-    notes,
+    appearance,
     features,
     warnings,
   };

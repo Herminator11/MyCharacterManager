@@ -286,8 +286,7 @@ describe("Notizen", () => {
   });
 
   it("hält das Äußere fest, soweit der Bogen etwas hergibt", () => {
-    const looks = eris().notes.find((n) => n.title === "Äußeres");
-    expect(looks!.body).toContain("Geschlecht: Female");
+    expect(eris().appearance).toContain("Geschlecht: Female");
   });
 
   it("übernimmt die Hintergrundgeschichte", () => {
