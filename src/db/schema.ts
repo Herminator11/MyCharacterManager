@@ -201,6 +201,14 @@ export const characters = sqliteTable("characters", {
    */
   encounterRound: integer("encounter_round").notNull().default(0),
 
+  /**
+   * Die laufende Session-Nummer der Kampagne — von Hand hochgezählt über
+   * „Nächste Session“, nicht aus dem Datum abgeleitet. Neue Kampagnen-
+   * Log-Einträge übernehmen sie, damit man hinterher weiß, in welcher
+   * Session was passiert ist, nicht nur an welchem Tag gespielt wurde.
+   */
+  currentSession: integer("current_session").notNull().default(0),
+
   // Abgeleitete Werte — null bedeutet "automatisch berechnen"
   hpMaxOverride: integer("hp_max_override"),
   /**
@@ -658,6 +666,13 @@ export const notes = sqliteTable(
      *             schreibt hier nichts automatisch mit.
      */
     kind: text("kind").$type<NoteKind>().notNull(),
+    /**
+     * Nur bei `log`-Einträgen gesetzt: die Session-Nummer der Kampagne zum
+     * Zeitpunkt des Eintrags, aus `characters.current_session` übernommen.
+     * Null bei allen anderen Arten und bei Log-Einträgen aus der Zeit vor
+     * dieser Spalte.
+     */
+    session: integer("session"),
     createdAt: integer("created_at").notNull().default(now),
     updatedAt: integer("updated_at").notNull().default(now),
   },

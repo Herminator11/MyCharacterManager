@@ -11,7 +11,11 @@ import {
   getCombatLog,
 } from "@/lib/server/characters";
 
-import { addCampaignLogAction, removeCampaignLogAction } from "./actions";
+import {
+  addCampaignLogAction,
+  bumpSessionAction,
+  removeCampaignLogAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +29,7 @@ function formatStamp(unixSeconds: number): string {
 }
 
 type TimelineItem =
-  | { type: "note"; id: number; at: number; body: string }
+  | { type: "note"; id: number; at: number; body: string; session: number | null }
   | { type: "combat"; id: number; at: number; entry: LiveLogEntry };
 
 export default async function CampaignLogPage({
@@ -49,6 +53,7 @@ export default async function CampaignLogPage({
       id: entry.id,
       at: entry.createdAt,
       body: entry.body,
+      session: entry.session,
     })),
     ...combat.map((entry) => ({
       type: "combat" as const,
@@ -61,7 +66,27 @@ export default async function CampaignLogPage({
   return (
     <>
       <Panel>
-        <SectionLabel>Festhalten</SectionLabel>
+        <SectionLabel
+          right={
+            <form
+              action={async () => {
+                "use server";
+                await bumpSessionAction(characterId);
+              }}
+            >
+              <button
+                type="submit"
+                className="text-xs text-mute transition-colors hover:text-patina"
+              >
+                {character.currentSession > 0
+                  ? `Session ${character.currentSession} · nächste →`
+                  : "Erste Session beginnen"}
+              </button>
+            </form>
+          }
+        >
+          Festhalten
+        </SectionLabel>
         <form
           action={async (formData: FormData) => {
             "use server";
@@ -96,9 +121,16 @@ export default async function CampaignLogPage({
             {timeline.map((item) =>
               item.type === "note" ? (
                 <li key={`note-${item.id}`} className="flex gap-3">
-                  <time className="w-20 shrink-0 text-xs text-faint tabular-nums">
-                    {formatStamp(item.at)}
-                  </time>
+                  <div className="w-20 shrink-0">
+                    {item.session ? (
+                      <span className="block text-xs font-semibold text-patina tabular-nums">
+                        Session {item.session}
+                      </span>
+                    ) : null}
+                    <time className="block text-xs text-faint tabular-nums">
+                      {formatStamp(item.at)}
+                    </time>
+                  </div>
                   <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
                     {item.body}
                   </p>
