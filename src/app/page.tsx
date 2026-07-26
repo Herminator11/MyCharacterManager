@@ -31,7 +31,7 @@ export default function Page() {
         <BrandMark className="size-9 text-patina" />
         <div>
           <p className="label">D&amp;D 5e</p>
-          <h1 className="mt-1 text-[2rem] leading-none font-semibold tracking-tight">
+          <h1 className="mt-1 font-display text-[2rem] leading-none font-semibold tracking-wide">
             Charaktere
           </h1>
         </div>

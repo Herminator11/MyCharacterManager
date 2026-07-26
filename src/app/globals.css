@@ -41,6 +41,13 @@
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
+  /* Namensschild (Marke, eine große Überschrift) und Instrumentenziffern
+     (HP, RK, Initiative & Co.) — siehe layout.tsx für die Begründung.
+     Beide fallen auf die Systemschrift zurück, falls next/font einmal
+     nicht greift. */
+  --font-display: var(--font-display-raw), var(--font-sans);
+  --font-numeral: var(--font-numeral-raw), var(--font-mono);
+
   --radius-socket: 3px;
 }
 

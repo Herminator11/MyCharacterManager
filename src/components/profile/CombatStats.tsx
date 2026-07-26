@@ -49,7 +49,7 @@ function Plate({
     <div className="flex w-[4.5rem] shrink-0 flex-col items-center">
       <div className="flex h-[3.75rem] w-full flex-col items-center justify-center gap-1 rounded-lg border border-edge bg-panel-2">
         <span className="text-faint">{icon}</span>
-        <dd className="text-[1.375rem] leading-none font-semibold tabular-nums">
+        <dd className="font-numeral text-[1.375rem] leading-none font-semibold tabular-nums">
           {value}
           {unit ? (
             <span className="ml-0.5 text-[0.625rem] font-normal text-faint">

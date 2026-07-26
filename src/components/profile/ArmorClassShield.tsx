@@ -25,7 +25,7 @@ export function ArmorClassShield({ value }: { value: number }) {
 
       {/* In der breiten oberen Hälfte, damit die Zahl nicht an der schrägen
           Flanke klebt. */}
-      <dd className="absolute top-[0.8rem] w-11 py-0.5 text-center text-[1.375rem] leading-none font-semibold tabular-nums">
+      <dd className="font-numeral absolute top-[0.8rem] w-11 py-0.5 text-center text-[1.375rem] leading-none font-semibold tabular-nums">
         {value}
       </dd>
 

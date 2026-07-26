@@ -124,7 +124,7 @@ export function Ratio({
   className?: string;
 }) {
   return (
-    <span className="tabular-nums whitespace-nowrap">
+    <span className="font-numeral tabular-nums whitespace-nowrap">
       <span className={className}>{current}</span>
       <span className="mx-[0.2em] text-faint">/</span>
       <span className="text-faint">{total}</span>
@@ -188,7 +188,9 @@ export function Stat({
 }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-xl leading-none font-semibold">{value}</span>
+      <span className="font-numeral text-xl leading-none font-semibold">
+        {value}
+      </span>
       <span className="label">{label}</span>
       {hint ? <span className="text-[0.625rem] text-faint">{hint}</span> : null}
     </div>

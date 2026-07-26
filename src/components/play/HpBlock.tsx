@@ -48,7 +48,7 @@ export function HpBlock({
           <p className="mt-1 flex items-baseline gap-1.5">
             <span
               className={cx(
-                "text-[2.75rem] leading-none font-semibold tracking-tight",
+                "font-numeral text-[2.75rem] leading-none font-semibold",
                 down ? "text-ember" : ratio <= 0.5 ? "text-brass" : "text-fg",
               )}
             >

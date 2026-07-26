@@ -15,7 +15,7 @@ export function KeyStat({
 }) {
   return (
     <div>
-      <dd className="text-lg leading-none font-semibold tabular-nums">
+      <dd className="font-numeral text-lg leading-none font-semibold tabular-nums">
         {value}
         {hint ? (
           <span className="ml-1 text-xs font-normal text-faint">{hint}</span>
