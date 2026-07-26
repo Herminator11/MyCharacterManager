@@ -3,10 +3,14 @@ import { notFound } from "next/navigation";
 import { BattleMode } from "@/components/play/BattleMode";
 import { characterIdFromParam } from "@/lib/characterUrl";
 import { LiveProvider } from "@/lib/live-context";
+import { abilityModifier, attackBonus, formatModifier } from "@/lib/rules/derive";
 import {
+  getAttacks,
   getCharacter,
   getCharacterSpells,
   getLiveState,
+  getSheet,
+  listConditions,
 } from "@/lib/server/characters";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +28,34 @@ export default async function BattlePage({ params }: PageProps<"/c/[id]/battle">
 
   const initial = getLiveState(characterId);
   const character = getCharacter(characterId);
-  if (!initial || !character) notFound();
+  const sheet = getSheet(characterId);
+  if (!initial || !character || !sheet) notFound();
+
+  const attacks = getAttacks(characterId).map((attack) => {
+    const bonus =
+      attack.attackBonusOverride ??
+      attackBonus(sheet.scores, attack.ability, attack.proficient, sheet.classes);
+    const damageBonus =
+      attack.damageBonusOverride ?? abilityModifier(sheet.scores[attack.ability]);
+
+    return {
+      id: attack.id,
+      name: attack.name,
+      bonus,
+      // Dieselbe Zusammensetzung wie im Angriffe-Tab: Würfel und Bonus
+      // ohne Leerzeichen ("1d8+3"), die Schadensart danach abgesetzt.
+      damageLine:
+        attack.damageDice +
+        (damageBonus !== 0 ? formatModifier(damageBonus) : "") +
+        (attack.damageType ? ` ${attack.damageType}` : ""),
+    };
+  });
+
+  const conditions = listConditions().map((c) => ({
+    key: c.key,
+    name: c.name,
+    description: c.description,
+  }));
 
   const favorites = getCharacterSpells(characterId)
     .filter(({ entry }) => entry.favorite)
@@ -47,7 +78,12 @@ export default async function BattlePage({ params }: PageProps<"/c/[id]/battle">
 
   return (
     <LiveProvider initial={initial}>
-      <BattleMode favorites={favorites} characterName={character.name} />
+      <BattleMode
+        favorites={favorites}
+        attacks={attacks}
+        conditions={conditions}
+        characterName={character.name}
+      />
     </LiveProvider>
   );
 }

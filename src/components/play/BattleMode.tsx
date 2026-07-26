@@ -15,12 +15,20 @@ import {
   parseActionCost,
   type ActionCost,
 } from "@/lib/rules/actions";
+import { formatModifier } from "@/lib/rules/derive";
 
 import { CombatLog } from "./CombatLog";
-import { ConcentrationBanner } from "./Dashboard";
+import { ConcentrationBanner, Conditions, type ConditionOption } from "./Dashboard";
 import { HpBlock } from "./HpBlock";
 import { PoolsPanel, ResourcesPanel } from "./panels";
 import { TurnBar } from "./TurnBar";
+
+export type BattleAttack = {
+  id: number;
+  name: string;
+  bonus: number;
+  damageLine: string;
+};
 
 /**
  * Der Kampfmodus — die Seite, die während einer Begegnung offen bleibt.
@@ -34,9 +42,13 @@ import { TurnBar } from "./TurnBar";
  */
 export function BattleMode({
   favorites,
+  attacks,
+  conditions,
   characterName,
 }: {
   favorites: CastableSpell[];
+  attacks: BattleAttack[];
+  conditions: ConditionOption[];
   characterName: string;
 }) {
   const { state, send, connected } = useLive();
@@ -105,12 +117,23 @@ export function BattleMode({
 
       <TurnBar state={state} send={send} />
 
+      {/* Was gerade gilt, gehört hierher, nicht nur auf die Übersicht —
+          Frightened oder Poisoned ändert sich am häufigsten mitten im
+          Kampf, nicht dazwischen. */}
+      <Conditions
+        state={state}
+        options={conditions}
+        onToggle={(key, active) => send({ type: "condition.set", key, active })}
+      />
+
       <FavoriteSpells
         favorites={favorites}
         state={state}
         onPick={setCasting}
         onQuickCast={(spell) => send(quickCastMutation(spell, state))}
       />
+
+      <Attacks attacks={attacks} />
 
       <HpBlock state={state} send={send} />
 
@@ -231,6 +254,36 @@ function FavoriteSpells({
           })}
         </div>
       )}
+    </Panel>
+  );
+}
+
+/**
+ * Waffen — reine Anzeige, keine Mutation. Vorher stand Treffer-/
+ * Schadensbonus nur auf dem Angriffe-Tab: für die Zahl mitten im Kampf
+ * musste man den Kampfmodus verlassen und danach den Schaden von dort
+ * aus separat in den HP-Block eintippen. Geändert wird die Waffe weiter
+ * im Angriffe-Tab — hier reicht die Zahl, die man gleich braucht.
+ */
+function Attacks({ attacks }: { attacks: BattleAttack[] }) {
+  if (attacks.length === 0) return null;
+
+  return (
+    <Panel>
+      <SectionLabel>Angriffe</SectionLabel>
+      <ul className="divide-y divide-edge">
+        {attacks.map((attack) => (
+          <li key={attack.id} className="flex items-center justify-between gap-3 py-2">
+            <span className="truncate text-sm font-medium">{attack.name}</span>
+            <span className="shrink-0 text-right">
+              <span className="font-numeral text-base font-semibold text-patina">
+                {formatModifier(attack.bonus)}
+              </span>
+              <span className="ml-2 text-xs text-mute">{attack.damageLine}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </Panel>
   );
 }

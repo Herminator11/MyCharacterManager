@@ -308,7 +308,12 @@ export function ConcentrationBanner({
   );
 }
 
-function Conditions({
+/**
+ * Auch im Kampfmodus verwendet — Conditions ändern sich am häufigsten
+ * genau dort, und man wechselte sonst für jedes Frightened/Poisoned auf
+ * die Übersicht und zurück.
+ */
+export function Conditions({
   state,
   options,
   onToggle,
