@@ -310,6 +310,17 @@ function getEncounterRound(characterId: number): number {
   );
 }
 
+/** Für die Session-Zuordnung im Kampagnen-Log — 0 heißt „keine gezählt". */
+function getCurrentSession(characterId: number): number {
+  return (
+    db
+      .select({ session: characters.currentSession })
+      .from(characters)
+      .where(eq(characters.id, characterId))
+      .get()?.session ?? 0
+  );
+}
+
 /**
  * Schreibt eine Zeile ins Kampflog — falls überhaupt etwas Erwähnenswertes
  * passiert ist und ein Kampf läuft.
@@ -340,6 +351,7 @@ function record(
       actionCost: line.actionCost,
       amount: line.amount,
       at: Math.floor(Date.now() / 1000),
+      session: getCurrentSession(characterId) || null,
     })
     .run();
 }

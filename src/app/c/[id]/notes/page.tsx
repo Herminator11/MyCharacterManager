@@ -21,9 +21,18 @@ import {
 
 export const dynamic = "force-dynamic";
 
+type NoteEntry = { id: number; body: string };
+
 type TimelineItem =
-  | { type: "note"; id: number; at: number; body: string; session: number | null }
-  | { type: "combat"; at: number; entries: LiveLogEntry[] };
+  | { type: "note"; id: number; at: number; body: string }
+  | { type: "combat"; at: number; entries: LiveLogEntry[] }
+  | {
+      type: "session";
+      session: number;
+      at: number;
+      notes: NoteEntry[];
+      combat: LiveLogEntry[];
+    };
 
 export default async function CampaignLogPage({
   params,
@@ -37,23 +46,62 @@ export default async function CampaignLogPage({
   const notes = getCampaignLog(characterId);
   const combat = getCombatLog(characterId);
 
-  // Zwei Quellen, eine Zeitleiste: von Hand notiert und von selbst
-  // mitgeschrieben landen nach Zeitstempel gemischt — nur so sieht man
-  // "wir haben X entdeckt" neben "wir haben gerade gekämpft". Der Kampf
-  // selbst zählt dabei als ein einziger Moment, nicht als eine Zeile pro
-  // Eintrag: Conditions und Rundendetails gehören zugeklappt, sonst
-  // ertränkt ein einzelnes Gefecht jede handgeschriebene Notiz daneben.
+  // Von Hand notiert und von selbst mitgeschrieben landen zusammen, sobald
+  // beide dieselbe Session tragen — sonst bleiben sie einzelne Momente in
+  // der Zeitleiste. So lässt sich "Session 2" einmal aufklappen, statt jede
+  // Notiz und jeden Kampf einzeln danach abzusuchen.
+  const sessions = new Map<
+    number,
+    { at: number; notes: NoteEntry[]; combat: LiveLogEntry[] }
+  >();
+  const bucket = (session: number) => {
+    let entry = sessions.get(session);
+    if (!entry) {
+      entry = { at: 0, notes: [], combat: [] };
+      sessions.set(session, entry);
+    }
+    return entry;
+  };
+
+  const looseNotes: typeof notes = [];
+  for (const note of notes) {
+    if (note.session) {
+      const entry = bucket(note.session);
+      entry.notes.push(note);
+      entry.at = Math.max(entry.at, note.createdAt);
+    } else {
+      looseNotes.push(note);
+    }
+  }
+
+  const looseCombat: typeof combat = [];
+  for (const line of combat) {
+    if (line.session) {
+      const entry = bucket(line.session);
+      entry.combat.push(line);
+      entry.at = Math.max(entry.at, line.at);
+    } else {
+      looseCombat.push(line);
+    }
+  }
+
   const timeline: TimelineItem[] = [
-    ...notes.map((entry) => ({
+    ...looseNotes.map((entry) => ({
       type: "note" as const,
       id: entry.id,
       at: entry.createdAt,
       body: entry.body,
-      session: entry.session,
     })),
-    ...(combat.length > 0
-      ? [{ type: "combat" as const, at: combat[0].at, entries: combat }]
+    ...(looseCombat.length > 0
+      ? [{ type: "combat" as const, at: looseCombat[0].at, entries: looseCombat }]
       : []),
+    ...[...sessions.entries()].map(([session, entry]) => ({
+      type: "session" as const,
+      session,
+      at: entry.at,
+      notes: entry.notes,
+      combat: entry.combat,
+    })),
   ].sort((a, b) => b.at - a.at);
 
   return (
@@ -133,64 +181,108 @@ export default async function CampaignLogPage({
         <Panel>
           <SectionLabel>Verlauf</SectionLabel>
           <ul className="space-y-2.5">
-            {timeline.map((item) =>
-              item.type === "note" ? (
-                <li key={`note-${item.id}`} className="flex gap-3">
-                  {item.session ? (
-                    <span className="w-20 shrink-0 text-xs font-semibold text-patina tabular-nums">
-                      Session {item.session}
-                    </span>
-                  ) : null}
-                  <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
-                    {item.body}
-                  </p>
-                  <form
-                    action={async () => {
-                      "use server";
-                      await removeCampaignLogAction(characterId, item.id);
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      aria-label="Eintrag löschen"
-                      className="px-1 text-faint transition-colors hover:text-ember"
+            {timeline.map((item) => {
+              if (item.type === "note") {
+                return (
+                  <li key={`note-${item.id}`} className="flex gap-3">
+                    <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
+                      {item.body}
+                    </p>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await removeCampaignLogAction(characterId, item.id);
+                      }}
                     >
-                      ✕
-                    </button>
-                  </form>
-                </li>
-              ) : (
-                <li key="combat">
+                      <button
+                        type="submit"
+                        aria-label="Eintrag löschen"
+                        className="px-1 text-faint transition-colors hover:text-ember"
+                      >
+                        ✕
+                      </button>
+                    </form>
+                  </li>
+                );
+              }
+
+              if (item.type === "combat") {
+                return (
+                  <li key="combat">
+                    <CombatBlock entries={item.entries} />
+                  </li>
+                );
+              }
+
+              return (
+                <li key={`session-${item.session}`}>
                   <details className="group">
                     <summary className="flex cursor-pointer list-none items-center gap-3 text-sm [&::-webkit-details-marker]:hidden">
-                      <CrossedSwordsIcon className="size-4 shrink-0 text-ember" />
-                      <span className="min-w-0 flex-1">
-                        Kampf ·{" "}
-                        {item.entries.length === 1
-                          ? "1 Eintrag"
-                          : `${item.entries.length} Einträge`}
+                      <span className="min-w-0 flex-1 font-semibold text-patina">
+                        Session {item.session}
                       </span>
                       <ChevronDownIcon className="size-4 shrink-0 text-faint transition-transform group-open:rotate-180" />
                     </summary>
-                    <div className="mt-2 ml-7 space-y-3">
-                      {groupByRound(item.entries).map(([round, entries]) => (
-                        <div key={round}>
-                          <p className="label mb-1 text-faint">Runde {round}</p>
-                          <ul className="space-y-1">
-                            {entries.map((entry) => (
-                              <CombatLogRow key={entry.id} entry={entry} />
-                            ))}
-                          </ul>
+                    <div className="mt-2 ml-1 space-y-2.5 border-l border-edge pl-3">
+                      {item.notes.map((note) => (
+                        <div key={note.id} className="flex gap-3">
+                          <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
+                            {note.body}
+                          </p>
+                          <form
+                            action={async () => {
+                              "use server";
+                              await removeCampaignLogAction(characterId, note.id);
+                            }}
+                          >
+                            <button
+                              type="submit"
+                              aria-label="Eintrag löschen"
+                              className="px-1 text-faint transition-colors hover:text-ember"
+                            >
+                              ✕
+                            </button>
+                          </form>
                         </div>
                       ))}
+                      {item.combat.length > 0 ? (
+                        <CombatBlock entries={item.combat} />
+                      ) : null}
                     </div>
                   </details>
                 </li>
-              ),
-            )}
+              );
+            })}
           </ul>
         </Panel>
       )}
     </>
+  );
+}
+
+/** Der eingeklappte Kampf — wiederverwendet, egal ob lose oder in einer Session. */
+function CombatBlock({ entries }: { entries: LiveLogEntry[] }) {
+  return (
+    <details className="group">
+      <summary className="flex cursor-pointer list-none items-center gap-3 text-sm [&::-webkit-details-marker]:hidden">
+        <CrossedSwordsIcon className="size-4 shrink-0 text-ember" />
+        <span className="min-w-0 flex-1">
+          Kampf · {entries.length === 1 ? "1 Eintrag" : `${entries.length} Einträge`}
+        </span>
+        <ChevronDownIcon className="size-4 shrink-0 text-faint transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="mt-2 ml-7 space-y-3">
+        {groupByRound(entries).map(([round, roundEntries]) => (
+          <div key={round}>
+            <p className="label mb-1 text-faint">Runde {round}</p>
+            <ul className="space-y-1">
+              {roundEntries.map((entry) => (
+                <CombatLogRow key={entry.id} entry={entry} />
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </details>
   );
 }

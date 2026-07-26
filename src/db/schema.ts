@@ -515,6 +515,14 @@ export const combatLog = sqliteTable(
     /** Schaden bzw. geheilte HP — für die Zusammenfassung am Kampfende. */
     amount: integer("amount").notNull().default(0),
     at: integer("at").notNull().default(now),
+    /**
+     * Wie `notes.session`: die Session-Nummer zum Zeitpunkt des Eintrags,
+     * damit sich der Kampf im Kampagnen-Log unter derselben Session
+     * einklappen lässt wie die Notizen von diesem Abend. Null, wenn noch
+     * keine Session lief oder der Eintrag aus der Zeit vor dieser Spalte
+     * stammt.
+     */
+    session: integer("session"),
   },
   (t) => [index("idx_combatlog_character").on(t.characterId)],
 );
