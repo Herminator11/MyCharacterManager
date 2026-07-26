@@ -124,3 +124,17 @@ export async function bumpSessionAction(characterId: number) {
 
   revalidatePath(`/c/${characterId}/notes`);
 }
+
+/**
+ * Die Session-Nummer von Hand setzen — für Korrekturen und zum Nachtragen,
+ * falls man die App nicht von der ersten Session an geführt hat. Negative
+ * Zahlen ergäben keinen Sinn und werden auf 0 gekappt.
+ */
+export async function setSessionAction(characterId: number, session: number) {
+  db.update(characters)
+    .set({ currentSession: Math.max(0, Math.trunc(session) || 0) })
+    .where(eq(characters.id, characterId))
+    .run();
+
+  revalidatePath(`/c/${characterId}/notes`);
+}

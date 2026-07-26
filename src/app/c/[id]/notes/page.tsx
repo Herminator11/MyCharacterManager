@@ -15,18 +15,10 @@ import {
   addCampaignLogAction,
   bumpSessionAction,
   removeCampaignLogAction,
+  setSessionAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
-
-/** Volles Datum — hier liest man auch Monate später noch nach. */
-function formatStamp(unixSeconds: number): string {
-  return new Date(unixSeconds * 1000).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-  });
-}
 
 type TimelineItem =
   | { type: "note"; id: number; at: number; body: string; session: number | null }
@@ -68,21 +60,43 @@ export default async function CampaignLogPage({
       <Panel>
         <SectionLabel
           right={
-            <form
-              action={async () => {
-                "use server";
-                await bumpSessionAction(characterId);
-              }}
-            >
-              <button
-                type="submit"
-                className="text-xs text-mute transition-colors hover:text-patina"
+            <div className="flex items-center gap-2 text-xs text-mute">
+              <span>Session</span>
+              <form
+                action={async (formData: FormData) => {
+                  "use server";
+                  await setSessionAction(
+                    characterId,
+                    Number(formData.get("session")),
+                  );
+                }}
               >
-                {character.currentSession > 0
-                  ? `Session ${character.currentSession} · nächste →`
-                  : "Erste Session beginnen"}
-              </button>
-            </form>
+                <input
+                  name="session"
+                  type="number"
+                  min={0}
+                  defaultValue={character.currentSession}
+                  aria-label="Session-Nummer setzen"
+                  className="min-h-8 w-14 rounded-md border border-edge bg-ink px-1.5 text-center tabular-nums focus:border-patina focus:outline-none"
+                />
+                <button type="submit" className="sr-only">
+                  Session-Nummer speichern
+                </button>
+              </form>
+              <form
+                action={async () => {
+                  "use server";
+                  await bumpSessionAction(characterId);
+                }}
+              >
+                <button
+                  type="submit"
+                  className="transition-colors hover:text-patina"
+                >
+                  nächste →
+                </button>
+              </form>
+            </div>
           }
         >
           Festhalten
@@ -121,16 +135,11 @@ export default async function CampaignLogPage({
             {timeline.map((item) =>
               item.type === "note" ? (
                 <li key={`note-${item.id}`} className="flex gap-3">
-                  <div className="w-20 shrink-0">
-                    {item.session ? (
-                      <span className="block text-xs font-semibold text-patina tabular-nums">
-                        Session {item.session}
-                      </span>
-                    ) : null}
-                    <time className="block text-xs text-faint tabular-nums">
-                      {formatStamp(item.at)}
-                    </time>
-                  </div>
+                  {item.session ? (
+                    <span className="w-20 shrink-0 text-xs font-semibold text-patina tabular-nums">
+                      Session {item.session}
+                    </span>
+                  ) : null}
                   <p className="min-w-0 flex-1 text-sm whitespace-pre-line">
                     {item.body}
                   </p>
@@ -150,11 +159,7 @@ export default async function CampaignLogPage({
                   </form>
                 </li>
               ) : (
-                <CombatLogRow
-                  key={`combat-${item.id}`}
-                  entry={item.entry}
-                  timestamp={formatStamp(item.at)}
-                />
+                <CombatLogRow key={`combat-${item.id}`} entry={item.entry} />
               ),
             )}
           </ul>

@@ -49,24 +49,10 @@ export function CombatLog({ state }: { state: LiveState }) {
 /**
  * Eine Zeile für sich — wiederverwendet, wo Kampflog-Einträge auch
  * außerhalb des laufenden Kampfs auftauchen, etwa im Kampagnen-Log.
- *
- * `timestamp` ersetzt dort die Rundenüberschrift: Runde 2 aus dem letzten
- * Kampf und Runde 2 aus dem vorletzten sähen sonst wie derselbe Moment aus.
  */
-export function CombatLogRow({
-  entry,
-  timestamp,
-}: {
-  entry: LiveLogEntry;
-  timestamp?: string;
-}) {
+export function CombatLogRow({ entry }: { entry: LiveLogEntry }) {
   return (
     <li className="flex items-baseline gap-2">
-      {timestamp ? (
-        <time className="w-20 shrink-0 text-xs text-faint tabular-nums">
-          {timestamp}
-        </time>
-      ) : null}
       <Marker entry={entry} />
       <span className="min-w-0 flex-1 text-sm">
         <span className={TEXT[entry.kind]}>{entry.text}</span>
