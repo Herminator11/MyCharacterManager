@@ -161,18 +161,18 @@ export default async function CampaignLogPage({
                 </li>
               ) : (
                 <li key="combat">
-                  <details className="group rounded-md border border-edge bg-ink px-3 py-2">
-                    <summary className="flex min-h-8 cursor-pointer list-none items-center gap-2 text-sm font-medium text-mute [&::-webkit-details-marker]:hidden">
-                      <CrossedSwordsIcon className="size-4 text-ember" />
-                      <span className="flex-1">
+                  <details className="group">
+                    <summary className="flex cursor-pointer list-none items-center gap-3 text-sm [&::-webkit-details-marker]:hidden">
+                      <CrossedSwordsIcon className="size-4 shrink-0 text-ember" />
+                      <span className="min-w-0 flex-1">
                         Kampf ·{" "}
                         {item.entries.length === 1
                           ? "1 Eintrag"
                           : `${item.entries.length} Einträge`}
                       </span>
-                      <ChevronDownIcon className="size-4 transition-transform group-open:rotate-180" />
+                      <ChevronDownIcon className="size-4 shrink-0 text-faint transition-transform group-open:rotate-180" />
                     </summary>
-                    <div className="mt-3 space-y-3">
+                    <div className="mt-2 ml-7 space-y-3">
                       {groupByRound(item.entries).map(([round, entries]) => (
                         <div key={round}>
                           <p className="label mb-1 text-faint">Runde {round}</p>
