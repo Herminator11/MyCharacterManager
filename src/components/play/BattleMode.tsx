@@ -26,6 +26,7 @@ import { TurnBar } from "./TurnBar";
 export type BattleAttack = {
   id: number;
   name: string;
+  cost: ActionSlot;
   bonus: number;
   damageLine: string;
 };
@@ -141,7 +142,8 @@ export function BattleMode({
           setExpandedSlot(null);
         }}
         onAttack={() => {
-          send({ type: "turn.set", slot: "action", used: true });
+          if (!expandedSlot) return;
+          send({ type: "turn.set", slot: expandedSlot, used: true });
           setExpandedSlot(null);
         }}
         onMarkUsed={() => {
@@ -226,9 +228,9 @@ function TurnOptions({
     );
   });
 
-  // Ein Angriff kostet in 5e die Aktion selbst — Reaktion und Bonusaktion
-  // kennen keine eigene Waffenkosten, die die App nachhalten könnte.
-  const readyAttacks = slot === "action" ? attacks : [];
+  // Normalerweise die Aktion selbst — Nebenhand-Angriffe & Co. tragen ihre
+  // Kosten aber jetzt selbst (im Angriffe-Tab gesetzt, "Kosten"-Feld).
+  const readyAttacks = attacks.filter((attack) => attack.cost === slot);
 
   const empty = readySpells.length === 0 && readyAttacks.length === 0;
 

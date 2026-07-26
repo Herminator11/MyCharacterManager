@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
 import { attacks, type Ability } from "@/db/schema";
+import { ACTION_SLOTS, type ActionSlot } from "@/lib/rules/actions";
 
 const ABILITIES = ["str", "dex", "con", "int", "wis", "cha"] as const;
 
@@ -18,6 +19,7 @@ export async function addAttackAction(characterId: number, formData: FormData) {
   if (!name) throw new Error("Der Angriff braucht einen Namen.");
 
   const ability = String(formData.get("ability") ?? "str");
+  const actionCost = String(formData.get("actionCost") ?? "action");
 
   db.insert(attacks)
     .values({
@@ -26,6 +28,9 @@ export async function addAttackAction(characterId: number, formData: FormData) {
       ability: (ABILITIES as readonly string[]).includes(ability)
         ? (ability as Ability)
         : "str",
+      actionCost: (ACTION_SLOTS as readonly string[]).includes(actionCost)
+        ? (actionCost as ActionSlot)
+        : "action",
       proficient: formData.get("proficient") === "on",
       attackBonusOverride: optionalNumber(formData, "attackBonusOverride"),
       damageDice: String(formData.get("damageDice") ?? "").trim(),

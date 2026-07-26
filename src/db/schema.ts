@@ -9,7 +9,7 @@ import {
   unique,
 } from "drizzle-orm/sqlite-core";
 
-import type { ActionCost } from "@/lib/rules/actions";
+import type { ActionCost, ActionSlot } from "@/lib/rules/actions";
 
 /* ------------------------------------------------------------------ *
  * Hilfstypen
@@ -449,6 +449,14 @@ export const attacks = sqliteTable(
     proficient: integer("proficient", { mode: "boolean" })
       .notNull()
       .default(true),
+    /**
+     * Was der Angriff im Zug kostet. Keine Eigenschaft der Waffe, sondern
+     * des Features dahinter — derselbe Dolch ist beim Two-Weapon-Fighting-
+     * Nebenhandangriff eine Bonusaktion, sonst eine Aktion. Lässt sich
+     * deshalb nicht herleiten, nur von Hand setzen; Vorgabe ist der
+     * Normalfall.
+     */
+    actionCost: text("action_cost").$type<ActionSlot>().notNull().default("action"),
     /** null = aus Ability + Proficiency berechnen. */
     attackBonusOverride: integer("attack_bonus_override"),
     damageDice: text("damage_dice").notNull().default(""),

@@ -41,6 +41,7 @@ export default async function BattlePage({ params }: PageProps<"/c/[id]/battle">
     return {
       id: attack.id,
       name: attack.name,
+      cost: attack.actionCost,
       bonus,
       // Dieselbe Zusammensetzung wie im Angriffe-Tab: Würfel und Bonus
       // ohne Leerzeichen ("1d8+3"), die Schadensart danach abgesetzt.

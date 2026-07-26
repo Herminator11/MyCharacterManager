@@ -1,0 +1,1 @@
+ALTER TABLE `attacks` ADD `action_cost` text DEFAULT 'action' NOT NULL;

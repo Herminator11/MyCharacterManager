@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { ActionShape } from "@/components/icons";
 import {
   Button,
   EmptyState,
@@ -9,6 +10,7 @@ import {
   SectionLabel,
 } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
+import { ACTION_LABELS, ACTION_SLOTS } from "@/lib/rules/actions";
 import {
   abilityModifier,
   attackBonus,
@@ -78,6 +80,16 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
 
               return (
                 <li key={attack.id} className="flex items-center gap-3 py-2.5">
+                  {/* Dieselbe Form wie in der Zugleiste im Kampfmodus — was
+                      der Angriff kostet, erkennt man hier ohne zu lesen. */}
+                  <span
+                    title={ACTION_LABELS[attack.actionCost]}
+                    aria-label={`kostet ${ACTION_LABELS[attack.actionCost]}`}
+                    className="shrink-0 text-faint"
+                  >
+                    <ActionShape kind={attack.actionCost} className="size-3.5" />
+                  </span>
+
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{attack.name}</p>
                     <p className="truncate text-xs text-faint">
@@ -200,6 +212,18 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
             </Field>
             <Field label="Reichweite">
               <input name="range" placeholder="5 ft." className={inputClass} />
+            </Field>
+            <Field
+              label="Kosten"
+              hint="Nebenhand-Angriffe u.ä. sind eine Bonusaktion"
+            >
+              <select name="actionCost" defaultValue="action" className={inputClass}>
+                {ACTION_SLOTS.map((slot) => (
+                  <option key={slot} value={slot}>
+                    {ACTION_LABELS[slot]}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Schadenswürfel">
               <input name="damageDice" placeholder="1d8" className={inputClass} />
