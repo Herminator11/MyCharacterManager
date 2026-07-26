@@ -1,5 +1,5 @@
 import type { CombatLogKind } from "@/db/schema";
-import type { LiveMutation, LiveState } from "@/lib/live-types";
+import type { LiveLogEntry, LiveMutation, LiveState } from "@/lib/live-types";
 
 import type { ActionCost } from "./actions";
 
@@ -273,6 +273,26 @@ function slotUsed(
     .find((pool) => pool.id === poolId)
     ?.slots.find((s) => s.level === level);
   return slot ? slot.used : null;
+}
+
+/**
+ * Nach Runden gruppieren, jüngste zuerst. Der Server liefert schon in
+ * dieser Reihenfolge — hier wird nur gebündelt, nicht sortiert.
+ *
+ * Steht hier statt in `CombatLog.tsx`, weil das eine Client-Komponente ist
+ * und Server Components wie das Kampagnen-Log keine Funktionen aus einem
+ * "use client"-Modul aufrufen dürfen — auch keine reinen Hilfsfunktionen.
+ */
+export function groupByRound(log: LiveLogEntry[]): [number, LiveLogEntry[]][] {
+  const groups: [number, LiveLogEntry[]][] = [];
+
+  for (const entry of log) {
+    const last = groups[groups.length - 1];
+    if (last && last[0] === entry.round) last[1].push(entry);
+    else groups.push([entry.round, [entry]]);
+  }
+
+  return groups;
 }
 
 /** 'poisoned' → 'Poisoned'. Die Chips tragen den englischen Regelbegriff. */

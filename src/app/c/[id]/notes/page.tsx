@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 
-import { AddIcon } from "@/components/icons";
+import { AddIcon, ChevronDownIcon, CrossedSwordsIcon } from "@/components/icons";
 import { CombatLogRow } from "@/components/play/CombatLog";
 import { Button, Panel, SectionLabel } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
 import type { LiveLogEntry } from "@/lib/live-types";
+import { groupByRound } from "@/lib/rules/combatLog";
 import {
   getCampaignLog,
   getCharacter,
@@ -22,7 +23,7 @@ export const dynamic = "force-dynamic";
 
 type TimelineItem =
   | { type: "note"; id: number; at: number; body: string; session: number | null }
-  | { type: "combat"; id: number; at: number; entry: LiveLogEntry };
+  | { type: "combat"; at: number; entries: LiveLogEntry[] };
 
 export default async function CampaignLogPage({
   params,
@@ -38,7 +39,10 @@ export default async function CampaignLogPage({
 
   // Zwei Quellen, eine Zeitleiste: von Hand notiert und von selbst
   // mitgeschrieben landen nach Zeitstempel gemischt — nur so sieht man
-  // "wir haben X entdeckt" neben "wir haben gerade gekämpft".
+  // "wir haben X entdeckt" neben "wir haben gerade gekämpft". Der Kampf
+  // selbst zählt dabei als ein einziger Moment, nicht als eine Zeile pro
+  // Eintrag: Conditions und Rundendetails gehören zugeklappt, sonst
+  // ertränkt ein einzelnes Gefecht jede handgeschriebene Notiz daneben.
   const timeline: TimelineItem[] = [
     ...notes.map((entry) => ({
       type: "note" as const,
@@ -47,13 +51,10 @@ export default async function CampaignLogPage({
       body: entry.body,
       session: entry.session,
     })),
-    ...combat.map((entry) => ({
-      type: "combat" as const,
-      id: entry.id,
-      at: entry.at,
-      entry,
-    })),
-  ].sort((a, b) => b.at - a.at || b.id - a.id);
+    ...(combat.length > 0
+      ? [{ type: "combat" as const, at: combat[0].at, entries: combat }]
+      : []),
+  ].sort((a, b) => b.at - a.at);
 
   return (
     <>
@@ -159,7 +160,32 @@ export default async function CampaignLogPage({
                   </form>
                 </li>
               ) : (
-                <CombatLogRow key={`combat-${item.id}`} entry={item.entry} />
+                <li key="combat">
+                  <details className="group rounded-md border border-edge bg-ink px-3 py-2">
+                    <summary className="flex min-h-8 cursor-pointer list-none items-center gap-2 text-sm font-medium text-mute [&::-webkit-details-marker]:hidden">
+                      <CrossedSwordsIcon className="size-4 text-ember" />
+                      <span className="flex-1">
+                        Kampf ·{" "}
+                        {item.entries.length === 1
+                          ? "1 Eintrag"
+                          : `${item.entries.length} Einträge`}
+                      </span>
+                      <ChevronDownIcon className="size-4 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="mt-3 space-y-3">
+                      {groupByRound(item.entries).map(([round, entries]) => (
+                        <div key={round}>
+                          <p className="label mb-1 text-faint">Runde {round}</p>
+                          <ul className="space-y-1">
+                            {entries.map((entry) => (
+                              <CombatLogRow key={entry.id} entry={entry} />
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                </li>
               ),
             )}
           </ul>

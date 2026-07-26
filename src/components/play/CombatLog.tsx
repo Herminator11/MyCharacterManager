@@ -3,6 +3,7 @@
 import { ActionShape } from "@/components/icons";
 import { Panel, SectionLabel, cx } from "@/components/ui";
 import type { LiveLogEntry, LiveState } from "@/lib/live-types";
+import { groupByRound } from "@/lib/rules/combatLog";
 
 /**
  * Was in diesem Kampf passiert ist — von selbst mitgeschrieben.
@@ -117,19 +118,3 @@ const TEXT: Record<LiveLogEntry["kind"], string> = {
   rest: "text-mute",
   state: "text-mute",
 };
-
-/**
- * Nach Runden gruppieren, jüngste zuerst. Der Server liefert schon in
- * dieser Reihenfolge — hier wird nur gebündelt, nicht sortiert.
- */
-function groupByRound(log: LiveLogEntry[]): [number, LiveLogEntry[]][] {
-  const groups: [number, LiveLogEntry[]][] = [];
-
-  for (const entry of log) {
-    const last = groups[groups.length - 1];
-    if (last && last[0] === entry.round) last[1].push(entry);
-    else groups.push([entry.round, [entry]]);
-  }
-
-  return groups;
-}
