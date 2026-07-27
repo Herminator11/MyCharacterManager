@@ -139,6 +139,14 @@ export const characters = sqliteTable("characters", {
   importedFromPdf: integer("imported_from_pdf", { mode: "boolean" })
     .notNull()
     .default(false),
+  /**
+   * Ob die Klassenbilder als Seitenhintergrund erscheinen. Rein
+   * kosmetisch, aber am Tisch bei schlechtem Licht kann jede Fläche
+   * stören, die nicht reiner Kontrast ist — deshalb abschaltbar.
+   */
+  backgroundThemeEnabled: integer("background_theme_enabled", { mode: "boolean" })
+    .notNull()
+    .default(true),
   background: text("background").notNull().default(""),
   alignment: text("alignment").notNull().default(""),
   xp: integer("xp").notNull().default(0),

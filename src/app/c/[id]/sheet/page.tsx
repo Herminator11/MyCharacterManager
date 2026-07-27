@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { BackgroundEditor } from "@/components/sheet/BackgroundEditor";
+import { ClassThemeToggle } from "@/components/sheet/ClassThemeToggle";
 import { FeatureEditor } from "@/components/sheet/FeatureEditor";
 import { ProficiencyToggle } from "@/components/sheet/ProficiencyToggle";
 import { SheetSummary } from "@/components/sheet/SheetSummary";
@@ -40,6 +41,7 @@ import {
   saveAppearanceAction,
   saveBackgroundAction,
   saveBasicsAction,
+  setBackgroundThemeAction,
   setClassLevelAction,
   setProficiencyAction,
   setSpeciesAction,
@@ -174,9 +176,18 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
       <Panel id="klassen" className="scroll-mt-24">
         <SectionLabel
           right={
-            <span className="text-xs text-mute">
-              Gesamtlevel {sheet.level} · Prof {formatModifier(sheet.proficiencyBonus)}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-mute">
+                Gesamtlevel {sheet.level} · Prof {formatModifier(sheet.proficiencyBonus)}
+              </span>
+              <ClassThemeToggle
+                enabled={character.backgroundThemeEnabled}
+                onChange={async (enabled) => {
+                  "use server";
+                  await setBackgroundThemeAction(characterId, enabled);
+                }}
+              />
+            </div>
           }
         >
           Klassen

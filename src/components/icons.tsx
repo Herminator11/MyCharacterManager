@@ -554,6 +554,24 @@ const CONDITION_PATHS: Record<string, React.ReactNode> = {
   ),
 };
 
+/**
+ * Ein Schalter: Pille mit Knopf links oder rechts — erste echte Ein/Aus-
+ * Präferenz der App, verdient ein eigenes Zeichen statt einer
+ * zweckentfremdeten Checkbox.
+ */
+export function SwitchIcon({ on, className }: IconProps & { on: boolean }) {
+  return (
+    <Icon className={className} strokeWidth={1.6}>
+      <path d="M7 8.5h10a3.5 3.5 0 0 1 0 7H7a3.5 3.5 0 0 1 0-7z" />
+      <path
+        d={on ? "M17 12a2.2 2.2 0 1 1 0-.01z" : "M7 12a2.2 2.2 0 1 1 0-.01z"}
+        fill="currentColor"
+        stroke="none"
+      />
+    </Icon>
+  );
+}
+
 /* ------------------------------------------------------------------ *
  * Aktionsökonomie
  * ------------------------------------------------------------------ */

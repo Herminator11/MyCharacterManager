@@ -1,0 +1,1 @@
+ALTER TABLE `characters` ADD `background_theme_enabled` integer DEFAULT true NOT NULL;

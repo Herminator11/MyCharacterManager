@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { HomeLink } from "@/components/Brand";
+import { ClassBackground } from "@/components/ClassBackground";
 import { StickyStats } from "@/components/StickyStats";
 import { TabBar } from "@/components/TabBar";
 import { characterIdFromParam, characterPath } from "@/lib/characterUrl";
@@ -26,6 +27,11 @@ export default async function CharacterLayout({
 
   return (
     <div className="pb-20">
+      <ClassBackground
+        enabled={sheet.character.backgroundThemeEnabled}
+        classes={sheet.classes}
+      />
+
       {/* Statusleiste: die Werte, die man im Kampf ständig nennt, immer
           sichtbar — sie scrollt bewusst nicht weg. */}
       <header className="sticky top-0 z-20 border-b border-edge bg-ink/95 backdrop-blur">

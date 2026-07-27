@@ -38,6 +38,20 @@ export async function saveBackgroundAction(characterId: number, backstory: strin
   revalidatePath(`/c/${characterId}/sheet`);
 }
 
+/**
+ * Klassenhintergrund an/aus. Wirkt auf Übersicht und Bogen gleichermaßen
+ * (gemeinsames Layout), deshalb `revalidatePath` auf die Layout-Ebene statt
+ * nur auf `/sheet`.
+ */
+export async function setBackgroundThemeAction(characterId: number, enabled: boolean) {
+  db.update(characters)
+    .set({ backgroundThemeEnabled: enabled })
+    .where(eq(characters.id, characterId))
+    .run();
+
+  revalidatePath(`/c/${characterId}`, "layout");
+}
+
 /** Größe, Gewicht, Augen-, Haut- und Haarfarbe — reiner Beschreibungstext. */
 export async function saveAppearanceAction(characterId: number, appearance: string) {
   db.update(characters)
