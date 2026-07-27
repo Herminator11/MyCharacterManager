@@ -4,7 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { characters, notes } from "@/db/schema";
+import { characters, combatLog, notes } from "@/db/schema";
 
 /** Ein Vermerk: kurzer Name, optional ein Satz dazu. */
 export async function addPinAction(characterId: number, formData: FormData) {
@@ -108,6 +108,17 @@ export async function addCampaignLogAction(characterId: number, formData: FormDa
 
 export async function removeCampaignLogAction(characterId: number, entryId: number) {
   db.delete(notes).where(eq(notes.id, entryId)).run();
+  revalidatePath(`/c/${characterId}/notes`);
+}
+
+/**
+ * Den Kampf aus dem Verlauf löschen — für Übersicht, nicht für die Regeln.
+ * Es gibt immer nur einen: `battle.start` leert den Kampflog schon beim
+ * nächsten Kampf, also trifft dieselbe Löschung nie mehr als eine
+ * Begegnung, ob sie lose steht oder gerade in einer Session eingeklappt ist.
+ */
+export async function removeCombatLogAction(characterId: number) {
+  db.delete(combatLog).where(eq(combatLog.characterId, characterId)).run();
   revalidatePath(`/c/${characterId}/notes`);
 }
 

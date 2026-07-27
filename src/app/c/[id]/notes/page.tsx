@@ -16,6 +16,7 @@ import {
   addCampaignLogAction,
   bumpSessionAction,
   removeCampaignLogAction,
+  removeCombatLogAction,
   setSessionAction,
 } from "./actions";
 
@@ -209,7 +210,13 @@ export default async function CampaignLogPage({
               if (item.type === "combat") {
                 return (
                   <li key="combat">
-                    <CombatBlock entries={item.entries} />
+                    <CombatBlock
+                      entries={item.entries}
+                      remove={async () => {
+                        "use server";
+                        await removeCombatLogAction(characterId);
+                      }}
+                    />
                   </li>
                 );
               }
@@ -246,7 +253,13 @@ export default async function CampaignLogPage({
                         </div>
                       ))}
                       {item.combat.length > 0 ? (
-                        <CombatBlock entries={item.combat} />
+                        <CombatBlock
+                          entries={item.combat}
+                          remove={async () => {
+                            "use server";
+                            await removeCombatLogAction(characterId);
+                          }}
+                        />
                       ) : null}
                     </div>
                   </details>
@@ -260,29 +273,51 @@ export default async function CampaignLogPage({
   );
 }
 
-/** Der eingeklappte Kampf — wiederverwendet, egal ob lose oder in einer Session. */
-function CombatBlock({ entries }: { entries: LiveLogEntry[] }) {
+/**
+ * Der eingeklappte Kampf — wiederverwendet, egal ob lose oder in einer
+ * Session. Der Löschen-Knopf steht bewusst außerhalb von `<summary>`: ein
+ * Klick darin würde sonst zusätzlich das Aufklappen auslösen, das
+ * `<details>` jedem Klick auf seinen Kopf mitgibt.
+ */
+function CombatBlock({
+  entries,
+  remove,
+}: {
+  entries: LiveLogEntry[];
+  remove: () => Promise<void>;
+}) {
   return (
-    <details className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-3 text-sm [&::-webkit-details-marker]:hidden">
-        <CrossedSwordsIcon className="size-4 shrink-0 text-ember" />
-        <span className="min-w-0 flex-1">
-          Kampf · {entries.length === 1 ? "1 Eintrag" : `${entries.length} Einträge`}
-        </span>
-        <ChevronDownIcon className="size-4 shrink-0 text-faint transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="mt-2 ml-7 space-y-3">
-        {groupByRound(entries).map(([round, roundEntries]) => (
-          <div key={round}>
-            <p className="label mb-1 text-faint">Runde {round}</p>
-            <ul className="space-y-1">
-              {roundEntries.map((entry) => (
-                <CombatLogRow key={entry.id} entry={entry} />
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </details>
+    <div className="flex items-start gap-3">
+      <details className="group min-w-0 flex-1">
+        <summary className="flex cursor-pointer list-none items-center gap-3 text-sm [&::-webkit-details-marker]:hidden">
+          <CrossedSwordsIcon className="size-4 shrink-0 text-ember" />
+          <span className="min-w-0 flex-1">
+            Kampf · {entries.length === 1 ? "1 Eintrag" : `${entries.length} Einträge`}
+          </span>
+          <ChevronDownIcon className="size-4 shrink-0 text-faint transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="mt-2 ml-7 space-y-3">
+          {groupByRound(entries).map(([round, roundEntries]) => (
+            <div key={round}>
+              <p className="label mb-1 text-faint">Runde {round}</p>
+              <ul className="space-y-1">
+                {roundEntries.map((entry) => (
+                  <CombatLogRow key={entry.id} entry={entry} />
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </details>
+      <form action={remove}>
+        <button
+          type="submit"
+          aria-label="Kampf-Log löschen"
+          className="px-1 text-faint transition-colors hover:text-ember"
+        >
+          ✕
+        </button>
+      </form>
+    </div>
   );
 }
