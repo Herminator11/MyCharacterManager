@@ -176,7 +176,9 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
       <Panel id="klassen" className="scroll-mt-24">
         <SectionLabel
           right={
-            <div className="flex items-center gap-3">
+            // Darf umbrechen: bei 360 px ragte der Schalter sonst 8 px
+            // aus dem Panel.
+            <div className="flex flex-wrap items-center justify-end gap-x-3">
               <span className="text-xs text-mute">
                 Gesamtlevel {sheet.level} · Prof {formatModifier(sheet.proficiencyBonus)}
               </span>
@@ -442,7 +444,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Erfahrungspunkte">
+              <Field label={"Erfahrungs\u00adpunkte"}>
                 <input
                   name="xp"
                   type="number"
