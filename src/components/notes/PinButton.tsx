@@ -55,13 +55,17 @@ export function PinButton({
       aria-expanded={open}
       aria-label="Vermerk anlegen"
       className={cx(
-        "relative flex size-8 items-center justify-center transition-colors",
-        open || count > 0 ? "text-brass" : "text-faint hover:text-mute",
+        "relative flex min-h-11 min-w-14 flex-col items-center justify-center gap-0.5 transition-colors",
+        open || count > 0 ? "text-brass" : "text-faint hover:text-fg",
       )}
     >
       <NoteIcon className="size-5" />
+      {/* Ein Blatt ist keine Konvention wie Papierkorb oder Stift — das
+          Wort steht deshalb sichtbar darunter, nicht nur im Tooltip, der
+          auf dem Handy nie erscheint. */}
+      <span className="text-[0.625rem] leading-none font-medium">Vermerk</span>
       {count > 0 ? (
-        <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
+        <span className="absolute top-0.5 right-2 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
           {count}
         </span>
       ) : null}
@@ -69,7 +73,7 @@ export function PinButton({
   );
 
   return (
-    <div ref={box} className="absolute top-3 right-3">
+    <div ref={box} className="relative">
       {/* Kein Tooltip, solange das Formular offen ist — beide sitzen an
           derselben Stelle unter dem Knopf und würden sich sonst
           überlappen. Das Formular erklärt sich dann ohnehin selbst. */}

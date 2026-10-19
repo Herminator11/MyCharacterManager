@@ -3,12 +3,11 @@ import { PinButton } from "@/components/notes/PinButton";
 import { PROFILE_ANCHOR_ID } from "@/components/StickyStats";
 import { CombatStats } from "@/components/profile/CombatStats";
 import { InspirationToggle } from "@/components/profile/InspirationToggle";
-import { KeyStat } from "@/components/profile/KeyStat";
+import { KeyStats } from "@/components/profile/KeyStat";
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
-import { ABILITY_LABELS } from "@/lib/rules/skills";
 import type { SheetView } from "@/lib/server/characters";
 
 /**
@@ -49,82 +48,66 @@ export function ProfileHeader({
   ].filter(Boolean);
 
   return (
-    <Panel className="relative flex flex-wrap items-start gap-4 pr-14">
-      <PortraitUpload
-        characterId={character.id}
-        name={character.name}
-        hasPortrait={Boolean(character.portraitFile)}
-        upload={uploadPortrait}
-      />
-
-      {/* Mindestbreite, damit die Instrumente rechts lieber in eine eigene
-          Zeile rutschen, als Namen und Kennzahlen zusammenzuquetschen. */}
-      <div className="flex min-w-[15rem] flex-1 flex-col justify-between gap-3">
-        <div className="min-w-0">
-          {/* Inspiration sitzt hier, neben Namen und Klasse, statt als
-              eigenes Flex-Element in der Kopfzeile — dort verschob sie je
-              nach Breite die Instrumentenreihe in eine zweite Zeile und
-              ließ die ganze Box springen. Innerhalb dieser Spalte kostet
-              sie nur Platz, den der eh schon abschneidende Name sowieso
-              nicht braucht. */}
-          <div className="flex items-center gap-2">
-            <h1 className="truncate text-2xl leading-tight font-semibold tracking-tight">
-              {character.name}
-            </h1>
-            <InspirationToggle className="shrink-0" />
-          </div>
-          <p className="mt-0.5 truncate text-sm text-patina">
-            {/* Subklasse in Klammern hinter dem Level: sie beantwortet die
-                Frage „was für ein Warlock", und die stellt am Tisch jeder
-                zuerst. Fehlt sie, fehlt nur die Klammer. Das Icon davor
-                ist reine Wiedererkennung — der Text bleibt die Quelle der
-                Wahrheit, unbekannte Klassen bekommen einfach keins. */}
-            {sheet.classes.length > 0
-              ? sheet.classes.map((c, i) => (
-                  <span key={`${c.classKey}-${i}`}>
-                    {i > 0 ? " / " : ""}
-                    <ClassIcon
-                      classKey={c.classKey}
-                      className="mr-1 inline-block size-3.5 align-text-bottom text-patina/70"
-                    />
-                    {classLabel(c.classKey)} {c.level}
-                    {c.subclass ? ` (${c.subclass})` : ""}
-                  </span>
-                ))
-              : "Ohne Klasse"}
-          </p>
-          {subtitle.length > 0 ? (
-            <p className="mt-0.5 truncate text-xs text-faint">
-              {subtitle.join(" · ")}
-            </p>
-          ) : null}
-        </div>
-
-        <dl className="flex flex-wrap gap-x-5 gap-y-2.5">
-          <KeyStat
-            label="Proficiency"
-            value={formatModifier(sheet.proficiencyBonus)}
-          />
-          {sheet.spellcasting ? (
-            <>
-              <KeyStat label="Spell DC" value={sheet.spellcasting.saveDc} />
-              <KeyStat
-                label="Zauberangriff"
-                value={formatModifier(sheet.spellcasting.attackBonus)}
-                hint={ABILITY_LABELS[sheet.spellcasting.ability].name}
-              />
-            </>
-          ) : null}
-          <KeyStat label="Passive Insight" value={sheet.passiveInsight} />
-          {character.xp > 0 ? (
-            <KeyStat label="XP" value={character.xp.toLocaleString("de-DE")} />
-          ) : null}
-        </dl>
+    // Ein Raster statt flex-wrap: am Handy rutschte die Namensspalte
+    // (min. 15rem) unter das Portrait und ließ daneben eine leere Fläche;
+    // die Kennzahlen standen 3 + 1 und die Instrumente füllten zwei
+    // Drittel der Breite. Jetzt: Portrait und Name nebeneinander,
+    // darunter Kennzahlen und Instrumente jeweils über die volle Breite.
+    // Ab lg wieder die alte Anordnung mit den Instrumenten rechts.
+    <Panel className="relative grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:pr-20">
+      <div className="lg:row-span-2">
+        <PortraitUpload
+          characterId={character.id}
+          name={character.name}
+          hasPortrait={Boolean(character.portraitFile)}
+          upload={uploadPortrait}
+        />
       </div>
+
+      {/* pr-16 hält am Handy die Ecke für Vermerk und Inspiration frei;
+          ab lg übernimmt das Panel den Rand. */}
+      <div className="min-w-0 self-center pr-16 lg:pr-0">
+        <h1 className="truncate text-2xl leading-tight font-semibold tracking-tight">
+          {character.name}
+        </h1>
+        {/* Darf am Handy umbrechen: neben dem Portrait ist die Zeile
+            schmal, und "Wizard 5 (School of Evocation)" abgeschnitten
+            verschweigt genau die Subklasse. */}
+        <p className="mt-0.5 text-sm text-patina lg:truncate">
+          {/* Subklasse in Klammern hinter dem Level: sie beantwortet die
+              Frage „was für ein Warlock", und die stellt am Tisch jeder
+              zuerst. Fehlt sie, fehlt nur die Klammer. Das Icon davor
+              ist reine Wiedererkennung — der Text bleibt die Quelle der
+              Wahrheit, unbekannte Klassen bekommen einfach keins. */}
+          {sheet.classes.length > 0
+            ? sheet.classes.map((c, i) => (
+                <span key={`${c.classKey}-${i}`}>
+                  {i > 0 ? " / " : ""}
+                  <ClassIcon
+                    classKey={c.classKey}
+                    className="mr-1 inline-block size-3.5 align-text-bottom text-patina/70"
+                  />
+                  {classLabel(c.classKey)} {c.level}
+                  {c.subclass ? ` (${c.subclass})` : ""}
+                </span>
+              ))
+            : "Ohne Klasse"}
+        </p>
+        {subtitle.length > 0 ? (
+          <p className="mt-0.5 text-xs text-faint lg:truncate">
+            {subtitle.join(" · ")}
+          </p>
+        ) : null}
+      </div>
+
+      <KeyStats sheet={sheet} className="col-span-2 lg:col-span-1 lg:col-start-2" />
 
       {/* Anker für die klebende Leiste: solange dieser Block sichtbar
           ist, hält sie ihre Zahlen zurück. */}
-      <div id={PROFILE_ANCHOR_ID} className="flex shrink-0 gap-2">
+      <div
+        id={PROFILE_ANCHOR_ID}
+        className="col-span-2 lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1"
+      >
         <CombatStats
           armorClass={sheet.armorClass}
           initiative={formatModifier(sheet.initiative)}
@@ -132,12 +115,16 @@ export function ProfileHeader({
         />
       </div>
 
-      {/* Der Vermerk hat die Ecke jetzt für sich allein: eine Randnotiz,
-          kein Kampfwert wie AC oder Speed — sie soll da sein, ohne mit den
-          Instrumenten um Aufmerksamkeit zu konkurrieren. Das `pr-14` oben
-          am Panel hält die Ecke frei, damit die Instrumentenreihe nicht
-          darunter verschwindet. */}
-      <PinButton count={pinCount} add={addPin} />
+      {/* Vermerk und Inspiration teilen sich die Ecke, beide mit Wort
+          unter dem Zeichen: ein Blatt und eine Flamme sind keine
+          Konventionen wie Papierkorb oder Stift, und ein Tooltip kommt
+          auf dem Handy nie an. Die Flamme stand früher neben dem Namen —
+          dort fraß sie die Breite, die der Name neben dem Portrait jetzt
+          braucht. */}
+      <div className="absolute top-2 right-2 flex flex-col items-center">
+        <PinButton count={pinCount} add={addPin} />
+        <InspirationToggle />
+      </div>
     </Panel>
   );
 }

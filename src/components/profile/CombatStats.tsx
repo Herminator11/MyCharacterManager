@@ -26,7 +26,10 @@ export function CombatStats({
   speed: number;
 }) {
   return (
-    <dl className="flex shrink-0 gap-2">
+    // Am Handy drei gleich breite Spalten über die volle Breite, jedes
+    // Instrument darin mittig — vorher standen die drei linksbündig und
+    // ließen ein Drittel leer. Ab lg wieder die kompakte Reihe rechts.
+    <dl className="grid grid-cols-3 justify-items-center gap-2 lg:flex lg:shrink-0">
       <ArmorClassShield value={armorClass} />
       <Plate label="Initiative" value={initiative} icon={<BoltIcon />} />
       <Plate label="Speed" value={speed} unit="ft" icon={<ShoeIcon />} />

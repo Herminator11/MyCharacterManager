@@ -10,7 +10,7 @@ import { useLive } from "@/lib/live-context";
  * Stern markiert auf der Startseite Favoriten, der Blitz steht neben der
  * Initiative. Drei ähnliche Zacken nebeneinander wären zum Verwechseln.
  *
- * Steht neben dem Namen statt in der Instrumentenreihe rechts:
+ * Steht oben in der Ecke beim Vermerk statt in der Instrumentenreihe:
  * Inspiration ist kein Kampfwert wie AC oder Speed, den man nachschlägt —
  * es ist ein Zustand, an den man sich erinnern lassen muss. Ein eigener
  * Platz tut das, ohne um Aufmerksamkeit mit den Instrumenten zu
@@ -24,6 +24,10 @@ export function InspirationToggle({ className }: { className?: string }) {
     <Tooltip
       label={on ? "Inspiration vorhanden — antippen zum Ausgeben" : "Keine Inspiration"}
       className={className}
+      // Am rechten Rand: zentriert ragte das unsichtbare Label über den
+      // Bildschirm hinaus und machte die ganze Übersicht seitlich
+      // verschiebbar.
+      align="end"
     >
       <button
         type="button"
@@ -33,11 +37,16 @@ export function InspirationToggle({ className }: { className?: string }) {
           on ? "Inspiration ausgeben" : "Inspiration erhalten"
         }
         className={cx(
-          "flex size-10 items-center justify-center transition-colors",
-          on ? "text-brass" : "text-faint hover:text-mute",
+          "flex min-h-11 min-w-14 flex-col items-center justify-center gap-0.5 transition-colors",
+          on ? "text-brass" : "text-faint hover:text-fg",
         )}
       >
         <FlameIcon lit={on} />
+        {/* Sichtbares Wort statt nur Tooltip: die Flamme allein sagt am
+            Handy niemandem, wofür sie steht. */}
+        <span className="text-[0.625rem] leading-none font-medium">
+          Inspiration
+        </span>
       </button>
     </Tooltip>
   );
@@ -50,7 +59,7 @@ export function InspirationToggle({ className }: { className?: string }) {
  */
 function FlameIcon({ lit }: { lit: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden className="size-7">
+    <svg viewBox="0 0 24 24" aria-hidden className="size-6">
       <path
         d="M12 2.5c3.4 3 5.5 5.6 5.5 8.9a5.5 5.5 0 1 1-11 0c0-1.7.7-3.2 1.9-4.6.3 1 .9 1.8 1.7 2.2.5-2.6.9-4.6 1.9-6.5z"
         fill={lit ? "var(--color-brass)" : "none"}

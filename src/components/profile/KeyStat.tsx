@@ -1,27 +1,74 @@
+import { cx } from "@/components/ui";
+import { formatModifier } from "@/lib/rules/derive";
+import { ABILITY_LABELS } from "@/lib/rules/skills";
+import type { SheetView } from "@/lib/server/characters";
+
 /**
- * Eine Kennzahl mit Beschriftung — Proficiency, Spell DC und Konsorten.
+ * Eine Kennzahl mit Beschriftung — Übungsbonus, Zauber-SG und Konsorten.
  *
- * Eigene Datei, weil sie an zwei Stellen mit demselben Aussehen steht: im
- * Profilkopf der Übersicht und in der Kurzübersicht oben auf dem Bogen.
+ * Der Wert steht immer allein und in derselben Größe; was ihn näher
+ * bestimmt (das Attribut beim Zauberangriff), gehört ins Label. Als
+ * kleiner grauer Anhang am Wert stand "+7 INT" sonst typografisch neben
+ * den anderen Zahlen statt mit ihnen in einer Reihe.
  */
 export function KeyStat({
   label,
   value,
-  hint,
 }: {
   label: string;
   value: React.ReactNode;
-  hint?: string;
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dd className="font-numeral text-lg leading-none font-semibold tabular-nums">
         {value}
-        {hint ? (
-          <span className="ml-1 text-xs font-normal text-faint">{hint}</span>
-        ) : null}
       </dd>
-      <dt className="label mt-1 text-[0.5625rem]">{label}</dt>
+      {/* leading-snug statt der 1 aus `label`: lange Labels wie "Motiv
+          erkennen (passiv)" dürfen in einer schmalen Spalte umbrechen. */}
+      <dt className="label mt-1 text-[0.625rem] leading-snug">{label}</dt>
     </div>
+  );
+}
+
+/**
+ * Der Kennzahlenblock aus Profilkopf und Bogen-Kurzübersicht — an beiden
+ * Stellen dasselbe Raster, damit dieselben Zahlen nicht an zwei Orten
+ * verschieden angeordnet sind. Zwei Spalten am Handy, drei ab sm (im schmalen Bogen ab lg wieder zwei): so geht
+ * es immer in vollen Reihen auf, statt 3 + 1 umzubrechen.
+ *
+ * Passive Wahrnehmung steht mit drin, weil die klebende Leiste sie als
+ * "Wahrn." zeigt — auf der Übersicht fehlte sie bisher, die Leiste nannte
+ * also eine Zahl, die man nirgends sonst fand.
+ */
+export function KeyStats({
+  sheet,
+  className,
+}: {
+  sheet: NonNullable<SheetView>;
+  className?: string;
+}) {
+  return (
+    <dl
+      className={cx(
+        "grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3",
+        className,
+      )}
+    >
+      <KeyStat label="Übungsbonus" value={formatModifier(sheet.proficiencyBonus)} />
+      {sheet.spellcasting ? (
+        <>
+          <KeyStat label="Zauber-SG" value={sheet.spellcasting.saveDc} />
+          <KeyStat
+            label={`Zauberangriff (${ABILITY_LABELS[sheet.spellcasting.ability].name})`}
+            value={formatModifier(sheet.spellcasting.attackBonus)}
+          />
+        </>
+      ) : null}
+      <KeyStat label="Wahrnehmung (passiv)" value={sheet.passivePerception} />
+      <KeyStat label="Motiv erkennen (passiv)" value={sheet.passiveInsight} />
+      {sheet.character.xp > 0 ? (
+        <KeyStat label="EP" value={sheet.character.xp.toLocaleString("de-DE")} />
+      ) : null}
+    </dl>
   );
 }

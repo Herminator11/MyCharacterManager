@@ -1,11 +1,10 @@
 import { ClassIcon } from "@/components/icons";
 import { CombatStats } from "@/components/profile/CombatStats";
-import { KeyStat } from "@/components/profile/KeyStat";
+import { KeyStats } from "@/components/profile/KeyStat";
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
-import { ABILITY_LABELS } from "@/lib/rules/skills";
 import type { SheetView } from "@/lib/server/characters";
 
 /**
@@ -35,74 +34,61 @@ export function SheetSummary({
   ].filter(Boolean);
 
   return (
-    <Panel className="flex flex-wrap items-start gap-4">
-      <PortraitUpload
-        characterId={character.id}
-        name={character.name}
-        hasPortrait={Boolean(character.portraitFile)}
-        upload={uploadPortrait}
-      />
+    // Dasselbe Raster wie im Profilkopf der Übersicht (siehe dort):
+    // Portrait und Name nebeneinander, Kennzahlen und Instrumente darunter
+    // über die volle Breite, ab lg die Instrumente rechts.
+    <Panel className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 lg:grid-cols-[auto_minmax(0,1fr)_auto]">
+      <div className="lg:row-span-2">
+        <PortraitUpload
+          characterId={character.id}
+          name={character.name}
+          hasPortrait={Boolean(character.portraitFile)}
+          upload={uploadPortrait}
+        />
+      </div>
 
-      <div className="flex min-w-[15rem] flex-1 flex-col justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="truncate text-2xl leading-tight font-semibold tracking-tight">
-            {character.name}
-          </h1>
-          <a
-            href="#klassen"
-            className="mt-0.5 block truncate text-sm text-patina hover:underline"
-          >
-            {sheet.classes.length > 0
-              ? sheet.classes.map((c, i) => (
-                  <span key={`${c.classKey}-${i}`}>
-                    {i > 0 ? " / " : ""}
-                    <ClassIcon
-                      classKey={c.classKey}
-                      className="mr-1 inline-block size-3.5 align-text-bottom text-patina/70"
-                    />
-                    {classLabel(c.classKey)} {c.level}
-                    {c.subclass ? ` (${c.subclass})` : ""}
-                  </span>
-                ))
-              : "Ohne Klasse — antippen zum Ergänzen"}
-          </a>
-          {subtitle.length > 0 ? (
-            <a
-              href="#spezies"
-              className="mt-0.5 block truncate text-xs text-faint transition-colors hover:text-patina"
-            >
-              {subtitle.join(" · ")}
-            </a>
-          ) : null}
-        </div>
-
-        <a href="#grunddaten" className="block hover:opacity-80">
-          <dl className="flex flex-wrap gap-x-5 gap-y-2.5">
-            <KeyStat
-              label="Proficiency"
-              value={formatModifier(sheet.proficiencyBonus)}
-            />
-            {sheet.spellcasting ? (
-              <>
-                <KeyStat label="Spell DC" value={sheet.spellcasting.saveDc} />
-                <KeyStat
-                  label="Zauberangriff"
-                  value={formatModifier(sheet.spellcasting.attackBonus)}
-                  hint={ABILITY_LABELS[sheet.spellcasting.ability].name}
-                />
-              </>
-            ) : null}
-            <KeyStat label="Passive Insight" value={sheet.passiveInsight} />
-            {character.xp > 0 ? (
-              <KeyStat label="XP" value={character.xp.toLocaleString("de-DE")} />
-            ) : null}
-          </dl>
+      <div className="min-w-0 self-center">
+        <h1 className="truncate text-2xl leading-tight font-semibold tracking-tight">
+          {character.name}
+        </h1>
+        <a
+          href="#klassen"
+          className="mt-0.5 block text-sm text-patina hover:underline lg:truncate"
+        >
+          {sheet.classes.length > 0
+            ? sheet.classes.map((c, i) => (
+                <span key={`${c.classKey}-${i}`}>
+                  {i > 0 ? " / " : ""}
+                  <ClassIcon
+                    classKey={c.classKey}
+                    className="mr-1 inline-block size-3.5 align-text-bottom text-patina/70"
+                  />
+                  {classLabel(c.classKey)} {c.level}
+                  {c.subclass ? ` (${c.subclass})` : ""}
+                </span>
+              ))
+            : "Ohne Klasse — antippen zum Ergänzen"}
         </a>
+        {subtitle.length > 0 ? (
+          <a
+            href="#spezies"
+            className="mt-0.5 block text-xs text-faint transition-colors hover:text-patina lg:truncate"
+          >
+            {subtitle.join(" · ")}
+          </a>
+        ) : null}
       </div>
 
       <a
+        href="#grunddaten"
+        className="col-span-2 block hover:opacity-80 lg:col-span-1 lg:col-start-2"
+      >
+        <KeyStats sheet={sheet} className="lg:grid-cols-2" />
+      </a>
+
+      <a
         href="#werte"
-        className="flex shrink-0 gap-2 transition-opacity hover:opacity-80"
+        className="col-span-2 block transition-opacity hover:opacity-80 lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1"
         aria-label="Zum Abschnitt Werte"
       >
         <CombatStats
