@@ -547,6 +547,16 @@ export const uiDe = {
       portrait: "Portrait",
     },
   },
+  meta: {
+    title: "Charakter-Manager",
+    name: "D&D Charakter-Manager",
+    shortName: "Charaktere",
+    description: "Live-Dashboard für D&D-5e-Charaktere am Spieltisch",
+  },
+  resourceNotes: {
+    rageDamage: (bonus: string) => `+${bonus} Schaden`,
+    arcaneRecovery: (levels: string) => `bis ${levels} Slot-Grade`,
+  },
   language: {
     label: "Sprache",
     hint: "Gilt nur für dieses Gerät.",
@@ -1086,6 +1096,16 @@ export const uiEn: Ui = {
       notes: "Notes, features and background texts",
       portrait: "Portrait",
     },
+  },
+  meta: {
+    title: "Character Manager",
+    name: "D&D Character Manager",
+    shortName: "Characters",
+    description: "Live dashboard for D&D 5e characters at the table",
+  },
+  resourceNotes: {
+    rageDamage: (bonus) => `+${bonus} damage`,
+    arcaneRecovery: (levels) => `up to ${levels} slot levels`,
   },
   language: {
     label: "Language",

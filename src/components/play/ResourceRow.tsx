@@ -30,7 +30,7 @@ export function ResourceRow({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{resource.name}</p>
         <p className="truncate text-xs text-faint">
-          {resource.note ? `${resource.note} · ` : ""}
+          {resource.note ? `${t.resourceNote(resource)} · ` : ""}
           {RECOVERY_LABEL[resource.recovery]?.(t) ?? resource.recovery}
         </p>
       </div>

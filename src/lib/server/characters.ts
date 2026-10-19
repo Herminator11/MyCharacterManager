@@ -318,6 +318,7 @@ export function getLiveState(characterId: number): LiveState | null {
       recovery: r.recovery,
       display: r.display,
       note: r.note,
+      autoKey: r.autoKey,
     })),
     conditions: conditionRows.map((c) => c.conditionKey),
     concentration: conc

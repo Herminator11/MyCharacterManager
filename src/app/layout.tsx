@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 
 import { I18nProvider } from "@/lib/i18n/client";
 import { localeOf } from "@/lib/i18n/modes";
-import { getMode } from "@/lib/i18n/server";
+import { getMode, getT } from "@/lib/i18n/server";
 
 import "./globals.css";
 
@@ -32,10 +32,10 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Charakter-Manager",
-  description: "Live-Dashboard für D&D-5e-Charaktere am Spieltisch",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t.meta.title, description: t.meta.description };
+}
 
 export const viewport: Viewport = {
   themeColor: "#0e1113",

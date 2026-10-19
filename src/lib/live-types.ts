@@ -47,6 +47,8 @@ export type LiveResource = {
   recovery: Recovery;
   display: "pips" | "counter";
   note: string;
+  /** Gesetzt bei abgeleiteten Ressourcen — siehe resourceNote in lib/i18n. */
+  autoKey: string;
 };
 
 /**

@@ -24,6 +24,15 @@ export type Messages = Ui & {
   poolName: (pool: { name: string; autoKey: string }) => string;
   /** Was eine Wirkzeit kostet, als Regelbegriff: Aktion / Action … */
   actionCost: (cost: ActionCost) => string;
+  /**
+   * Die Notiz einer abgeleiteten Ressource ("+2 Schaden", "Grad 6, 7").
+   * Die Ableitung schreibt sie bei jedem Abgleich deutsch in die DB; hier
+   * wird sie für die Anzeige in die Sprache des Geräts gebracht. Nur die
+   * Muster, die resourceTemplates erzeugt — eine selbst geschriebene
+   * Notiz bleibt, wie sie ist. Ein Test über alle Vorlagen hält beide
+   * Seiten zusammen.
+   */
+  resourceNote: (resource: { autoKey: string; note: string }) => string;
 };
 
 /**
@@ -62,6 +71,26 @@ export function getMessages(mode: Mode): Messages {
         reaction: term.reaction,
         long: term.longerAction,
       }[cost];
+    },
+    resourceNote: ({ autoKey, note }) => {
+      const ui = uiLanguage(mode) === "en" ? uiEn : uiDe;
+      const term = termLanguage(mode) === "en" ? termsEn : termsDe;
+      let match: RegExpMatchArray | null;
+      if (autoKey === "barbarian:rage" && (match = note.match(/^\+(\d+) Schaden$/))) {
+        return ui.resourceNotes.rageDamage(match[1]);
+      }
+      if (autoKey === "paladin:lay-on-hands" && note === "Trefferpunkte") {
+        return term.hitPoints;
+      }
+      if (autoKey === "warlock:mystic-arcanum" && (match = note.match(/^Grad ([\d, ]+)$/))) {
+        // "Grad 6, 7" → "Level 6, 7": nur die erste Zahl trägt das Wort.
+        const [first, ...rest] = match[1].split(", ");
+        return [term.spellLevel(Number(first)), ...rest].join(", ");
+      }
+      if (autoKey === "wizard:arcane-recovery" && (match = note.match(/^bis (\d+) Slot-Grade$/))) {
+        return ui.resourceNotes.arcaneRecovery(match[1]);
+      }
+      return note;
     },
   };
 }

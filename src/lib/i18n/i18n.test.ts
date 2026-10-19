@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { CLASS_KEYS } from "@/lib/rules/classes";
+import { deriveResources } from "@/lib/rules/resourceTemplates";
+
 import { renderLogLine } from "./log";
 import { getMessages } from "./messages";
 import { isMode, localeOf, MODES, resolveMode } from "./modes";
@@ -152,5 +155,43 @@ describe("Kampflog in drei Modi", () => {
     expect(
       renderLogLine(getMessages("en"), { text: "12 Schaden", detail: "30 → 18", message: null }),
     ).toEqual({ text: "12 Schaden", detail: "30 → 18" });
+  });
+});
+
+describe("Notizen abgeleiteter Ressourcen", () => {
+  const scores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 16 };
+  const notes = CLASS_KEYS.flatMap((classKey) =>
+    Array.from({ length: 20 }, (_, i) => deriveResources([{ classKey, level: i + 1 }], scores)),
+  )
+    .flat()
+    .filter((resource) => resource.note);
+
+  it("deckt überhaupt Vorlagen mit Notiz ab", () => {
+    expect(notes.length).toBeGreaterThan(0);
+  });
+
+  // Hält resourceTemplates und die Übersetzung zusammen: ändert jemand den
+  // Vorlagentext, greift das Muster nicht mehr — und dieser Test merkt es,
+  // bevor im englischen Modus wieder deutscher Text steht.
+  it("auf Englisch bleibt kein deutsches Wort stehen", () => {
+    const en = getMessages("en");
+    for (const resource of notes) {
+      expect(en.resourceNote(resource), resource.note).not.toMatch(
+        /Schaden|Trefferpunkte|Grad|bis|Slot-Grade/,
+      );
+    }
+  });
+
+  it("auf Deutsch bleibt die Notiz, wie die Vorlage sie schreibt", () => {
+    const de = getMessages("de");
+    for (const resource of notes) {
+      expect(de.resourceNote(resource)).toBe(resource.note);
+    }
+  });
+
+  it("eine selbst geschriebene Notiz wird nie angefasst", () => {
+    expect(getMessages("en").resourceNote({ autoKey: "", note: "bis 3 Slot-Grade" })).toBe(
+      "bis 3 Slot-Grade",
+    );
   });
 });

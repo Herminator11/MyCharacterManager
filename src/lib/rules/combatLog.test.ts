@@ -41,6 +41,7 @@ const BASE: LiveState = {
       recovery: "short",
       display: "pips",
       note: "",
+      autoKey: "",
     },
   ],
   conditions: [],
