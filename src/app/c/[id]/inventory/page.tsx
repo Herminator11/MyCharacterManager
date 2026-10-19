@@ -11,6 +11,7 @@ import {
 } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
 import { copperToGold, totalCopper } from "@/lib/rules/derive";
+import { getT } from "@/lib/i18n/server";
 import { getCharacter, getInventory } from "@/lib/server/characters";
 
 import {
@@ -25,13 +26,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const COINS = [
-  { key: "pp", label: "PP", name: "Platin" },
-  { key: "gp", label: "GP", name: "Gold" },
-  { key: "ep", label: "EP", name: "Elektrum" },
-  { key: "sp", label: "SP", name: "Silber" },
-  { key: "cp", label: "CP", name: "Kupfer" },
-] as const;
+const COINS = ["pp", "gp", "ep", "sp", "cp"] as const;
 
 export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
@@ -41,6 +36,7 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
   if (!character) notFound();
 
   const items = getInventory(characterId);
+  const t = await getT();
   const purseGold = copperToGold(totalCopper(character));
 
   return (
@@ -49,15 +45,17 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
         <SectionLabel
           right={
             <span className="text-xs text-mute">
-              {purseGold.toLocaleString("de-DE", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
-              gp gesamt
+              {t.inventory.purseTotal(
+                t.number(purseGold, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }),
+                t.term.coins.gp.short,
+              )}
             </span>
           }
         >
-          Geldbeutel
+          {t.inventory.purse}
         </SectionLabel>
 
         <form
@@ -68,29 +66,27 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
         >
           <div className="grid grid-cols-5 gap-2">
             {COINS.map((coin) => (
-              <label key={coin.key} className="block">
-                <span className="label">{coin.label}</span>
+              <label key={coin} className="block">
+                <span className="label">{t.term.coins[coin].short}</span>
                 <input
-                  name={coin.key}
+                  name={coin}
                   type="number"
                   min={0}
-                  defaultValue={character[coin.key]}
-                  aria-label={coin.name}
+                  defaultValue={character[coin]}
+                  aria-label={t.term.coins[coin].name}
                   className="mt-1 w-full min-h-12 rounded-md border border-edge bg-ink px-1 text-center focus:border-patina focus:outline-none"
                 />
               </label>
             ))}
           </div>
           <Button type="submit" className="mt-3 w-full">
-            Geld speichern
+            {t.inventory.savePurse}
           </Button>
         </form>
       </Panel>
 
       {items.length === 0 ? (
-        <EmptyState title="Das Gepäck ist leer.">
-          Trag unten ein, was du mit dir herumschleppst.
-        </EmptyState>
+        <EmptyState title={t.inventory.emptyTitle}>{t.inventory.emptyBody}</EmptyState>
       ) : (
         <ItemList
           items={items}
@@ -120,7 +116,7 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
       )}
 
       <Panel>
-        <SectionLabel>Gegenstand hinzufügen</SectionLabel>
+        <SectionLabel>{t.inventory.addTitle}</SectionLabel>
         <form
           action={async (formData: FormData) => {
             "use server";
@@ -128,17 +124,17 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
           }}
           className="space-y-3"
         >
-          <Field label="Name">
+          <Field label={t.home.name}>
             <input
               name="name"
               required
-              placeholder="z. B. Rationen (1 Tag)"
+              placeholder={t.common.example(t.mode === "en" ? "Rations (1 day)" : "Rationen (1 Tag)")}
               className={inputClass}
             />
           </Field>
 
           <div className="grid grid-cols-3 gap-3">
-            <Field label="Menge">
+            <Field label={t.inventory.qty}>
               <input
                 name="qty"
                 type="number"
@@ -147,40 +143,40 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Gewicht">
+            <Field label={t.inventory.weight}>
               <input
                 name="weight"
                 type="number"
                 min={0}
                 step="0.1"
                 defaultValue={0}
-                aria-label="Gewicht in Pfund"
+                aria-label={t.inventory.weightLabel}
                 placeholder="lb"
                 className={inputClass}
               />
             </Field>
-            <Field label="Wert">
+            <Field label={t.inventory.value}>
               <input
                 name="valueGp"
                 type="number"
                 min={0}
                 step="0.01"
                 defaultValue={0}
-                aria-label="Wert in Gold"
-                placeholder="gp"
+                aria-label={t.inventory.valueLabel}
+                placeholder={t.term.coins.gp.short.toLowerCase()}
                 className={inputClass}
               />
             </Field>
           </div>
 
           <Field
-            label="Wirkung"
-            hint="Auch Hausregeln und Abwandlungen gehören hierher — später jederzeit änderbar."
+            label={t.inventory.effect}
+            hint={t.inventory.effectHint}
           >
             <textarea
               name="description"
               rows={2}
-              placeholder="Optional"
+              placeholder={t.common.optional}
               className="w-full rounded-md border border-edge bg-ink px-3 py-2.5 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
             />
           </Field>
@@ -192,7 +188,7 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
                 name="equipped"
                 className="size-4 accent-[var(--color-patina)]"
               />
-              Angelegt
+              {t.inventory.equipped}
             </label>
             <label className="flex items-center gap-2 text-sm text-mute">
               <input
@@ -200,12 +196,12 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
                 name="requiresAttunement"
                 className="size-4 accent-[var(--color-brass)]"
               />
-              Braucht Einstimmung
+              {t.inventory.requiresAttunement}
             </label>
           </div>
 
           <Button type="submit" variant="solid" className="w-full">
-            Hinzufügen
+            {t.common.add}
           </Button>
         </form>
       </Panel>

@@ -10,7 +10,8 @@ import {
   SectionLabel,
 } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
-import { ACTION_LABELS, ACTION_SLOTS } from "@/lib/rules/actions";
+import { getT } from "@/lib/i18n/server";
+import { ACTION_SLOTS } from "@/lib/rules/actions";
 import {
   abilityModifier,
   attackBonus,
@@ -29,6 +30,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
 
   const sheet = getSheet(characterId);
   if (!sheet) notFound();
+  const t = await getT();
 
   const list = getAttacks(characterId);
   const equipped = getInventory(characterId).filter((item) => item.equipped);
@@ -38,16 +40,16 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
     <div className="mx-auto max-w-2xl space-y-3">
       {sheet.spellcasting ? (
         <Panel>
-          <SectionLabel>Zauberangriffe</SectionLabel>
+          <SectionLabel>{t.attacks.spellAttacks}</SectionLabel>
           <div className="flex gap-6">
             <p className="text-sm">
-              <span className="label block">Zauber-SG</span>
+              <span className="label block">{t.term.spellSaveDc}</span>
               <span className="text-xl font-semibold">
                 {sheet.spellcasting.saveDc}
               </span>
             </p>
             <p className="text-sm">
-              <span className="label block">Angriffsbonus</span>
+              <span className="label block">{t.attacks.attackBonus}</span>
               <span className="text-xl font-semibold">
                 {formatModifier(sheet.spellcasting.attackBonus)}
               </span>
@@ -57,13 +59,10 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
       ) : null}
 
       {list.length === 0 ? (
-        <EmptyState title="Noch keine Waffen eingetragen.">
-          Trag unten deine Waffen ein — Angriffs- und Schadensbonus rechnet die
-          App aus Attribut und Übung aus.
-        </EmptyState>
+        <EmptyState title={t.attacks.emptyTitle}>{t.attacks.emptyBody}</EmptyState>
       ) : (
         <Panel>
-          <SectionLabel>Angriffe</SectionLabel>
+          <SectionLabel>{t.attacks.title}</SectionLabel>
           <ul className="divide-y divide-edge">
             {list.map((attack) => {
               const bonus =
@@ -83,8 +82,8 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
                   {/* Dieselbe Form wie in der Zugleiste im Kampfmodus — was
                       der Angriff kostet, erkennt man hier ohne zu lesen. */}
                   <span
-                    title={ACTION_LABELS[attack.actionCost]}
-                    aria-label={`kostet ${ACTION_LABELS[attack.actionCost]}`}
+                    title={t.actionCost(attack.actionCost)}
+                    aria-label={t.battle.costs(t.actionCost(attack.actionCost))}
                     className="shrink-0 text-faint"
                   >
                     <ActionShape kind={attack.actionCost} className="size-3.5" />
@@ -96,7 +95,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
                       {[
                         ABILITY_LABELS[attack.ability].name,
                         attack.range,
-                        attack.proficient ? "geübt" : "ungeübt",
+                        attack.proficient ? t.attacks.proficient : t.attacks.notProficient,
                         attack.notes,
                       ]
                         .filter(Boolean)
@@ -123,7 +122,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
                   >
                     <button
                       type="submit"
-                      aria-label={`${attack.name} entfernen`}
+                      aria-label={t.attacks.remove(attack.name)}
                       className="min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
                     >
                       ✕
@@ -147,12 +146,12 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
             right={
               attuned > 0 ? (
                 <span className="text-xs text-brass">
-                  {attuned} eingestimmt
+                  {t.attacks.attunedCount(attuned)}
                 </span>
               ) : null
             }
           >
-            Angelegt
+            {t.attacks.equipped}
           </SectionLabel>
 
           <ul className="divide-y divide-edge">
@@ -165,7 +164,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
                   ) : null}
                   {item.attuned ? (
                     <span className="ml-2 text-xs font-normal text-brass">
-                      eingestimmt
+                      {t.attacks.attuned}
                     </span>
                   ) : null}
                 </p>
@@ -181,7 +180,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
       ) : null}
 
       <Panel>
-        <SectionLabel>Angriff hinzufügen</SectionLabel>
+        <SectionLabel>{t.attacks.addTitle}</SectionLabel>
         <form
           action={async (formData: FormData) => {
             "use server";
@@ -189,49 +188,49 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
           }}
           className="space-y-3"
         >
-          <Field label="Name">
+          <Field label={t.home.name}>
             <input
               name="name"
               required
-              placeholder="z. B. Rapier"
+              placeholder={t.common.example("Rapier")}
               className={inputClass}
             />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Attribut">
+            <Field label={t.attacks.ability}>
               <select name="ability" defaultValue="dex" className={inputClass}>
                 {(["str", "dex", "con", "int", "wis", "cha"] as const).map(
                   (key) => (
                     <option key={key} value={key}>
-                      {ABILITY_LABELS[key].name} — {ABILITY_LABELS[key].de}
+                      {ABILITY_LABELS[key].name} — {t.term.abilities[key]}
                     </option>
                   ),
                 )}
               </select>
             </Field>
-            <Field label="Reichweite">
-              <input name="range" placeholder="z. B. 5 ft." className={inputClass} />
+            <Field label={t.attacks.range}>
+              <input name="range" placeholder={t.common.example("5 ft.")} className={inputClass} />
             </Field>
             <Field
-              label="Kosten"
-              hint="Nebenhand-Angriffe u.ä. sind eine Bonusaktion"
+              label={t.attacks.cost}
+              hint={t.attacks.costHint(t.term.bonusAction)}
             >
               <select name="actionCost" defaultValue="action" className={inputClass}>
                 {ACTION_SLOTS.map((slot) => (
                   <option key={slot} value={slot}>
-                    {ACTION_LABELS[slot]}
+                    {t.actionCost(slot)}
                   </option>
                 ))}
               </select>
             </Field>
-            <Field label="Schadenswürfel">
-              <input name="damageDice" placeholder="z. B. 1d8" className={inputClass} />
+            <Field label={t.attacks.damageDice}>
+              <input name="damageDice" placeholder={t.common.example("1d8")} className={inputClass} />
             </Field>
-            <Field label="Schadensart">
+            <Field label={t.attacks.damageType}>
               <input
                 name="damageType"
-                placeholder="z. B. Piercing"
+                placeholder={t.common.example("Piercing")}
                 className={inputClass}
               />
             </Field>
@@ -244,22 +243,22 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
               defaultChecked
               className="size-4 accent-[var(--color-patina)]"
             />
-            Geübt — Übungsbonus zählt zum Angriff
+            {t.attacks.proficientHint(t.term.proficiencyBonus)}
           </label>
 
           <details>
             <summary className="cursor-pointer text-sm text-mute">
-              Boni von Hand setzen
+              {t.attacks.manualBonuses}
             </summary>
             <div className="mt-3 grid grid-cols-2 gap-3">
-              <Field label="Angriffsbonus" hint="Leer = berechnen">
+              <Field label={t.attacks.attackBonus} hint={t.attacks.emptyMeansCompute}>
                 <input
                   name="attackBonusOverride"
                   type="number"
                   className={inputClass}
                 />
               </Field>
-              <Field label="Schadensbonus" hint="Leer = Attribut">
+              <Field label={t.attacks.damageBonus} hint={t.attacks.emptyMeansAbility}>
                 <input
                   name="damageBonusOverride"
                   type="number"
@@ -268,10 +267,10 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
               </Field>
             </div>
             <div className="mt-3">
-              <Field label="Notiz">
+              <Field label={t.attacks.note}>
                 <input
                   name="notes"
-                  placeholder="z. B. Finesse, +1 magisch"
+                  placeholder={t.common.example("Finesse, +1")}
                   className={inputClass}
                 />
               </Field>
@@ -279,7 +278,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
           </details>
 
           <Button type="submit" variant="solid" className="w-full">
-            Angriff hinzufügen
+            {t.attacks.submit}
           </Button>
         </form>
       </Panel>

@@ -1,4 +1,6 @@
 import { Button, cx, Panel, SectionLabel } from "@/components/ui";
+import { getT } from "@/lib/i18n/server";
+import type { Messages } from "@/lib/i18n/messages";
 import { copperToGold } from "@/lib/rules/derive";
 
 export type Item = {
@@ -31,7 +33,7 @@ const ATTUNEMENT_LIMIT = 3;
  * und eine Liste aus vierzig Zeilen Seil, Fackeln und Rationen macht genau
  * die drei Zeilen unsichtbar, auf die es ankommt.
  */
-export function ItemList({
+export async function ItemList({
   items,
   actions,
 }: {
@@ -42,24 +44,26 @@ export function ItemList({
   const packed = items.filter((item) => !item.equipped);
   const attunedCount = items.filter((item) => item.attuned).length;
   const carried = items.reduce((sum, i) => sum + i.weight * i.qty, 0);
+  const t = await getT();
 
   return (
     <Panel>
       <SectionLabel
         right={
           <span className="text-xs text-mute">
-            {carried.toLocaleString("de-DE", { maximumFractionDigits: 1 })} lb
+            {t.number(carried, { maximumFractionDigits: 1 })} lb
           </span>
         }
       >
-        Gepäck
+        {t.inventory.title}
       </SectionLabel>
 
       <Group
-        title="Am Körper"
+        title={t.inventory.worn}
         items={worn}
         actions={actions}
-        empty="Nichts angelegt."
+        t={t}
+        empty={t.inventory.nothingWorn}
         note={
           attunedCount > 0 || items.some((i) => i.requiresAttunement) ? (
             <span
@@ -68,7 +72,7 @@ export function ItemList({
                 attunedCount > ATTUNEMENT_LIMIT ? "text-ember" : "text-faint",
               )}
             >
-              Attunement {attunedCount} / {ATTUNEMENT_LIMIT}
+              {t.term.attunement} {attunedCount} / {ATTUNEMENT_LIMIT}
             </span>
           ) : null
         }
@@ -76,15 +80,16 @@ export function ItemList({
 
       <div className="mt-4">
         <Group
-          title="Im Rucksack"
+          title={t.inventory.packed}
           items={packed}
           actions={actions}
-          empty="Der Rucksack ist leer."
+          t={t}
+          empty={t.inventory.packEmpty}
         />
       </div>
 
       <p className="mt-3 text-xs text-faint">
-        Der Punkt links legt an und ab. Menge auf 0 entfernt den Eintrag.
+        {t.inventory.help}
       </p>
     </Panel>
   );
@@ -96,10 +101,12 @@ function Group({
   actions,
   empty,
   note,
+  t,
 }: {
   title: string;
   items: Item[];
   actions: ItemActions;
+  t: Messages;
   empty: string;
   note?: React.ReactNode;
 }) {
@@ -115,7 +122,7 @@ function Group({
       ) : (
         <ul className="divide-y divide-edge">
           {items.map((item) => (
-            <ItemRow key={item.id} item={item} actions={actions} />
+            <ItemRow key={item.id} item={item} actions={actions} t={t} />
           ))}
         </ul>
       )}
@@ -123,10 +130,19 @@ function Group({
   );
 }
 
-function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
+function ItemRow({
+  item,
+  actions,
+  t,
+}: {
+  item: Item;
+  actions: ItemActions;
+  /** Vom Listenkopf durchgereicht — alle drei sind Server-Komponenten. */
+  t: Messages;
+}) {
   const meta = [
-    item.weight > 0 ? `${item.weight} lb` : "",
-    item.valueCp > 0 ? `${copperToGold(item.valueCp)} gp` : "",
+    item.weight > 0 ? `${t.number(item.weight)} lb` : "",
+    item.valueCp > 0 ? `${t.number(copperToGold(item.valueCp))} ${t.term.coins.gp.short.toLowerCase()}` : "",
   ].filter(Boolean);
 
   return (
@@ -141,7 +157,7 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
           <button
             type="submit"
             aria-pressed={item.equipped}
-            aria-label={item.equipped ? `${item.name} ablegen` : `${item.name} anlegen`}
+            aria-label={item.equipped ? t.inventory.unequip(item.name) : t.inventory.equip(item.name)}
             // Der Punkt bleibt klein, die Tippfläche nicht: 12 px trifft am
             // Spieltisch niemand zuverlässig. Der Ring in mute statt
             // edge-bright erreicht die 3:1 für Bedienelemente.
@@ -162,7 +178,7 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
             {item.name}
             {item.attuned ? (
               <span className="ml-2 text-xs font-normal text-brass">
-                eingestimmt
+                {t.inventory.attuned}
               </span>
             ) : null}
           </p>
@@ -183,11 +199,11 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
             type="number"
             min={0}
             defaultValue={item.qty}
-            aria-label={`Menge ${item.name}`}
+            aria-label={t.inventory.qtyOf(item.name)}
             className="min-h-11 w-16 rounded-md border border-edge bg-ink px-1 text-center focus:border-patina focus:outline-none"
           />
           <button type="submit" className="sr-only">
-            Menge speichern
+            {t.inventory.saveQty}
           </button>
         </form>
 
@@ -199,7 +215,7 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
         >
           <button
             type="submit"
-            aria-label={`${item.name} entfernen`}
+            aria-label={t.inventory.remove(item.name)}
             className="min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
           >
             ✕
@@ -213,7 +229,7 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
         <summary className="cursor-pointer list-none pl-5 text-xs text-faint transition-colors hover:text-patina">
           {item.description
             ? truncate(item.description)
-            : "Wirkung eintragen"}
+            : t.inventory.addEffect}
         </summary>
 
         <div className="mt-2 space-y-2 pl-5">
@@ -231,12 +247,12 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
               name="description"
               rows={3}
               defaultValue={item.description}
-              placeholder="Was bewirkt der Gegenstand? Auch Hausregeln gehören hierher."
-              aria-label={`Wirkung von ${item.name}`}
+              placeholder={t.inventory.effectPlaceholder}
+              aria-label={t.inventory.effectOf(item.name)}
               className="w-full rounded-md border border-edge bg-ink px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-patina focus:outline-none"
             />
             <Button type="submit" size="sm">
-              Wirkung speichern
+              {t.inventory.saveEffect}
             </Button>
           </form>
 
@@ -256,7 +272,7 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
                     : "border-edge bg-panel-2 text-mute hover:border-edge-bright",
                 )}
               >
-                {item.attuned ? "Einstimmung lösen" : "Einstimmen"}
+                {item.attuned ? t.inventory.endAttunement : t.inventory.attune}
               </button>
             </form>
           ) : null}

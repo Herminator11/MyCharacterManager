@@ -58,6 +58,16 @@ export const termsDe = {
   shortRest: "Kurze Rast",
   longRest: "Lange Rast",
   traits: "Merkmale",
+  attunement: "Einstimmung",
+  /** Münzen nach dem deutschen Spielerhandbuch — "EP" wäre hier Elektrum
+   *  und Erfahrungspunkte zugleich. */
+  coins: {
+    pp: { short: "PM", name: "Platin" },
+    gp: { short: "GM", name: "Gold" },
+    ep: { short: "EM", name: "Elektrum" },
+    sp: { short: "SM", name: "Silber" },
+    cp: { short: "KM", name: "Kupfer" },
+  },
   abilities: {
     str: "Stärke",
     dex: "Geschicklichkeit",
@@ -109,6 +119,14 @@ export const termsEn: Terms = {
   shortRest: "Short Rest",
   longRest: "Long Rest",
   traits: "Traits",
+  attunement: "Attunement",
+  coins: {
+    pp: { short: "PP", name: "Platinum" },
+    gp: { short: "GP", name: "Gold" },
+    ep: { short: "EP", name: "Electrum" },
+    sp: { short: "SP", name: "Silver" },
+    cp: { short: "CP", name: "Copper" },
+  },
   abilities: {
     str: "Strength",
     dex: "Dexterity",

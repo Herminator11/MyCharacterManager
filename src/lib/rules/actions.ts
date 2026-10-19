@@ -16,12 +16,8 @@ export type ActionCost = (typeof ACTION_COSTS)[number];
 export const ACTION_SLOTS = ["action", "bonus", "reaction"] as const;
 export type ActionSlot = (typeof ACTION_SLOTS)[number];
 
-export const ACTION_LABELS: Record<ActionCost, string> = {
-  action: "Aktion",
-  bonus: "Bonusaktion",
-  reaction: "Reaktion",
-  long: "Länger",
-};
+// Die Namen der Kosten stehen im Glossar (lib/i18n/terms) und kommen über
+// t.actionCost — sie hängen am Sprachmodus des Geräts, nicht an der Regel.
 
 /**
  * Liest die Wirkzeit eines Zaubers als Aktionskosten.
