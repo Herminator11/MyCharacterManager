@@ -114,6 +114,15 @@ input[type="number"]::-webkit-inner-spin-button {
   color: var(--color-faint);
 }
 
+/* Waagrecht wischbare Reihen (Zauberfilter) ohne Scrollbalken — der
+   angeschnittene letzte Chip zeigt schon, dass es weitergeht. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Sichtbarer Fokus, der auf dunklem Grund auch wirklich auffällt. */
 @layer base {
   :focus-visible {

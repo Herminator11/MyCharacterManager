@@ -106,12 +106,13 @@ export function SpellList({
       {/* Verfügbare Slots bleiben beim Blättern durch die Liste sichtbar —
           sonst müsste man für jede Entscheidung zurück aufs Dashboard. */}
       {state.pools.length > 0 ? (
-        <div className="sticky top-[3.75rem] z-10 space-y-1.5 rounded-lg border border-edge bg-panel/95 px-3 py-2.5 backdrop-blur">
+        <div className="sticky top-[3.75rem] z-10 space-y-2 rounded-lg border border-edge bg-panel px-3 py-2.5">
           {state.pools.map((pool) => (
-            <div key={pool.id} className="flex items-center gap-2 text-xs">
-              <span className="w-24 shrink-0 truncate text-faint">
-                {pool.name}
-              </span>
+            <div key={pool.id} className="text-xs">
+              <p className="label mb-1.5 truncate">{pool.name}</p>
+              {/* Ausgeschrieben statt "1: 4": die nackte Zahl vor dem
+                  Doppelpunkt las sich nicht als Grad, und ohne Gesamtzahl
+                  sah man nicht, ob 2 viel oder wenig ist. */}
               <div className="flex flex-wrap gap-1">
                 {pool.slots.map((slot) => {
                   const free = slot.total - slot.used;
@@ -119,13 +120,13 @@ export function SpellList({
                     <span
                       key={slot.level}
                       className={cx(
-                        "rounded px-1.5 py-0.5 tabular-nums",
+                        "rounded px-1.5 py-0.5 whitespace-nowrap tabular-nums",
                         free > 0
                           ? "bg-patina-deep text-patina"
                           : "bg-ink text-faint",
                       )}
                     >
-                      {slot.level}: {free}
+                      Grad {slot.level} · {free}/{slot.total}
                     </span>
                   );
                 })}
@@ -145,7 +146,12 @@ export function SpellList({
           className="w-full min-h-11 rounded-md border border-edge bg-ink px-3 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
         />
 
-        <div className="flex flex-wrap gap-1.5">
+        {/* Jede Filtergruppe eine eigene, waagrecht wischbare Reihe: beim
+            Umbrechen stand "Reaktion" allein in einer Zeile und die Grenze
+            zwischen Grad, Wirkzeit und dem Rest war nicht mehr zu sehen.
+            -mx-4/px-4 lässt die Reihe bis an den Panelrand laufen, damit
+            man sieht, dass sie weitergeht. */}
+        <div role="group" aria-label="Grad" className={FILTER_ROW}>
           <FilterChip
             active={filter.level === "all"}
             onClick={() => setFilter((f) => ({ ...f, level: "all" }))}
@@ -158,7 +164,7 @@ export function SpellList({
               active={filter.level === level}
               onClick={() => setFilter((f) => ({ ...f, level }))}
             >
-              {level === 0 ? "Cantrips" : level}
+              {level === 0 ? "Zaubertricks" : `Grad ${level}`}
             </FilterChip>
           ))}
         </div>
@@ -166,7 +172,7 @@ export function SpellList({
         {/* Die Frage mitten im Kampf lautet nicht "welchen Grad?", sondern
             "was geht als Bonusaktion noch?". Die Wirkzeit steht in jedem
             SRD-Eintrag — der Filter fällt daraus ab. */}
-        <div className="flex flex-wrap gap-1.5">
+        <div role="group" aria-label="Wirkzeit" className={FILTER_ROW}>
           <FilterChip
             active={filter.cost === "all"}
             onClick={() => setFilter((f) => ({ ...f, cost: "all" }))}
@@ -184,7 +190,7 @@ export function SpellList({
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div role="group" aria-label="Sonstiges" className={FILTER_ROW}>
           <FilterChip
             active={filter.preparedOnly}
             onClick={() =>
@@ -199,7 +205,8 @@ export function SpellList({
               onChange={(event) =>
                 setFilter((f) => ({ ...f, school: event.target.value }))
               }
-              className="min-h-11 rounded-md border border-edge bg-panel-2 px-2.5 text-sm text-mute focus:border-patina focus:outline-none"
+              aria-label="Schule"
+              className="min-h-11 shrink-0 rounded-md border border-edge-bright bg-panel-2 px-2.5 text-sm text-fg focus:border-patina focus:outline-none"
             >
               <option value="all">Alle Schulen</option>
               {schools.map((school) => (
@@ -244,7 +251,7 @@ export function SpellList({
                         ? `${spell.name} aus den Favoriten nehmen`
                         : `${spell.name} favorisieren`
                     }
-                    className="flex min-h-11 w-8 shrink-0 items-center justify-center text-faint transition-colors hover:text-brass"
+                    className="flex min-h-11 w-11 shrink-0 items-center justify-center text-faint transition-colors hover:text-brass"
                   >
                     <svg viewBox="0 0 24 24" aria-hidden className="size-4">
                       <path
@@ -262,7 +269,10 @@ export function SpellList({
                   <button
                     type="button"
                     onClick={() => setCasting(spell)}
-                    className="min-h-11 flex-1 rounded-md px-1 text-left transition-colors hover:bg-panel-2"
+                    // min-w-0: sonst schrumpft der Knopf nicht unter Name
+                    // plus K/R-Marken, und die Zeile ragte bei 360 px über
+                    // den Panelrand statt den Namen abzuschneiden.
+                    className="min-h-11 min-w-0 flex-1 rounded-md px-1 text-left transition-colors hover:bg-panel-2"
                   >
                     <span className="flex items-center gap-1.5">
                       <span className="truncate font-medium">{spell.name}</span>
@@ -336,6 +346,10 @@ export function SpellList({
   );
 }
 
+// py-1/-my-1: overflow-x schneidet sonst den Fokusrahmen oben und unten ab.
+const FILTER_ROW =
+  "scrollbar-none -mx-4 -my-1 flex gap-1.5 overflow-x-auto px-4 py-1";
+
 function FilterChip({
   active,
   onClick,
@@ -351,6 +365,7 @@ function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={cx(
+        "shrink-0",
         active && "border-patina bg-patina-deep text-patina",
       )}
     >
