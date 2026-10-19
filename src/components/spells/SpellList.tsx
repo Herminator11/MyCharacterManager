@@ -323,7 +323,7 @@ export function SpellList({
                     type="button"
                     onClick={() => onRemove(spell.id)}
                     aria-label={`${spell.name} entfernen`}
-                    className="min-h-11 shrink-0 px-2 text-faint transition-colors hover:text-ember"
+                    className="min-h-11 min-w-11 shrink-0 text-faint transition-colors hover:text-ember"
                   >
                     ✕
                   </button>

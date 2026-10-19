@@ -32,7 +32,7 @@ export default function ImportPage() {
             herauskommen will — ein Zeichen allein wäre zu leise. */}
         <Link
           href="/"
-          className="label inline-flex items-center gap-2 transition-colors hover:text-patina"
+          className="label -my-3 inline-flex min-h-11 items-center gap-2 transition-colors hover:text-patina"
         >
           <BrandMark className="size-5" />← Charaktere
         </Link>

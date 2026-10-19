@@ -11,7 +11,7 @@ import {
   DieIcon,
   MoonIcon,
 } from "@/components/icons";
-import { Button, cx, Panel, Ratio, SectionLabel } from "@/components/ui";
+import { Button, cx, Panel, Ratio, SectionLabel, TEXT_ACTION } from "@/components/ui";
 import { characterPath } from "@/lib/characterUrl";
 import { useLive } from "@/lib/live-context";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
@@ -341,7 +341,7 @@ export function Conditions({
             type="button"
             onClick={() => setPicking(!picking)}
             aria-expanded={picking}
-            className="text-[0.6875rem] text-faint transition-colors hover:text-patina"
+            className={TEXT_ACTION}
           >
             {picking ? "Fertig" : "Setzen"}
           </button>

@@ -43,6 +43,15 @@ export function SectionLabel({
 }
 
 /**
+ * Kleine Textknöpfe neben Abschnittstiteln ("Bearbeiten", "Setzen", "Zug
+ * beenden"): 44 px Tippfläche für den Finger, der negative Rand nimmt sie
+ * aus der Zeilenhöhe wieder heraus — die Kopfzeile bleibt so flach wie
+ * vorher.
+ */
+export const TEXT_ACTION =
+  "-my-3.5 inline-flex min-h-11 items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina";
+
+/**
  * Der Umschalter in den Bearbeiten-Modus.
  *
  * Heißt überall gleich und trägt überall denselben Stift: „Edit“ ist an
@@ -65,7 +74,7 @@ export function EditToggle({
       onClick={onClick}
       aria-pressed={editing}
       className={cx(
-        "inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina",
+        TEXT_ACTION,
         className,
       )}
     >
@@ -96,7 +105,7 @@ export function EditLink({
     <Link
       href={href}
       className={cx(
-        "inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina",
+        TEXT_ACTION,
         className,
       )}
     >

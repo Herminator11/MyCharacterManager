@@ -142,11 +142,19 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
             type="submit"
             aria-pressed={item.equipped}
             aria-label={item.equipped ? `${item.name} ablegen` : `${item.name} anlegen`}
-            className={cx(
-              "size-3 shrink-0 rounded-full border transition-colors",
-              item.equipped ? "border-patina bg-patina" : "border-edge-bright",
-            )}
-          />
+            // Der Punkt bleibt klein, die Tippfläche nicht: 12 px trifft am
+            // Spieltisch niemand zuverlässig. Der Ring in mute statt
+            // edge-bright erreicht die 3:1 für Bedienelemente.
+            className="-m-4 flex size-11 shrink-0 items-center justify-center"
+          >
+            <span
+              aria-hidden
+              className={cx(
+                "size-3 rounded-full border transition-colors",
+                item.equipped ? "border-patina bg-patina" : "border-mute",
+              )}
+            />
+          </button>
         </form>
 
         <div className="min-w-0 flex-1">
@@ -192,7 +200,7 @@ function ItemRow({ item, actions }: { item: Item; actions: ItemActions }) {
           <button
             type="submit"
             aria-label={`${item.name} entfernen`}
-            className="min-h-11 px-1 text-faint transition-colors hover:text-ember"
+            className="min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
           >
             ✕
           </button>

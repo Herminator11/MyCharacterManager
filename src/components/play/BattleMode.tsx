@@ -80,14 +80,14 @@ export function BattleMode({
           <button
             type="button"
             onClick={finish}
-            className="text-sm text-faint transition-colors hover:text-patina"
+            className="-my-3 inline-flex min-h-11 items-center text-sm text-mute transition-colors hover:text-patina"
           >
             Kampf beenden
           </button>
         ) : (
           <Link
             href={overviewHref}
-            className="text-sm text-faint transition-colors hover:text-patina"
+            className="-my-3 inline-flex min-h-11 items-center text-sm text-mute transition-colors hover:text-patina"
           >
             Zur Übersicht
           </Link>

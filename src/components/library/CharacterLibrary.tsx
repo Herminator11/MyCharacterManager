@@ -7,7 +7,7 @@ import { AddIcon, ChevronDownIcon, TrashIcon } from "@/components/icons";
 import { Portrait } from "@/components/profile/Portrait";
 import { characterPath } from "@/lib/characterUrl";
 
-import { Button, cx, EditToggle, EmptyState, inputClass } from "@/components/ui";
+import { Button, cx, EditToggle, EmptyState, inputClass, TEXT_ACTION } from "@/components/ui";
 
 export type LibraryCharacter = {
   id: number;
@@ -79,7 +79,7 @@ export function CharacterLibrary({
             type="button"
             onClick={() => setAddingFolder((value) => !value)}
             aria-pressed={addingFolder}
-            className="inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-patina"
+            className={TEXT_ACTION}
           >
             <AddIcon />
             Ordner

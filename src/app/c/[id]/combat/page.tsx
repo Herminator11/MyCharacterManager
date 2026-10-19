@@ -124,7 +124,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
                     <button
                       type="submit"
                       aria-label={`${attack.name} entfernen`}
-                      className="min-h-11 px-1 text-faint transition-colors hover:text-ember"
+                      className="min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
                     >
                       ✕
                     </button>
