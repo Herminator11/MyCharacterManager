@@ -51,19 +51,26 @@ export function TurnBar({
 }) {
   const { turn } = state;
   const spent = ACTION_SLOTS.filter((slot) => turn[slot]).length;
+  // Im Kampf schaltet "Zug beenden" auch die Runde weiter — das muss
+  // gehen, wenn man den Zug ungenutzt verstreichen lässt. Gesperrt ist es
+  // nur außerhalb, wo es allein die Konten zurücksetzt und es dann nichts
+  // zurückzusetzen gibt.
+  const canEnd = spent > 0 || state.round > 0;
 
   return (
     <section className="rounded-lg border border-edge bg-panel px-4 py-3">
       <div className="mb-2.5 flex items-baseline justify-between gap-3">
         <h2 className="label">Zug</h2>
+        {/* min-h-11 mit negativem Rand: volles Tippziel, ohne die
+            Kopfzeile aufzublähen. */}
         <button
           type="button"
           onClick={() => {
             send({ type: "turn.end" });
             onToggle(null);
           }}
-          disabled={spent === 0}
-          className="text-[0.6875rem] text-faint transition-colors hover:text-patina disabled:opacity-40 disabled:hover:text-faint"
+          disabled={!canEnd}
+          className="-my-3 inline-flex min-h-11 items-center text-xs text-mute transition-colors hover:text-patina disabled:opacity-40 disabled:hover:text-mute"
         >
           Zug beenden
         </button>
@@ -90,8 +97,13 @@ export function TurnBar({
               }
               aria-pressed={used}
               aria-expanded={!used ? open : undefined}
+              // Form, Wort und Zustand übereinander statt nebeneinander:
+              // "Bonusaktion" mit Dreieck und Chevron in einer Zeile ist
+              // breiter als ein Drittel von 390 px und ragte über den
+              // Rand. min-w-0 erlaubt der Grid-Spalte, kleiner als ihr
+              // Inhalt zu werden; hyphens fängt noch schmalere Bildschirme.
               className={cx(
-                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-md border px-2 text-sm font-medium transition-colors",
+                "flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-md border px-1.5 py-2 text-[0.8125rem] leading-tight font-medium transition-colors",
                 used
                   ? "border-edge bg-ink text-faint"
                   : open
@@ -99,13 +111,16 @@ export function TurnBar({
                     : `${border} ${text}`,
               )}
             >
-              <span className="flex items-center gap-1.5">
-                <ActionShape
-                  kind={slot}
-                  filled={!used}
-                  className="size-[1.05rem]"
-                />
+              <ActionShape
+                kind={slot}
+                filled={!used}
+                className="size-[1.05rem] shrink-0"
+              />
+              <span className="max-w-full text-center break-words hyphens-auto">
                 {ACTION_LABELS[slot]}
+              </span>
+              <span className="flex items-center gap-0.5 text-[0.625rem] font-normal tracking-wide uppercase">
+                {used ? "verbraucht" : "frei"}
                 {!used ? (
                   <ChevronDownIcon
                     className={cx(
@@ -114,9 +129,6 @@ export function TurnBar({
                     )}
                   />
                 ) : null}
-              </span>
-              <span className="text-[0.625rem] font-normal tracking-wide uppercase">
-                {used ? "verbraucht" : "frei"}
               </span>
             </button>
           );
