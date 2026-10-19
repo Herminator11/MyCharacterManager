@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { BurstIcon, HeartIcon, PlusIcon, SkullIcon } from "@/components/icons";
 import { Button, cx } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { deathStatus, type DeathStatus } from "@/lib/rules/hp";
 
@@ -21,6 +22,7 @@ export function HpBlock({
   state: LiveState;
   send: (mutation: LiveMutation) => void;
 }) {
+  const t = useT();
   const [amount, setAmount] = useState("");
 
   const ratio = state.hpMax > 0 ? state.hpCurrent / state.hpMax : 0;
@@ -43,7 +45,7 @@ export function HpBlock({
               sieht schon an ihm, wie es steht. */}
           <p className="label flex items-center gap-1.5">
             <HeartIcon className={tone} />
-            Trefferpunkte
+            {t.term.hitPoints}
           </p>
           <p className="mt-1 flex items-baseline gap-1.5">
             <span
@@ -82,17 +84,17 @@ export function HpBlock({
           onKeyDown={(event) => {
             if (event.key === "Enter") applyTyped(-1);
           }}
-          placeholder="Betrag"
-          aria-label="Betrag für Schaden oder Heilung"
+          placeholder={t.play.amount}
+          aria-label={t.play.amountLabel}
           className="min-w-0 min-h-12 rounded-md border border-edge bg-ink px-2 text-center text-lg font-semibold text-fg placeholder:text-base placeholder:font-normal placeholder:text-faint focus:border-patina focus:outline-none"
         />
         <Button variant="danger" className="gap-1.5 px-2" onClick={() => applyTyped(-1)}>
           <BurstIcon />
-          Schaden
+          {t.play.damage}
         </Button>
         <Button variant="heal" className="gap-1.5 px-2" onClick={() => applyTyped(1)}>
           <PlusIcon />
-          Heilung
+          {t.play.healing}
         </Button>
       </div>
 
@@ -110,6 +112,7 @@ function TempHp({
   value: number;
   send: (mutation: LiveMutation) => void;
 }) {
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
 
@@ -128,7 +131,7 @@ function TempHp({
   if (editing) {
     return (
       <div className="text-right">
-        <p className="label">Temp</p>
+        <p className="label">{t.play.temp}</p>
         <input
           autoFocus
           type="number"
@@ -152,7 +155,7 @@ function TempHp({
       onClick={() => setEditing(true)}
       className="rounded-md px-2 py-1 text-right transition-colors hover:bg-panel-2"
     >
-      <span className="label">Temp</span>
+      <span className="label">{t.play.temp}</span>
       <span
         className={cx(
           "mt-1 block text-xl leading-none font-semibold",
@@ -183,16 +186,16 @@ function DeathSaves({
   state: LiveState;
   send: (mutation: LiveMutation) => void;
 }) {
+  const t = useT();
   if (status === "dead") {
     return (
       <div className="mt-4 rounded-md border border-ember bg-ember-deep px-3.5 py-3">
         <p className="flex items-center gap-2 text-sm font-semibold text-ember">
           <SkullIcon className="size-4" />
-          Tot — drei Fehlschläge
+          {t.play.dead}
         </p>
         <p className="mt-1.5 text-xs text-mute">
-          Von hier führt kein Wurf mehr zurück, nur noch Revivify, Raise Dead
-          oder ein Wunsch. Jede Heilung über 0 HP hebt das hier auf.
+          {t.play.deadHint(t.term.hitPointsShort)}
         </p>
         <button
           type="button"
@@ -201,7 +204,7 @@ function DeathSaves({
           }
           className="mt-2 min-h-11 text-xs text-faint transition-colors hover:text-patina"
         >
-          Einen Fehlschlag zurücknehmen
+          {t.play.undoFailure}
         </button>
       </div>
     );
@@ -211,11 +214,10 @@ function DeathSaves({
     return (
       <div className="mt-4 rounded-md border border-patina-dim bg-patina-deep px-3.5 py-3">
         <p className="text-sm font-semibold text-patina">
-          Stabil — keine Würfe mehr
+          {t.play.stable}
         </p>
         <p className="mt-1.5 text-xs text-mute">
-          Bewusstlos bei 0 HP, aber außer Gefahr. Nach 1W4 Stunden wachst du
-          mit 1 HP auf; Schaden wirft dich zurück ins Sterben.
+          {t.play.stableHint(t.term.hitPointsShort)}
         </p>
         <button
           type="button"
@@ -224,7 +226,7 @@ function DeathSaves({
           }
           className="mt-2 min-h-11 text-xs text-faint transition-colors hover:text-patina"
         >
-          Doch nicht stabil
+          {t.play.notStable}
         </button>
       </div>
     );
@@ -248,6 +250,7 @@ function DyingSaves({
   state: LiveState;
   send: (mutation: LiveMutation) => void;
 }) {
+  const t = useT();
   const row = (
     label: string,
     filled: number,
@@ -280,16 +283,16 @@ function DyingSaves({
     <div className="mt-4 space-y-2.5 rounded-md border border-ember-dim bg-ember-deep/40 px-3.5 py-3">
       <p className="flex items-center gap-2 text-sm font-semibold text-ember">
         <SkullIcon className="size-4" />
-        Bewusstlos — Todesrettungswürfe
+        {t.play.unconscious} — {t.term.deathSaves}
       </p>
-      {row("Erfolge", state.deathSaveSuccesses, "patina", (successes) =>
+      {row(t.play.successes, state.deathSaveSuccesses, "patina", (successes) =>
         send({
           type: "death.set",
           successes,
           failures: state.deathSaveFailures,
         }),
       )}
-      {row("Fehlschläge", state.deathSaveFailures, "ember", (failures) =>
+      {row(t.play.failures, state.deathSaveFailures, "ember", (failures) =>
         send({
           type: "death.set",
           successes: state.deathSaveSuccesses,

@@ -44,6 +44,7 @@ export const termsDe = {
   cantrips: "Zaubertricks",
   spellLevel: (level: number) => `Grad ${level}`,
   spellSlots: "Zauberplätze",
+  pactMagic: "Paktmagie",
   castingTime: "Wirkzeit",
   action: "Aktion",
   bonusAction: "Bonusaktion",
@@ -53,6 +54,14 @@ export const termsDe = {
   shortRest: "Kurze Rast",
   longRest: "Lange Rast",
   traits: "Merkmale",
+  abilities: {
+    str: "Stärke",
+    dex: "Geschicklichkeit",
+    con: "Konstitution",
+    int: "Intelligenz",
+    wis: "Weisheit",
+    cha: "Charisma",
+  },
 };
 
 export type Terms = typeof termsDe;
@@ -82,6 +91,7 @@ export const termsEn: Terms = {
   cantrips: "Cantrips",
   spellLevel: (level) => `Level ${level}`,
   spellSlots: "Spell Slots",
+  pactMagic: "Pact Magic",
   castingTime: "Casting Time",
   action: "Action",
   bonusAction: "Bonus Action",
@@ -91,4 +101,12 @@ export const termsEn: Terms = {
   shortRest: "Short Rest",
   longRest: "Long Rest",
   traits: "Traits",
+  abilities: {
+    str: "Strength",
+    dex: "Dexterity",
+    con: "Constitution",
+    int: "Intelligence",
+    wis: "Wisdom",
+    cha: "Charisma",
+  },
 };

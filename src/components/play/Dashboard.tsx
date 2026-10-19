@@ -13,6 +13,7 @@ import {
 } from "@/components/icons";
 import { Button, cx, Panel, Ratio, SectionLabel, TEXT_ACTION } from "@/components/ui";
 import { characterPath } from "@/lib/characterUrl";
+import { useT } from "@/lib/i18n/client";
 import { useLive } from "@/lib/live-context";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 
@@ -34,6 +35,7 @@ export function Dashboard({
   // Der Live-Zustand gehört der Seite, nicht diesem Block — oben im
   // Profilkopf hängt die Inspiration an derselben Verbindung.
   const { state, send, connected } = useLive();
+  const t = useT();
 
   return (
     <div className="space-y-3">
@@ -55,7 +57,7 @@ export function Dashboard({
           Profilkopf — man sucht sie nicht, man muss an sie erinnert
           werden, sonst verfällt sie ungenutzt. */}
       <Panel>
-        <SectionLabel>Trefferwürfel</SectionLabel>
+        <SectionLabel>{t.term.hitDice}</SectionLabel>
         <div className="divide-y divide-edge">
           {state.hitDice.map((entry) => (
             <HitDiceRow
@@ -84,8 +86,7 @@ export function Dashboard({
 
       {!connected ? (
         <p className="pt-2 text-center text-xs text-brass">
-          Keine Live-Verbindung — Änderungen werden gespeichert, andere Geräte
-          sehen sie aber erst nach dem Neuladen.
+          {t.play.offline}
         </p>
       ) : null}
     </div>
@@ -114,6 +115,7 @@ function RollInitiative({
   characterName: string;
 }) {
   const router = useRouter();
+  const t = useT();
   const running = state.round > 0;
   const href = characterPath(state.characterId, characterName, "/battle");
 
@@ -125,11 +127,11 @@ function RollInitiative({
       <Link href={href} className={className}>
         <span className="flex items-center gap-2.5 font-semibold tracking-tight">
           <CrossedSwordsIcon className="size-5" />
-          Zurück in den Kampf
+          {t.play.backToBattle}
         </span>
         <span className="flex items-center gap-3">
           <span className="text-sm font-normal text-mute">
-            Runde {state.round}
+            {t.play.round(state.round)}
           </span>
           <span aria-hidden>→</span>
         </span>
@@ -150,7 +152,7 @@ function RollInitiative({
     >
       <span className="flex items-center gap-2.5 font-semibold tracking-tight">
         <CrossedSwordsIcon className="size-5" />
-        Kampf beginnen
+        {t.play.startBattle}
       </span>
       <span aria-hidden>→</span>
     </button>
@@ -176,6 +178,7 @@ function HitDiceRow({
   conModifier: number;
   send: (mutation: LiveMutation) => void;
 }) {
+  const t = useT();
   const [roll, setRoll] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -214,7 +217,7 @@ function HitDiceRow({
           aria-expanded={open}
         >
           <DieIcon />
-          Ausgeben
+          {t.play.spend}
         </Button>
 
         {entry.used > 0 ? (
@@ -229,7 +232,7 @@ function HitDiceRow({
                 used: entry.used - 1,
               })
             }
-            aria-label={`Trefferwürfel ${label} zurückgeben`}
+            aria-label={t.play.returnHitDie(label)}
           >
             ↩
           </Button>
@@ -239,7 +242,7 @@ function HitDiceRow({
       {open ? (
         <div className="mt-2 flex items-center gap-2 rounded-md border border-edge bg-ink px-3 py-2">
           <label className="flex items-center gap-2 text-sm text-mute">
-            <span className="whitespace-nowrap">d{entry.hitDie} gewürfelt</span>
+            <span className="whitespace-nowrap">{t.play.rolled(entry.hitDie)}</span>
             <input
               autoFocus
               type="number"
@@ -258,12 +261,12 @@ function HitDiceRow({
 
           <span className="min-w-0 flex-1 truncate text-xs text-faint">
             {healed !== null
-              ? `${value} ${conModifier < 0 ? "−" : "+"} ${Math.abs(conModifier)} CON = ${healed} HP`
-              : `1 bis ${entry.hitDie}`}
+              ? t.play.hitDieFormula(value, conModifier < 0 ? "−" : "+", Math.abs(conModifier), healed, t.term.hitPointsShort)
+              : t.play.rollRange(entry.hitDie)}
           </span>
 
           <Button size="sm" variant="heal" disabled={!valid} onClick={commit}>
-            Heilen
+            {t.play.heal}
           </Button>
         </div>
       ) : null}
@@ -283,6 +286,7 @@ export function ConcentrationBanner({
   state: LiveState;
   onClear: () => void;
 }) {
+  const t = useT();
   if (!state.concentration) return null;
 
   const { label, castAtLevel } = state.concentration;
@@ -290,19 +294,19 @@ export function ConcentrationBanner({
   return (
     <div className="flex items-center gap-3 rounded-lg border border-brass/50 bg-brass/10 px-4 py-3">
       <div className="min-w-0 flex-1">
-        <p className="label text-brass">Konzentration</p>
+        <p className="label text-brass">{t.term.concentration}</p>
         <p className="mt-0.5 truncate text-sm font-semibold">
-          {label || "Aktiv"}
+          {label || t.play.concentrationActive}
           {castAtLevel > 0 ? (
-            <span className="font-normal text-mute"> · Grad {castAtLevel}</span>
+            <span className="font-normal text-mute"> · {t.term.spellLevel(castAtLevel)}</span>
           ) : null}
         </p>
         <p className="mt-0.5 text-xs text-mute">
-          Bei Schaden: CON-Save gegen DC 10 oder halben Schaden — was höher ist.
+          {t.play.concentrationRule}
         </p>
       </div>
       <Button size="sm" onClick={onClear}>
-        Beenden
+        {t.play.end}
       </Button>
     </div>
   );
@@ -322,6 +326,7 @@ export function Conditions({
   options: ConditionOption[];
   onToggle: (key: string, active: boolean) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const active = options.filter((c) => state.conditions.includes(c.key));
@@ -343,20 +348,20 @@ export function Conditions({
             aria-expanded={picking}
             className={TEXT_ACTION}
           >
-            {picking ? "Fertig" : "Setzen"}
+            {picking ? t.common.done : t.play.set}
           </button>
         }
       >
-        Zustände
+        {t.term.conditions}
         {active.length > 0 ? (
           <span className="ml-2 font-normal tracking-normal normal-case text-ember">
-            {active.length} aktiv
+            {t.play.activeCount(active.length)}
           </span>
         ) : null}
       </SectionLabel>
 
       {shown.length === 0 ? (
-        <p className="text-sm text-faint">Keine aktiv.</p>
+        <p className="text-sm text-faint">{t.play.noneActive}</p>
       ) : null}
 
       <div className="flex flex-wrap gap-1.5">
@@ -436,19 +441,20 @@ function RestControls({
   onShort: () => void;
   onLong: () => void;
 }) {
+  const t = useT();
   const [pending, setPending] = useState<"short" | "long" | null>(null);
 
   const shortEffects = [
-    ...state.pools.filter((p) => p.recovery === "short").map((p) => p.name),
+    ...state.pools.filter((p) => p.recovery === "short").map((p) => t.poolName(p)),
     ...state.resources.filter((r) => r.recovery === "short").map((r) => r.name),
   ];
 
   const longEffects = [
-    "Trefferpunkte",
-    "Todesrettungswürfe",
-    "die Hälfte der Trefferwürfel",
-    "Konzentration",
-    ...state.pools.map((p) => p.name),
+    t.play.resetHitPoints,
+    t.term.deathSaves,
+    t.play.resetHalfHitDice,
+    t.term.concentration,
+    ...state.pools.map((p) => t.poolName(p)),
     ...state.resources.map((r) => r.name),
   ];
 
@@ -457,23 +463,22 @@ function RestControls({
     return (
       <Panel>
         <p className="text-sm font-semibold">
-          {pending === "short" ? "Kurze Rast" : "Lange Rast"}
+          {pending === "short" ? t.term.shortRest : t.term.longRest}
         </p>
         <p className="mt-1.5 text-sm text-mute">
           {effects.length > 0 ? (
-            <>Zurückgesetzt wird: {effects.join(", ")}.</>
+            t.play.resetList(effects.join(", "))
           ) : (
-            <>Es gibt nichts zurückzusetzen.</>
+            t.play.nothingToReset
           )}
         </p>
         {pending === "short" ? (
           <p className="mt-1.5 text-xs text-faint">
-            Trefferpunkte bleiben, wo sie sind — die holst du dir über
-            Trefferwürfel zurück, so viele du willst.
+            {t.play.shortRestHint}
           </p>
         ) : null}
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button onClick={() => setPending(null)}>Abbrechen</Button>
+          <Button onClick={() => setPending(null)}>{t.common.cancel}</Button>
           <Button
             variant="solid"
             onClick={() => {
@@ -482,7 +487,7 @@ function RestControls({
               setPending(null);
             }}
           >
-            Rasten
+            {t.play.rest}
           </Button>
         </div>
       </Panel>
@@ -495,11 +500,11 @@ function RestControls({
           Spielstand zurücksetzt — die Form ist hier kein Schmuck. */}
       <Button size="lg" onClick={() => setPending("short")}>
         <CampfireIcon className="size-[1.15rem]" />
-        Kurze Rast
+        {t.term.shortRest}
       </Button>
       <Button size="lg" onClick={() => setPending("long")}>
         <MoonIcon className="size-[1.15rem]" />
-        Lange Rast
+        {t.term.longRest}
       </Button>
     </div>
   );

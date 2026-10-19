@@ -28,6 +28,12 @@ export type LiveSlot = {
 export type LivePool = {
   id: number;
   name: string;
+  /**
+   * 'spellcasting' / 'pact-magic' bei abgeleiteten Pools, sonst leer. Die
+   * Anzeige braucht es, um den gespeicherten deutschen Standardnamen in
+   * der gewählten Sprache zu zeigen (siehe poolName in lib/i18n).
+   */
+  autoKey: string;
   recovery: Recovery;
   slots: LiveSlot[];
 };

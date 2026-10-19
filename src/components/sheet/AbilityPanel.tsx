@@ -22,14 +22,16 @@ export async function AbilityPanel({
   const t = await getT();
   return (
     <Panel>
-      <SectionLabel right={<EditLink href={editHref} label={t.common.edit} />}>Attribute</SectionLabel>
+      <SectionLabel right={<EditLink href={editHref} label={t.common.edit} />}>
+        {t.play.abilities}
+      </SectionLabel>
 
       {/* Reihenfolge bleibt STR–DEX–CON–INT–WIS–CHA wie auf jedem gedruckten
           Bogen. CON hat keine Fertigkeiten und wird dadurch von selbst zur
           kürzesten Zeile. */}
       <div className="space-y-4">
         {abilities.map((ability) => (
-          <AbilityColumn key={ability.key} ability={ability} />
+          <AbilityColumn key={ability.key} ability={ability} t={t} />
         ))}
       </div>
     </Panel>

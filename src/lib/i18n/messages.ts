@@ -7,6 +7,19 @@ export type Messages = Ui & {
   term: Terms;
   /** Zahlen im Format der Bedienung: 6.500 auf Deutsch, 6,500 auf Englisch. */
   number: (value: number, options?: Intl.NumberFormatOptions) => string;
+  /**
+   * Fertigkeiten heißen im SRD englisch, im Spielerhandbuch deutsch. Die
+   * jeweils andere Fassung bleibt als Hinweis daneben stehen — außer im
+   * rein englischen Modus, wo sie niemand braucht.
+   */
+  skill: (en: string, de: string) => { label: string; hint?: string };
+  /**
+   * Abgeleitete Pools tragen ihren Standardnamen fest in der DB
+   * ("Zauberplätze", "Pact Magic"). Nur solange er unverändert ist, zeigt
+   * die App ihn in der gewählten Sprache — einen selbst vergebenen Namen
+   * übersetzt sie nicht.
+   */
+  poolName: (pool: { name: string; autoKey: string }) => string;
 };
 
 /**
@@ -25,5 +38,17 @@ export function getMessages(mode: Mode): Messages {
     mode,
     term: termLanguage(mode) === "en" ? termsEn : termsDe,
     number: (value, options) => value.toLocaleString(locale, options),
+    skill: (en, de) =>
+      mode === "de"
+        ? { label: de, hint: en }
+        : mode === "de-en"
+          ? { label: en, hint: de }
+          : { label: en },
+    poolName: (pool) => {
+      const term = termLanguage(mode) === "en" ? termsEn : termsDe;
+      if (pool.autoKey === "spellcasting" && pool.name === "Zauberplätze") return term.spellSlots;
+      if (pool.autoKey === "pact-magic" && pool.name === "Pact Magic") return term.pactMagic;
+      return pool.name;
+    },
   };
 }

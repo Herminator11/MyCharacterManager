@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 
 import { Portrait } from "@/components/profile/Portrait";
 import { cx } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Portrait mit Klick-zum-Wechseln — steht im Kurzüberblick von Übersicht
@@ -29,6 +30,7 @@ export function PortraitUpload({
   hasPortrait: boolean;
   upload: (formData: FormData) => Promise<{ error?: string } | void>;
 }) {
+  const t = useT();
   const input = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function PortraitUpload({
         type="button"
         disabled={pending}
         onClick={() => input.current?.click()}
-        aria-label={hasPortrait ? "Portrait wechseln" : "Portrait hochladen"}
+        aria-label={hasPortrait ? t.portrait.change : t.portrait.upload}
         className={cx(
           "group relative block rounded-lg transition-opacity",
           pending && "opacity-50",
@@ -55,7 +57,7 @@ export function PortraitUpload({
         />
 
         <span className="absolute inset-x-0 bottom-0 bg-ink/85 py-1 text-[0.625rem] font-semibold tracking-wide uppercase text-mute opacity-0 transition-opacity group-hover:opacity-100">
-          {pending ? "lädt…" : "Bild wählen"}
+          {pending ? t.portrait.loading : t.portrait.pick}
         </span>
       </button>
 

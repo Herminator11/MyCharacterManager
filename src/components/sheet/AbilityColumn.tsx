@@ -1,5 +1,6 @@
 import { cx } from "@/components/ui";
 import type { Ability } from "@/db/schema";
+import type { Messages } from "@/lib/i18n/messages";
 import { formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
 
@@ -27,7 +28,14 @@ export type AbilityEntry = {
  * fast nur beim Levelaufstieg braucht. Rechts daneben die Würfe, für die
  * dieses Attribut zählt.
  */
-export function AbilityColumn({ ability }: { ability: AbilityEntry }) {
+export function AbilityColumn({
+  ability,
+  t,
+}: {
+  ability: AbilityEntry;
+  /** Vom Panel durchgereicht — beide sind Server-Komponenten. */
+  t: Messages;
+}) {
   const label = ABILITY_LABELS[ability.key];
 
   return (
@@ -46,20 +54,23 @@ export function AbilityColumn({ ability }: { ability: AbilityEntry }) {
 
       <ul className="min-w-0 flex-1 space-y-px self-start pt-1">
         <ProficiencyLine
-          label="Rettungswurf"
+          label={t.term.savingThrow}
           bonus={ability.save}
           level={ability.saveProficient ? 1 : 0}
           isSave
         />
-        {ability.skills.map((skill) => (
-          <ProficiencyLine
-            key={skill.key}
-            label={skill.name}
-            hint={skill.de}
-            bonus={skill.bonus}
-            level={skill.level}
-          />
-        ))}
+        {ability.skills.map((skill) => {
+          const { label: skillLabel, hint } = t.skill(skill.name, skill.de);
+          return (
+            <ProficiencyLine
+              key={skill.key}
+              label={skillLabel}
+              hint={hint}
+              bonus={skill.bonus}
+              level={skill.level}
+            />
+          );
+        })}
       </ul>
     </div>
   );

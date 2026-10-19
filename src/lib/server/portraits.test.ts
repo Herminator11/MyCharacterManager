@@ -78,7 +78,12 @@ describe("savePortrait", () => {
     const huge = new File([new Uint8Array(9 * 1024 * 1024)], "gross.png", {
       type: "image/png",
     });
-    await expect(savePortrait(id, huge)).rejects.toThrow(/8 MB/);
+    // Die Art statt des Satzes: der Text entsteht erst in der Sprache des
+    // Geräts, in der Server Action.
+    await expect(savePortrait(id, huge)).rejects.toMatchObject({
+      kind: "tooLarge",
+      megabytes: 9,
+    });
   });
 
   it("weist leere Dateien ab", async () => {

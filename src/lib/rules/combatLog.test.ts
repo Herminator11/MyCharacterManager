@@ -27,6 +27,7 @@ const BASE: LiveState = {
     {
       id: 7,
       name: "Pact Magic",
+      autoKey: "pact-magic",
       recovery: "short",
       slots: [{ level: 2, total: 2, used: 0 }],
     },
@@ -110,6 +111,7 @@ describe("Zauber", () => {
         {
           id: 7,
           name: "Pact Magic",
+          autoKey: "pact-magic",
           recovery: "short",
           slots: [{ level: 2, total: 2, used: 1 }],
         },

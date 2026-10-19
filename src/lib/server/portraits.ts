@@ -33,21 +33,29 @@ const ALLOWED = new Map([
 
 const MAX_BYTES = 8 * 1024 * 1024;
 
-export class PortraitError extends Error {}
+/**
+ * Erwartbare Ablehnung eines Uploads. Trägt die Art statt eines fertigen
+ * Satzes: der Text entsteht erst in der Server Action, die die Sprache des
+ * Geräts kennt.
+ */
+export class PortraitError extends Error {
+  constructor(
+    readonly kind: "empty" | "tooLarge" | "type",
+    readonly megabytes = 0,
+  ) {
+    super(kind);
+  }
+}
 
 export async function savePortrait(characterId: number, file: File) {
-  if (file.size === 0) throw new PortraitError("Keine Datei ausgewählt.");
+  if (file.size === 0) throw new PortraitError("empty");
   if (file.size > MAX_BYTES) {
-    throw new PortraitError(
-      `Das Bild ist ${(file.size / 1024 / 1024).toFixed(1)} MB groß. Mehr als 8 MB nimmt die App nicht an.`,
-    );
+    throw new PortraitError("tooLarge", file.size / 1024 / 1024);
   }
 
   const extension = ALLOWED.get(file.type);
   if (!extension) {
-    throw new PortraitError(
-      "Nur PNG, JPEG, WebP oder GIF. Die Datei sieht nach etwas anderem aus.",
-    );
+    throw new PortraitError("type");
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());

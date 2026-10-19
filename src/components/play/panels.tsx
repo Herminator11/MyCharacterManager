@@ -1,6 +1,7 @@
 "use client";
 
 import { Panel, SectionLabel } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 
 import { ResourceRow } from "./ResourceRow";
@@ -20,6 +21,7 @@ export function PoolsPanel({
   state: LiveState;
   send: (mutation: LiveMutation) => void;
 }) {
+  const t = useT();
   if (state.pools.length === 0) return null;
 
   return (
@@ -30,11 +32,11 @@ export function PoolsPanel({
             <SectionLabel
               right={
                 <span className="text-[0.6875rem] text-faint">
-                  {pool.recovery === "short" ? "kurze Rast" : "lange Rast"}
+                  {pool.recovery === "short" ? t.play.shortRecovery : t.play.longRecovery}
                 </span>
               }
             >
-              {pool.name}
+              {t.poolName(pool)}
             </SectionLabel>
             <div className="space-y-2">
               {pool.slots.map((slot) => (
@@ -67,11 +69,12 @@ export function ResourcesPanel({
   state: LiveState;
   send: (mutation: LiveMutation) => void;
 }) {
+  const t = useT();
   if (state.resources.length === 0) return null;
 
   return (
     <Panel>
-      <SectionLabel>Ressourcen</SectionLabel>
+      <SectionLabel>{t.play.resources}</SectionLabel>
       <div className="divide-y divide-edge">
         {state.resources.map((resource) => (
           <ResourceRow

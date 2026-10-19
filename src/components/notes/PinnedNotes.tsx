@@ -1,4 +1,5 @@
 import { Panel, SectionLabel } from "@/components/ui";
+import { getT } from "@/lib/i18n/server";
 
 export type Pin = { id: number; title: string; body: string };
 
@@ -14,7 +15,7 @@ export type Pin = { id: number; title: string; body: string };
  * Ohne Vermerke bleibt nur eine dünne Zeile stehen. Ein leerer Kasten mit
  * Überschrift wäre jeden Tag im Weg, an dem nichts gilt.
  */
-export function PinnedNotes({
+export async function PinnedNotes({
   pins,
   resolve,
 }: {
@@ -24,13 +25,14 @@ export function PinnedNotes({
   // Nichts angeheftet, nichts zu zeigen: der Kasten erschiene sonst jeden
   // Tag als leere Überschrift. Angelegt wird oben am Zettel im Profilkopf.
   if (pins.length === 0) return null;
+  const t = await getT();
 
   return (
     <Panel>
       <SectionLabel
-        right={<span className="text-xs text-brass">{pins.length} aktiv</span>}
+        right={<span className="text-xs text-brass">{t.play.activeCount(pins.length)}</span>}
       >
-        Aktuell gilt für dich
+        {t.play.pinsTitle}
       </SectionLabel>
 
       <ul className="space-y-1.5">
@@ -58,7 +60,7 @@ export function PinnedNotes({
                 type="submit"
                 className="min-h-11 px-2 text-xs text-faint transition-colors hover:text-patina"
               >
-                Beenden
+                {t.play.end}
               </button>
             </form>
           </li>

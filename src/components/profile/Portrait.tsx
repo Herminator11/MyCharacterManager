@@ -1,4 +1,5 @@
 import { cx } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Das Portrait als reine Anzeige.
@@ -25,6 +26,9 @@ export function Portrait({
   version?: number;
   className?: string;
 }) {
+  // Hook ohne eigenes "use client": Portrait steht nur in
+  // Client-Komponenten (Bibliothek, PortraitUpload).
+  const t = useT();
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   // Zwei konkurrierende size-* in Tailwind v4 entscheiden sich nach der
   // Reihenfolge im erzeugten Stylesheet, nicht im Klassenstring — die
@@ -45,7 +49,7 @@ export function Portrait({
         // ausgeliefert; next/image bringt hier keinen Vorteil.
         <img
           src={`/api/characters/${characterId}/portrait?v=${version}`}
-          alt={`Portrait von ${name}`}
+          alt={t.portrait.alt(name)}
           className="size-full object-cover"
         />
       ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import { cx, Ratio } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Die Zauberplätze eines Grades als Reihe von Sockeln.
@@ -31,6 +32,7 @@ export function SlotRail({
   onChange: (used: number) => void;
   tone?: "arcane" | "ember";
 }) {
+  const t = useT();
   const free = total - used;
 
   return (
@@ -52,8 +54,8 @@ export function SlotRail({
               onClick={() => onChange(isFree ? used + 1 : used - 1)}
               aria-label={
                 isFree
-                  ? `Zauberplatz Grad ${level} verbrauchen`
-                  : `Zauberplatz Grad ${level} zurückgeben`
+                  ? t.play.spendSlot(t.term.spellLevel(level))
+                  : t.play.returnSlot(t.term.spellLevel(level))
               }
               className={cx(
                 "socket",

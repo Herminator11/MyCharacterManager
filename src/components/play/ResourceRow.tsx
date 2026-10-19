@@ -1,12 +1,14 @@
 "use client";
 
 import { Button, cx, Ratio } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
+import type { Messages } from "@/lib/i18n/messages";
 import type { LiveResource } from "@/lib/live-types";
 
-const RECOVERY_LABEL: Record<string, string> = {
-  short: "kurze Rast",
-  long: "lange Rast",
-  none: "nicht automatisch",
+const RECOVERY_LABEL: Record<string, (t: Messages) => string> = {
+  short: (t) => t.play.shortRecovery,
+  long: (t) => t.play.longRecovery,
+  none: (t) => t.play.noRecovery,
 };
 
 /**
@@ -22,13 +24,14 @@ export function ResourceRow({
   resource: LiveResource;
   onChange: (current: number) => void;
 }) {
+  const t = useT();
   return (
     <div className="flex items-center gap-3 py-2">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{resource.name}</p>
         <p className="truncate text-xs text-faint">
           {resource.note ? `${resource.note} · ` : ""}
-          {RECOVERY_LABEL[resource.recovery] ?? resource.recovery}
+          {RECOVERY_LABEL[resource.recovery]?.(t) ?? resource.recovery}
         </p>
       </div>
 
@@ -59,7 +62,7 @@ export function ResourceRow({
             className="w-11 px-0"
             onClick={() => onChange(resource.current - 1)}
             disabled={resource.current <= 0}
-            aria-label={`${resource.name} verringern`}
+            aria-label={t.play.decrease(resource.name)}
           >
             −
           </Button>
@@ -77,7 +80,7 @@ export function ResourceRow({
             className="w-11 px-0"
             onClick={() => onChange(resource.current + 1)}
             disabled={resource.current >= resource.max}
-            aria-label={`${resource.name} erhöhen`}
+            aria-label={t.play.increase(resource.name)}
           >
             +
           </Button>

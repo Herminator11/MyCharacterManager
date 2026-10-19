@@ -301,6 +301,7 @@ export function getLiveState(characterId: number): LiveState | null {
     pools: pools.map((pool) => ({
       id: pool.id,
       name: pool.name,
+      autoKey: pool.autoKey,
       recovery: pool.recovery,
       slots: slotRows
         .filter((s) => s.poolId === pool.id)
