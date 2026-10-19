@@ -7,6 +7,7 @@ import { Button, Field, inputClass, Panel } from "@/components/ui";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { listCharacters } from "@/lib/server/characters";
 import { listFolders } from "@/lib/server/library";
+import { getT } from "@/lib/i18n/server";
 
 import {
   createCharacterAction,
@@ -21,8 +22,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default function Page() {
+export default async function Page() {
   const characters = listCharacters();
+  const t = await getT();
 
   return (
     <main className="mx-auto max-w-2xl px-4 pb-16 pt-10">
@@ -31,9 +33,9 @@ export default function Page() {
       <header className="flex items-center gap-3">
         <BrandMark className="size-9 text-patina" />
         <div>
-          <p className="label">D&amp;D 5e</p>
+          <p className="label">{t.home.kicker}</p>
           <h1 className="mt-1 font-display text-[2rem] leading-none font-semibold tracking-wide">
-            Charaktere
+            {t.home.title}
           </h1>
         </div>
       </header>
@@ -48,7 +50,7 @@ export default function Page() {
               ? character.classes
                   .map((c) => `${classLabel(c.classKey)} ${c.level}`)
                   .join(" / ")
-              : "Ohne Klasse",
+              : t.header.noClass,
           hasPortrait: Boolean(character.portraitFile),
           favorite: character.favorite,
           folderId: character.folderId,
@@ -95,10 +97,10 @@ export default function Page() {
       >
         <span>
           <span className="block text-sm font-semibold">
-            Charakterbogen importieren
+            {t.home.importTitle}
           </span>
           <span className="mt-0.5 block text-xs text-faint">
-            Ausfüllbares PDF im offiziellen D&amp;D-Format — etwa aus Aurora.
+            {t.home.importHint}
           </span>
         </span>
         <span aria-hidden className="shrink-0 text-patina">
@@ -107,32 +109,32 @@ export default function Page() {
       </Link>
 
       <Panel className="mt-3">
-        <h2 className="label">Neuer Charakter</h2>
+        <h2 className="label">{t.home.newCharacter}</h2>
         <form action={createCharacterAction} className="mt-4 space-y-4">
-          <Field label="Name">
+          <Field label={t.home.name}>
             <input
               name="name"
               required
               autoComplete="off"
-              placeholder="z. B. Vex"
+              placeholder={t.common.example("Vex")}
               className={inputClass}
             />
           </Field>
 
-          <Field label="Rasse" hint="Optional — reine Anzeige.">
+          <Field label={t.home.race} hint={t.home.raceHint}>
             <input
               name="race"
               autoComplete="off"
-              placeholder="z. B. Tiefling"
+              placeholder={t.common.example("Tiefling")}
               className={inputClass}
             />
           </Field>
 
           <div className="grid grid-cols-[1fr_5.5rem] gap-3">
-            <Field label="Klasse">
+            <Field label={t.home.class}>
               <select name="classKey" className={inputClass} defaultValue="">
                 <option value="" disabled>
-                  Wählen…
+                  {t.home.choose}
                 </option>
                 {CLASSES.map((c) => (
                   <option key={c.key} value={c.key}>
@@ -142,7 +144,7 @@ export default function Page() {
               </select>
             </Field>
 
-            <Field label="Level">
+            <Field label={t.home.level}>
               <input
                 name="level"
                 type="number"
@@ -155,12 +157,9 @@ export default function Page() {
           </div>
 
           <Button type="submit" variant="solid" size="lg" className="w-full">
-            Charakter anlegen
+            {t.home.submit}
           </Button>
-          <p className="text-xs text-faint">
-            Weitere Klassen fürs Multiclassing kommen später im Charakterbogen
-            dazu.
-          </p>
+          <p className="text-xs text-faint">{t.home.multiclassHint}</p>
         </form>
       </Panel>
 

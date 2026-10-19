@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
+import { useT } from "@/lib/i18n/client";
+
 import { PenIcon } from "./icons";
 
 /** Zusammenfügen von Klassen — kürzer als jedes Mal filter/join zu schreiben. */
@@ -68,6 +70,10 @@ export function EditToggle({
   onClick: () => void;
   className?: string;
 }) {
+  // Hook in einer Datei ohne "use client": geht, weil EditToggle immer in
+  // einer Client-Komponente steht — ohne onClick-Handler ergäbe sie keinen
+  // Sinn, und den kann eine Server-Komponente nicht übergeben.
+  const t = useT();
   return (
     <button
       type="button"
@@ -79,7 +85,7 @@ export function EditToggle({
       )}
     >
       {editing ? null : <PenIcon />}
-      {editing ? "Fertig" : "Bearbeiten"}
+      {editing ? t.common.done : t.common.edit}
     </button>
   );
 }
@@ -95,11 +101,13 @@ export function EditToggle({
 export function EditLink({
   href,
   className,
-  label = "Bearbeiten",
+  label,
 }: {
   href: string;
   className?: string;
-  label?: string;
+  /** Kommt vom Aufrufer, meist `t.common.edit` — EditLink steht auch in
+   *  Server-Komponenten und kann sich die Sprache nicht selbst holen. */
+  label: string;
 }) {
   return (
     <Link

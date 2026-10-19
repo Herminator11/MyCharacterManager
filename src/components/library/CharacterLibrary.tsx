@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { AddIcon, ChevronDownIcon, TrashIcon } from "@/components/icons";
 import { Portrait } from "@/components/profile/Portrait";
 import { characterPath } from "@/lib/characterUrl";
+import { useT } from "@/lib/i18n/client";
 
 import { Button, cx, EditToggle, EmptyState, inputClass, TEXT_ACTION } from "@/components/ui";
 
@@ -48,6 +49,7 @@ export function CharacterLibrary({
   folders: LibraryFolder[];
   actions: LibraryActions;
 }) {
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [addingFolder, setAddingFolder] = useState(false);
 
@@ -59,10 +61,7 @@ export function CharacterLibrary({
   if (characters.length === 0 && folders.length === 0) {
     return (
       <div className="mt-8">
-        <EmptyState title="Noch kein Charakter angelegt.">
-          Leg unten deinen ersten an — Klasse und Level bestimmen, welche
-          Zauberplätze und Ressourcen die App für dich mitführt.
-        </EmptyState>
+        <EmptyState title={t.library.emptyTitle}>{t.library.emptyBody}</EmptyState>
       </div>
     );
   }
@@ -71,8 +70,7 @@ export function CharacterLibrary({
     <div className="mt-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="label">
-          {characters.length}{" "}
-          {characters.length === 1 ? "Charakter" : "Charaktere"}
+          {t.library.count(characters.length)}
         </h2>
         <div className="flex items-center gap-4">
           <button
@@ -82,7 +80,7 @@ export function CharacterLibrary({
             className={TEXT_ACTION}
           >
             <AddIcon />
-            Ordner
+            {t.library.folder}
           </button>
           <EditToggle editing={editing} onClick={() => setEditing(!editing)} />
         </div>
@@ -97,7 +95,7 @@ export function CharacterLibrary({
 
       <div className="mt-3 space-y-5">
         {favorites.length > 0 ? (
-          <Group title="Favoriten">
+          <Group title={t.library.favorites}>
             {favorites.map((character) => (
               <Row
                 key={character.id}
@@ -114,7 +112,7 @@ export function CharacterLibrary({
         ) : null}
 
         {loose.length > 0 ? (
-          <Group title={folders.length > 0 ? "Ohne Ordner" : "Alle"}>
+          <Group title={folders.length > 0 ? t.library.noFolder : t.library.all}>
             {loose.map((character) => (
               <Row
                 key={character.id}
@@ -145,10 +143,10 @@ export function CharacterLibrary({
                   {/* Zählt der Ordner Charaktere, stehen sie als Favoriten
                       oben — „nichts drin“ wäre dann schlicht gelogen. */}
                   {all.length === 0
-                    ? "Nichts in diesem Ordner."
+                    ? t.library.folderEmpty
                     : all.length === 1
-                      ? "Der eine Charakter steht oben bei den Favoriten."
-                      : "Alle stehen oben bei den Favoriten."}
+                      ? t.library.folderOneFavorite
+                      : t.library.folderAllFavorites}
                 </p>
               ) : (
                 inside.map((character) => (
@@ -217,6 +215,7 @@ function Row({
   editing: boolean;
   location?: string;
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
   const run = (fn: () => Promise<void>) => startTransition(() => void fn());
 
@@ -235,7 +234,7 @@ function Row({
     <span className="mt-1 block truncate text-sm text-mute">
       {character.race ? `${character.race} · ` : ""}
       {character.classLine}
-      {location ? <span className="text-faint"> · in {location}</span> : null}
+      {location ? <span className="text-faint"> · {t.library.inFolder(location)}</span> : null}
     </span>
   );
 
@@ -289,7 +288,7 @@ function Row({
                   setRenaming(false);
                 }
               }}
-              aria-label={`Name von ${character.name}`}
+              aria-label={t.library.nameOf(character.name)}
               className="w-full rounded-md border border-patina bg-ink px-2 py-1 text-lg font-semibold tracking-tight focus:outline-none"
             />
             {classAndLocation}
@@ -344,29 +343,29 @@ function RowEditor({
   actions: LibraryActions;
   run: (fn: () => Promise<void>) => void;
 }) {
+  const t = useT();
   const [confirming, setConfirming] = useState(false);
 
   if (confirming) {
     return (
       <div className="border-t border-ember-dim bg-ember-deep/40 px-4 py-3">
         <p className="text-sm text-ember">
-          <span className="font-semibold">{character.name}</span> endgültig
-          löschen?
+          <span className="font-semibold">{character.name}</span>{" "}
+          {t.library.confirmDelete}
         </p>
         <p className="mt-0.5 text-xs text-mute">
-          Mit allen Zaubern, Ressourcen und Notizen. Das lässt sich nicht
-          rückgängig machen.
+          {t.library.confirmDeleteHint}
         </p>
         <div className="mt-2.5 grid grid-cols-2 gap-2">
           <Button size="sm" onClick={() => setConfirming(false)}>
-            Abbrechen
+            {t.common.cancel}
           </Button>
           <Button
             size="sm"
             variant="danger"
             onClick={() => run(() => actions.remove(character.id))}
           >
-            Endgültig löschen
+            {t.library.deleteForever}
           </Button>
         </div>
       </div>
@@ -386,14 +385,14 @@ function RowEditor({
               ),
             )
           }
-          aria-label={`Ordner von ${character.name}`}
+          aria-label={t.library.folderOf(character.name)}
           // appearance-none statt des nativen Pfeils: der saß ohne Abstand
           // am rechten Rand. Der eigene Pfeil bekommt seinen Platz über
           // pr-9 und pointer-events-none, damit er die Klickfläche nicht
           // stiehlt.
           className={`${inputClass} w-full appearance-none pr-9`}
         >
-          <option value="">Ohne Ordner</option>
+          <option value="">{t.library.noFolder}</option>
           {folders.map((folder) => (
             <option key={folder.id} value={folder.id}>
               {folder.name}
@@ -406,7 +405,7 @@ function RowEditor({
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        aria-label={`${character.name} löschen`}
+        aria-label={t.library.deleteOf(character.name)}
         className="flex w-11 shrink-0 items-center justify-center rounded-md text-faint transition-colors hover:text-ember"
       >
         <TrashIcon className="size-4" />
@@ -424,12 +423,13 @@ function Star({
   name: string;
   onToggle: () => void;
 }) {
+  const t = useT();
   return (
     <button
       type="button"
       onClick={onToggle}
       aria-pressed={on}
-      aria-label={on ? `${name} nicht mehr favorisieren` : `${name} favorisieren`}
+      aria-label={on ? t.library.unfavorite(name) : t.library.favorite(name)}
       className="flex w-11 shrink-0 items-center justify-center self-stretch text-faint transition-colors hover:text-brass"
     >
       <svg viewBox="0 0 24 24" aria-hidden className="size-[1.125rem]">
@@ -452,6 +452,7 @@ function FolderControls({
   folder: LibraryFolder;
   actions: LibraryActions;
 }) {
+  const t = useT();
   const [name, setName] = useState(folder.name);
   const [mode, setMode] = useState<"idle" | "rename" | "confirm">("idle");
   const [, startTransition] = useTransition();
@@ -471,7 +472,7 @@ function FolderControls({
               setMode("idle");
             }
           }}
-          aria-label={`Name von ${folder.name}`}
+          aria-label={t.library.nameOf(folder.name)}
           className="min-h-9 rounded-md border border-edge bg-ink px-2 text-sm focus:border-patina focus:outline-none"
         />
         <button
@@ -482,7 +483,7 @@ function FolderControls({
           }}
           className="text-xs text-patina"
         >
-          Speichern
+          {t.common.save}
         </button>
       </div>
     );
@@ -491,20 +492,20 @@ function FolderControls({
   if (mode === "confirm") {
     return (
       <p className="flex items-center gap-3 text-xs text-ember">
-        Ordner löschen? Die Charaktere bleiben.
+        {t.library.confirmDeleteFolder}
         <button
           type="button"
           onClick={() => setMode("idle")}
           className="text-faint"
         >
-          Nein
+          {t.common.no}
         </button>
         <button
           type="button"
           onClick={() => run(() => actions.deleteFolder(folder.id))}
           className="font-semibold"
         >
-          Ja
+          {t.common.yes}
         </button>
       </p>
     );
@@ -517,14 +518,14 @@ function FolderControls({
         onClick={() => setMode("rename")}
         className="transition-colors hover:text-patina"
       >
-        Umbenennen
+        {t.common.rename}
       </button>
       <button
         type="button"
         onClick={() => setMode("confirm")}
         className="transition-colors hover:text-ember"
       >
-        Löschen
+        {t.common.delete}
       </button>
     </span>
   );
@@ -537,6 +538,7 @@ function NewFolder({
   create: (name: string) => Promise<void>;
   onDone: () => void;
 }) {
+  const t = useT();
   const [name, setName] = useState("");
   const [, startTransition] = useTransition();
 
@@ -559,12 +561,12 @@ function NewFolder({
         onBlur={() => {
           if (!name.trim()) onDone();
         }}
-        placeholder="Neuer Ordner — etwa eine Kampagne"
-        aria-label="Name des neuen Ordners"
+        placeholder={t.library.newFolderPlaceholder}
+        aria-label={t.library.newFolderLabel}
         className={inputClass}
       />
       <Button size="sm" onClick={commit} disabled={!name.trim()}>
-        Anlegen
+        {t.common.create}
       </Button>
     </div>
   );

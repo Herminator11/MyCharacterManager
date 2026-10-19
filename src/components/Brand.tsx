@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { getT } from "@/lib/i18n/server";
+
 import { D20Icon } from "./icons";
 import { cx } from "./ui";
 
@@ -24,12 +26,13 @@ export function BrandMark({ className }: { className?: string }) {
  * Ausweg nicht sucht, sondern erwartet. Die Trefferfläche ist größer als
  * das Zeichen: am Spieltisch trifft man mit dem Daumen ungenau.
  */
-export function HomeLink({ className }: { className?: string }) {
+export async function HomeLink({ className }: { className?: string }) {
+  const t = await getT();
   return (
     <Link
       href="/"
-      title="Zur Charakterliste"
-      aria-label="Zur Charakterliste"
+      title={t.header.home}
+      aria-label={t.header.home}
       className={cx(
         "-m-2 shrink-0 p-2 text-patina transition-colors hover:text-fg",
         className,

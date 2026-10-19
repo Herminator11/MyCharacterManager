@@ -1,5 +1,6 @@
 import { AbilityColumn, type AbilityEntry } from "@/components/sheet/AbilityColumn";
 import { EditLink, Panel, SectionLabel } from "@/components/ui";
+import { getT } from "@/lib/i18n/server";
 
 /**
  * Die Attribute mit allem, was an ihnen hängt — zum Ablesen.
@@ -11,16 +12,17 @@ import { EditLink, Panel, SectionLabel } from "@/components/ui";
  * und die neue Klassenstufe ein — und die standen ohnehin nur im Bogen. Der
  * Stift führt jetzt genau dorthin.
  */
-export function AbilityPanel({
+export async function AbilityPanel({
   abilities,
   editHref,
 }: {
   abilities: AbilityEntry[];
   editHref: string;
 }) {
+  const t = await getT();
   return (
     <Panel>
-      <SectionLabel right={<EditLink href={editHref} />}>Attribute</SectionLabel>
+      <SectionLabel right={<EditLink href={editHref} label={t.common.edit} />}>Attribute</SectionLabel>
 
       {/* Reihenfolge bleibt STR–DEX–CON–INT–WIS–CHA wie auf jedem gedruckten
           Bogen. CON hat keine Fertigkeiten und wird dadurch von selbst zur
