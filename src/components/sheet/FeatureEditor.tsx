@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 
 import { TrashIcon } from "@/components/icons";
 import { inputClass } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 
 export type Feature = { id: number; title: string; body: string };
 
@@ -22,6 +23,7 @@ export function FeatureEditor({
   save: (name: string, description: string) => Promise<void>;
   remove: () => Promise<void>;
 }) {
+  const t = useT();
   const [title, setTitle] = useState(feature.title);
   const [body, setBody] = useState(feature.body);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -55,13 +57,13 @@ export function FeatureEditor({
               if (event.key === "Enter") event.currentTarget.blur();
             }}
             autoFocus
-            aria-label="Name der Fähigkeit"
+            aria-label={t.sheet.featureName}
             className={`${inputClass} font-semibold`}
           />
         ) : (
           <h3
             onDoubleClick={() => setEditingTitle(true)}
-            title="Doppelklick zum Umbenennen"
+            title={t.sheet.doubleClickRename}
             className="min-h-11 flex-1 cursor-text content-center truncate text-sm font-semibold"
           >
             {title}
@@ -70,7 +72,7 @@ export function FeatureEditor({
         <button
           type="button"
           onClick={() => startTransition(remove)}
-          aria-label={`${title} entfernen`}
+          aria-label={t.sheet.remove(title)}
           className="flex min-h-11 w-11 shrink-0 items-center justify-center rounded-md text-faint transition-colors hover:text-ember"
         >
           <TrashIcon className="size-4" />
@@ -81,8 +83,8 @@ export function FeatureEditor({
         onChange={(event) => setBody(event.target.value)}
         onBlur={flush}
         rows={2}
-        placeholder="Kurzbeschreibung"
-        aria-label="Beschreibung"
+        placeholder={t.sheet.shortDescription}
+        aria-label={t.sheet.description}
         className="mt-1.5 w-full rounded-md border border-edge bg-ink px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-patina focus:outline-none"
       />
     </div>

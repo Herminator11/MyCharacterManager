@@ -1,5 +1,6 @@
 import { Button, Field, inputClass } from "@/components/ui";
 import { ABILITIES } from "@/db/schema";
+import { getT } from "@/lib/i18n/server";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
 
 const textareaClass =
@@ -13,15 +14,16 @@ const textareaClass =
  * Hausregel entstehen hier. Eingeklappt, weil der Regelfall die Auswahl
  * darüber ist; die Action kommt fertig gebunden von der Seite.
  */
-export function CustomSpeciesForm({
+export async function CustomSpeciesForm({
   action,
 }: {
   action: (formData: FormData) => void | Promise<void>;
 }) {
+  const t = await getT();
   return (
     <details className="group mt-3 border-t border-edge pt-3">
       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        <span className="label">Eigene Spezies anlegen</span>
+        <span className="label">{t.species.customTitle}</span>
         <span
           aria-hidden
           className="text-lg leading-none text-mute transition-transform group-open:rotate-45"
@@ -31,17 +33,17 @@ export function CustomSpeciesForm({
       </summary>
 
       <form action={action} className="mt-3 space-y-3">
-        <Field label="Name">
+        <Field label={t.home.name}>
           <input
             name="name"
             required
-            placeholder="z. B. Aasimar"
+            placeholder={t.common.example("Aasimar")}
             className={inputClass}
           />
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Bewegungsrate" hint="in Fuß">
+          <Field label={t.term.speed} hint={t.species.speedHint}>
             <input
               name="speed"
               type="number"
@@ -50,7 +52,7 @@ export function CustomSpeciesForm({
               className={inputClass}
             />
           </Field>
-          <Field label="Größe">
+          <Field label={t.species.size}>
             <select name="size" defaultValue="Medium" className={inputClass}>
               {["Tiny", "Small", "Medium", "Large"].map((size) => (
                 <option key={size} value={size}>
@@ -62,7 +64,7 @@ export function CustomSpeciesForm({
         </div>
 
         <div>
-          <span className="label">Attributsboni</span>
+          <span className="label">{t.species.bonuses}</span>
           <div className="mt-1.5 grid grid-cols-3 gap-2.5">
             {ABILITIES.map((ability) => (
               <label key={ability} className="block">
@@ -79,38 +81,35 @@ export function CustomSpeciesForm({
             ))}
           </div>
           <p className="mt-1.5 text-xs text-faint">
-            0 heißt „kein Bonus". Sie werden nicht automatisch aufgerechnet —
-            dafür ist der Knopf oben da.
+            {t.species.bonusesHint}
           </p>
         </div>
 
         <Field
-          label="Merkmale"
-          hint="Ein Trait je Absatz, Name und Text mit — getrennt."
+          label={t.term.traits}
+          hint={t.species.traitsHint}
         >
           <textarea
             name="traits"
             rows={5}
-            placeholder={
-              "Darkvision — Du siehst 60 Fuß weit im Dunkeln wie im Dämmerlicht.\n\nHealing Hands — Einmal je langer Rast heilst du Trefferpunkte in Höhe deines Levels."
-            }
+            placeholder={t.species.traitsPlaceholder}
             className={textareaClass}
           />
         </Field>
 
         <Field
-          label="Offene Wahl"
-          hint="Was das Regelwerk dem Spieler überlässt. Bleibt ein Merkzettel."
+          label={t.species.choice}
+          hint={t.species.choiceHint}
         >
           <input
             name="choiceNote"
-            placeholder="Dazu 2 × +1 auf frei gewählte Attribute."
+            placeholder={t.species.choicePlaceholder}
             className={inputClass}
           />
         </Field>
 
         <Button type="submit" variant="solid" className="w-full">
-          Anlegen und auswählen
+          {t.species.createAndSelect}
         </Button>
       </form>
     </details>

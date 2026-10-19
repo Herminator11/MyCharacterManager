@@ -4,6 +4,7 @@ import { useTransition } from "react";
 
 import { cx } from "@/components/ui";
 import { SwitchIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Ein-/Ausschalter für den Klassenhintergrund. Rein kosmetisch, deshalb
@@ -17,6 +18,7 @@ export function ClassThemeToggle({
   enabled: boolean;
   onChange: (enabled: boolean) => Promise<void>;
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -32,7 +34,7 @@ export function ClassThemeToggle({
       )}
     >
       <SwitchIcon on={enabled} />
-      Klassenhintergrund
+      {t.sheet.classTheme}
     </button>
   );
 }

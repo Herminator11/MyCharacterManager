@@ -15,6 +15,7 @@ import {
 } from "@/components/ui";
 import { ABILITIES } from "@/db/schema";
 import { characterIdFromParam } from "@/lib/characterUrl";
+import { getT } from "@/lib/i18n/server";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
 import { SUBCLASSES } from "@/lib/rules/progression.generated";
@@ -73,16 +74,16 @@ export const dynamic = "force-dynamic";
 
 /** Reihenfolge und Beschriftung der Sprungmarken — und der Abschnitte. */
 const SECTIONS = [
-  { id: "spezies", label: "Spezies" },
-  { id: "klassen", label: "Klassen" },
-  { id: "faehigkeiten", label: "Fähigkeiten" },
-  { id: "aussehen", label: "Aussehen" },
-  { id: "vorgeschichte", label: "Vorgeschichte" },
-  { id: "grunddaten", label: "Grunddaten" },
-  { id: "attribute", label: "Attribute" },
-  { id: "werte", label: "Werte" },
-  { id: "uebungen", label: "Übungen" },
-  { id: "zaubern", label: "Zaubern" },
+  "spezies",
+  "klassen",
+  "faehigkeiten",
+  "aussehen",
+  "vorgeschichte",
+  "grunddaten",
+  "attribute",
+  "werte",
+  "uebungen",
+  "zaubern",
 ] as const;
 
 export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
@@ -95,6 +96,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
   const { character } = sheet;
   const usedClassKeys = sheet.classes.map((c) => c.classKey);
   const features = getFeatures(characterId);
+  const t = await getT();
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
@@ -113,17 +115,17 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           Handy in keine Zeile, und eine zweite Zeile Navigation über einem
           Formular ist mehr Leiste als Inhalt. */}
       <nav
-        aria-label="Abschnitte"
+        aria-label={t.sheet.sectionsLabel}
         className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         <ul className="flex w-max gap-1.5">
           {SECTIONS.map((section) => (
-            <li key={section.id}>
+            <li key={section}>
               <a
-                href={`#${section.id}`}
+                href={`#${section}`}
                 className="block rounded-md border border-edge bg-panel px-3 py-1.5 text-xs text-mute transition-colors hover:border-patina hover:text-patina"
               >
-                {section.label}
+                {t.sheet.sections[section]}
               </a>
             </li>
           ))}
@@ -180,7 +182,11 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             // aus dem Panel.
             <div className="flex flex-wrap items-center justify-end gap-x-3">
               <span className="text-xs text-mute">
-                Gesamtlevel {sheet.level} · Übung {formatModifier(sheet.proficiencyBonus)}
+                {t.sheet.totalLevel(
+                  sheet.level,
+                  t.sheet.proficiencyShort,
+                  formatModifier(sheet.proficiencyBonus),
+                )}
               </span>
               <ClassThemeToggle
                 enabled={character.backgroundThemeEnabled}
@@ -192,7 +198,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             </div>
           }
         >
-          Klassen
+          {t.sheet.sections.klassen}
         </SectionLabel>
 
         <ul className="divide-y divide-edge">
@@ -222,11 +228,11 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                   min={1}
                   max={20}
                   defaultValue={entry.level}
-                  aria-label={`Level ${classLabel(entry.classKey)}`}
+                  aria-label={t.sheet.levelOf(classLabel(entry.classKey))}
                   className="min-h-11 w-16 rounded-md border border-edge bg-ink px-2 text-center focus:border-patina focus:outline-none"
                 />
                 <button type="submit" className="sr-only">
-                  Level speichern
+                  {t.sheet.saveLevel}
                 </button>
               </form>
 
@@ -239,8 +245,8 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 >
                   <button
                     type="submit"
-                    aria-label={`${classLabel(entry.classKey)} entfernen`}
-                    className="min-h-11 px-2 text-faint transition-colors hover:text-ember"
+                    aria-label={t.sheet.removeClass(classLabel(entry.classKey))}
+                    className="min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
                   >
                     ✕
                   </button>
@@ -266,12 +272,12 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                   name="subclass"
                   defaultValue={entry.subclass}
                   list={`subclasses-${entry.classKey}`}
-                  placeholder="Subklasse — Enter speichert"
-                  aria-label={`Subklasse ${classLabel(entry.classKey)}`}
+                  placeholder={t.sheet.subclassPlaceholder}
+                  aria-label={t.sheet.subclassOf(classLabel(entry.classKey))}
                   className="min-h-11 w-full rounded-md border border-edge bg-ink px-2.5 text-sm placeholder:text-faint focus:border-patina focus:outline-none"
                 />
                 <button type="submit" className="sr-only">
-                  Subklasse speichern
+                  {t.sheet.saveSubclass}
                 </button>
               </form>
 
@@ -298,7 +304,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             className={`${inputClass} flex-1`}
           >
             <option value="" disabled>
-              Klasse ergänzen…
+              {t.sheet.addClass}
             </option>
             {CLASSES.filter((c) => !usedClassKeys.includes(c.key)).map((c) => (
               <option key={c.key} value={c.key}>
@@ -312,14 +318,13 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             min={1}
             max={20}
             defaultValue={1}
-            aria-label="Level der neuen Klasse"
+            aria-label={t.sheet.newClassLevel}
             className="min-h-12 w-16 rounded-md border border-edge bg-ink px-2 text-center focus:border-patina focus:outline-none"
           />
-          <Button type="submit">Hinzufügen</Button>
+          <Button type="submit">{t.common.add}</Button>
         </form>
         <p className="mt-2 text-xs text-faint">
-          Zauberplätze und Ressourcen werden daraus abgeleitet — bei
-          Multiclassing bekommt Warlock einen eigenen Pact-Magic-Pool.
+          {t.sheet.classesHint}
         </p>
       </Panel>
 
@@ -328,10 +333,9 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           nachschlagen will, was "Sneak Attack" gerade bedeutet, trägt es
           hier einmal ein. */}
       <Panel id="faehigkeiten" className="scroll-mt-24">
-        <SectionLabel>Fähigkeiten</SectionLabel>
+        <SectionLabel>{t.sheet.sections.faehigkeiten}</SectionLabel>
         <p className="mb-3 text-xs text-faint">
-          Klassenmerkmale, Rassenmerkmale, Feats — was du selbst
-          nachschlagen willst.
+          {t.sheet.featuresHint}
         </p>
 
         {features.length > 0 ? (
@@ -368,29 +372,29 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           <input
             name="name"
             required
-            placeholder="z. B. Sneak Attack"
-            aria-label="Name der neuen Fähigkeit"
+            placeholder={t.common.example("Sneak Attack")}
+            aria-label={t.sheet.newFeatureName}
             className={inputClass}
           />
           <textarea
             name="description"
             rows={2}
-            placeholder="Optional — kurze Beschreibung"
-            aria-label="Beschreibung der neuen Fähigkeit"
+            placeholder={t.sheet.shortDescriptionOptional}
+            aria-label={t.sheet.newFeatureBody}
             className="w-full rounded-md border border-edge bg-ink px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-patina focus:outline-none"
           />
           <Button type="submit" className="w-full">
-            Hinzufügen
+            {t.common.add}
           </Button>
         </form>
       </Panel>
 
       <Panel id="aussehen" className="scroll-mt-24">
-        <SectionLabel>Aussehen</SectionLabel>
+        <SectionLabel>{t.sheet.sections.aussehen}</SectionLabel>
         <BackgroundEditor
           defaultValue={character.appearance}
-          placeholder="Größe, Gewicht, Augen-, Haut- und Haarfarbe…"
-          ariaLabel="Aussehen"
+          placeholder={t.sheet.appearancePlaceholder}
+          ariaLabel={t.sheet.sections.aussehen}
           save={async (appearance: string) => {
             "use server";
             await saveAppearanceAction(characterId, appearance);
@@ -399,9 +403,11 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
       </Panel>
 
       <Panel id="vorgeschichte" className="scroll-mt-24">
-        <SectionLabel>Vorgeschichte</SectionLabel>
+        <SectionLabel>{t.sheet.sections.vorgeschichte}</SectionLabel>
         <BackgroundEditor
           defaultValue={character.backstory}
+          placeholder={t.sheet.backstoryPlaceholder}
+          ariaLabel={t.sheet.sections.vorgeschichte}
           save={async (backstory: string) => {
             "use server";
             await saveBackgroundAction(characterId, backstory);
@@ -421,30 +427,30 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         className="space-y-3"
       >
         <Panel id="grunddaten" className="scroll-mt-24">
-          <SectionLabel>Grunddaten</SectionLabel>
+          <SectionLabel>{t.sheet.sections.grunddaten}</SectionLabel>
           <div className="space-y-3">
-            <Field label="Name">
+            <Field label={t.home.name}>
               <input name="name" defaultValue={character.name} className={inputClass} />
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Rasse">
+              <Field label={t.sheet.race}>
                 <input name="race" defaultValue={character.race} className={inputClass} />
               </Field>
-              <Field label="Hintergrund">
+              <Field label={t.sheet.background}>
                 <input
                   name="background"
                   defaultValue={character.background}
                   className={inputClass}
                 />
               </Field>
-              <Field label="Gesinnung">
+              <Field label={t.sheet.alignment}>
                 <input
                   name="alignment"
                   defaultValue={character.alignment}
                   className={inputClass}
                 />
               </Field>
-              <Field label={"Erfahrungs\u00adpunkte"}>
+              <Field label={t.sheet.experience}>
                 <input
                   name="xp"
                   type="number"
@@ -458,7 +464,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         </Panel>
 
         <Panel id="attribute" className="scroll-mt-24">
-          <SectionLabel>Attribute</SectionLabel>
+          <SectionLabel>{t.sheet.sections.attribute}</SectionLabel>
           <div className="grid grid-cols-3 gap-2.5">
             {sheet.abilities.map((ability) => (
               <div key={ability.key}>
@@ -480,20 +486,17 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             ))}
           </div>
           <p className="mt-2.5 text-xs text-faint">
-            Rettungswürfe, Fertigkeiten, Zauber-DC und die maximalen
-            Trefferpunkte rechnen sich neu, sobald du speicherst.
+            {t.sheet.abilitiesHint}
           </p>
         </Panel>
 
         <Panel id="werte" className="scroll-mt-24">
-          <SectionLabel>Werte</SectionLabel>
+          <SectionLabel>{t.sheet.sections.werte}</SectionLabel>
           <p className="mb-3 text-xs text-faint">
-            Leer lassen heißt: automatisch berechnen. Der berechnete Wert steht
-            als Platzhalter im Feld. So trägt man eine AC aus Shield of Faith
-            ein und nimmt sie hinterher ebenso schnell wieder zurück.
+            {t.sheet.valuesHint}
           </p>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Max. Trefferpunkte">
+            <Field label={t.sheet.maxHp(t.term.hitPoints)}>
               <input
                 name="hpMaxOverride"
                 type="number"
@@ -503,7 +506,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Rüstungsklasse">
+            <Field label={t.term.armorClass}>
               <input
                 name="acOverride"
                 type="number"
@@ -512,7 +515,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Initiative">
+            <Field label={t.term.initiative}>
               <input
                 name="initiativeOverride"
                 type="number"
@@ -521,7 +524,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Bewegungsrate">
+            <Field label={t.term.speed}>
               <input
                 name="speed"
                 type="number"
@@ -530,7 +533,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Wahrnehmung (passiv)">
+            <Field label={t.term.passivePerception}>
               <input
                 name="passivePerceptionOverride"
                 type="number"
@@ -539,7 +542,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Motiv erkennen (passiv)">
+            <Field label={t.term.passiveInsight}>
               <input
                 name="passiveInsightOverride"
                 type="number"
@@ -556,21 +559,21 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             nicht speichert — und benennt damit dauernd eine Zuständigkeit,
             die er dort gerade nicht hat. */}
         <Button type="submit" variant="solid" size="lg" className="w-full">
-          Grunddaten, Attribute und Werte speichern
+          {t.sheet.saveBasics}
         </Button>
       </form>
 
       <Panel id="uebungen" className="scroll-mt-24">
         <SectionLabel
-          right={<span className="text-xs text-faint">Tippen wechselt durch</span>}
+          right={<span className="text-xs text-faint">{t.sheet.tapCycles}</span>}
         >
-          Rettungswürfe
+          {t.sheet.savingThrows}
         </SectionLabel>
         <div className="grid gap-0.5 sm:grid-cols-2">
           {sheet.abilities.map((ability) => (
             <ProficiencyToggle
               key={ability.key}
-              label={ABILITY_LABELS[ability.key].de}
+              label={t.term.abilities[ability.key]}
               sublabel={ABILITY_LABELS[ability.key].name}
               bonus={ability.save}
               level={
@@ -587,7 +590,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
         </div>
 
         <div className="mt-5 border-t border-edge pt-4">
-          <SectionLabel>Fertigkeiten</SectionLabel>
+          <SectionLabel>{t.sheet.skills}</SectionLabel>
           {/* Nach Attribut gruppiert wie auf der Übersicht und auf jedem
               gedruckten Bogen — nicht alphabetisch. Wer eine Fertigkeit
               sucht, weiß meist, woran sie hängt. CON hat keine und fällt
@@ -605,15 +608,15 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                   <h3 className="label mb-1">
                     {ABILITY_LABELS[ability].name}
                     <span className="ml-2 font-normal tracking-normal normal-case">
-                      {ABILITY_LABELS[ability].de}
+                      {t.term.abilities[ability]}
                     </span>
                   </h3>
                   <div className="grid gap-0.5">
                     {group.map((skill) => (
                       <ProficiencyToggle
                         key={skill.key}
-                        label={skill.name}
-                        sublabel={skill.de}
+                        label={t.skill(skill.name, skill.de).label}
+                        sublabel={t.skill(skill.name, skill.de).hint}
                         bonus={skill.bonus}
                         level={skill.level}
                         onChange={async (level) => {
@@ -640,29 +643,29 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           sich trotzdem — aber über die Spalten, die der Import setzt, nicht
           von Hand. Steht hier, weil man sie im Bogen sucht. */}
       <Panel id="zaubern" className="scroll-mt-24">
-        <SectionLabel>Zaubern</SectionLabel>
+        <SectionLabel>{t.sheet.sections.zaubern}</SectionLabel>
         {sheet.spellcasting ? (
           <dl className="grid grid-cols-3 gap-3 text-center">
             <div>
               <dd className="text-xl font-semibold">
                 {ABILITY_LABELS[sheet.spellcasting.ability].name}
               </dd>
-              <dt className="label mt-1">Attribut</dt>
+              <dt className="label mt-1">{t.sheet.ability}</dt>
             </div>
             <div>
               <dd className="text-xl font-semibold">{sheet.spellcasting.saveDc}</dd>
-              <dt className="label mt-1">Zauber-SG</dt>
+              <dt className="label mt-1">{t.term.spellSaveDc}</dt>
             </div>
             <div>
               <dd className="text-xl font-semibold">
                 {formatModifier(sheet.spellcasting.attackBonus)}
               </dd>
-              <dt className="label mt-1">Angriff</dt>
+              <dt className="label mt-1">{t.sheet.attack}</dt>
             </div>
           </dl>
         ) : (
           <p className="text-sm text-faint">
-            Keine zaubernde Klasse eingetragen.
+            {t.sheet.noCaster}
           </p>
         )}
       </Panel>

@@ -5,6 +5,7 @@ import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
+import { getT } from "@/lib/i18n/server";
 import type { SheetView } from "@/lib/server/characters";
 
 /**
@@ -18,7 +19,7 @@ import type { SheetView } from "@/lib/server/characters";
  * Das Portrait ist die eine Ausnahme, die direkt hier wechselbar ist —
  * dafür braucht es unten im Bogen keinen eigenen Abschnitt mehr.
  */
-export function SheetSummary({
+export async function SheetSummary({
   sheet,
   uploadPortrait,
 }: {
@@ -26,6 +27,7 @@ export function SheetSummary({
   uploadPortrait: (formData: FormData) => Promise<{ error?: string } | void>;
 }) {
   const { character } = sheet;
+  const t = await getT();
 
   const subtitle = [
     sheet.species?.name || character.race,
@@ -67,7 +69,7 @@ export function SheetSummary({
                   {c.subclass ? ` (${c.subclass})` : ""}
                 </span>
               ))
-            : "Ohne Klasse — antippen zum Ergänzen"}
+            : t.sheet.noClassTap}
         </a>
         {subtitle.length > 0 ? (
           <a
@@ -89,7 +91,7 @@ export function SheetSummary({
       <a
         href="#werte"
         className="col-span-2 block transition-opacity hover:opacity-80 lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1"
-        aria-label="Zum Abschnitt Werte"
+        aria-label={t.sheet.toValues}
       >
         <CombatStats
           armorClass={sheet.armorClass}

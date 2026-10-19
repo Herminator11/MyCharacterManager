@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 
 import { Button, cx, inputClass } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 
 export type SpeciesOption = {
   key: string;
@@ -53,6 +54,7 @@ export function SpeciesPicker({
   onApply: () => Promise<void>;
   onRevert: () => Promise<void>;
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
 
   const bases = options.filter((o) => !o.parentKey);
@@ -60,7 +62,7 @@ export function SpeciesPicker({
   return (
     <div className={cx("space-y-3", pending && "opacity-60")}>
       <select
-        aria-label="Spezies"
+        aria-label={t.species.title}
         value={current}
         disabled={pending}
         onChange={(event) =>
@@ -68,7 +70,7 @@ export function SpeciesPicker({
         }
         className={inputClass}
       >
-        <option value="">Keine Angabe</option>
+        <option value="">{t.species.none}</option>
         {bases.map((base) => {
           const children = options.filter((o) => o.parentKey === base.key);
 
@@ -84,7 +86,7 @@ export function SpeciesPicker({
 
           return (
             <optgroup key={base.key} label={base.name}>
-              <option value={base.key}>{base.name} (ohne Subrasse)</option>
+              <option value={base.key}>{t.species.noSubrace(base.name)}</option>
               {children.map((child) => (
                 <option key={child.key} value={child.key}>
                   {child.name}
@@ -101,7 +103,7 @@ export function SpeciesPicker({
       {applied ? (
         <div className="rounded-md border border-patina-dim bg-patina-deep/40 px-3 py-3">
           <p className="text-xs text-patina">
-            Die Boni stecken in den Attributen.
+            {t.species.applied}
           </p>
           <Button
             variant="ghost"
@@ -109,7 +111,7 @@ export function SpeciesPicker({
             onClick={() => startTransition(() => onRevert())}
             className="mt-1.5 w-full"
           >
-            {pending ? "Nimmt zurück…" : "Rückgängig"}
+            {pending ? t.species.reverting : t.species.revert}
           </Button>
         </div>
       ) : applyHint ? (
@@ -123,8 +125,7 @@ export function SpeciesPicker({
             // als erstes, was ins Auge fällt.
             <>
               <p className="mt-2.5 text-xs text-brass">
-                Dieser Charakter stammt aus dem PDF-Import — die Boni stecken
-                deshalb vermutlich schon in den Attributen.
+                {t.species.fromPdf}
               </p>
               <button
                 type="button"
@@ -132,7 +133,7 @@ export function SpeciesPicker({
                 onClick={() => startTransition(() => onApply())}
                 className="mt-2 text-xs text-faint underline-offset-4 hover:text-patina hover:underline"
               >
-                {pending ? "Übernimmt…" : "Trotzdem übernehmen"}
+                {pending ? t.species.applying : t.species.applyAnyway}
               </button>
             </>
           ) : (
@@ -143,11 +144,10 @@ export function SpeciesPicker({
                 onClick={() => startTransition(() => onApply())}
                 className="mt-2.5 w-full"
               >
-                {pending ? "Übernimmt…" : "Boni übernehmen"}
+                {pending ? t.species.applying : t.species.apply}
               </Button>
               <p className="mt-2 text-xs text-faint">
-                Aus einem PDF importierte Bögen haben die Boni fast immer
-                schon eingerechnet — dann ist hier nichts zu tun.
+                {t.species.pdfHint}
               </p>
             </>
           )}

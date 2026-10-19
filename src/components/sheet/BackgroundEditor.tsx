@@ -6,13 +6,14 @@ import { useEffect, useRef, useState, useTransition } from "react";
 export function BackgroundEditor({
   defaultValue,
   save,
-  placeholder = "Woher kommt dein Charakter?",
-  ariaLabel = "Vorgeschichte",
+  placeholder,
+  ariaLabel,
 }: {
   defaultValue: string;
   save: (value: string) => Promise<void>;
-  placeholder?: string;
-  ariaLabel?: string;
+  /** Vom Aufrufer in der Sprache des Geräts — kein deutscher Vorgabewert mehr. */
+  placeholder: string;
+  ariaLabel: string;
 }) {
   const [value, setValue] = useState(defaultValue);
   const saved = useRef(defaultValue);

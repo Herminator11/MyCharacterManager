@@ -4,6 +4,8 @@ import {
   type SpeciesOption,
 } from "@/components/species/SpeciesPicker";
 import { Panel, SectionLabel } from "@/components/ui";
+import { getT } from "@/lib/i18n/server";
+import type { Messages } from "@/lib/i18n/messages";
 import { formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
 import {
@@ -23,7 +25,7 @@ import type { AbilityScores } from "@/lib/rules/derive";
  * was das Übernehmen *ändern würde*, und zwar in Modifikatoren — dass CHA
  * von 15 auf 17 steigt, ist am Tisch folgenlos, solange +2 stehen bleibt.
  */
-export function SpeciesPanel({
+export async function SpeciesPanel({
   id,
   options,
   current,
@@ -66,6 +68,7 @@ export function SpeciesPanel({
   onRevert: () => Promise<void>;
   onCreate: (formData: FormData) => Promise<void>;
 }) {
+  const t = await getT();
   const bonuses = current ? bonusEntries(current) : [];
 
   return (
@@ -79,13 +82,13 @@ export function SpeciesPanel({
           ) : null
         }
       >
-        Spezies
+        {t.species.title}
       </SectionLabel>
 
       <SpeciesPicker
         options={options}
         current={current?.key ?? ""}
-        applyHint={applyHint(current, scores, appliedFrom)}
+        applyHint={applyHint(current, scores, appliedFrom, t)}
         applied={applied}
         importedFromPdf={importedFromPdf}
         onSelect={onSelect}
@@ -133,18 +136,15 @@ export function SpeciesPanel({
         // Der Text vom Bogen bleibt stehen — verloren geht nichts. Ob der
         // Katalog ihn kennt, entscheidet nur, welchen Rat wir geben.
         <p className="mt-3 text-xs text-faint">
-          Auf dem Bogen steht „{fallbackName}".{" "}
+          {t.species.onSheet(fallbackName)}{" "}
           {suggestion ? (
             <>
-              Das ist{" "}
-              <span className="text-patina">{suggestion}</span> im Katalog —
-              oben auswählen, dann stehen Boni und Traits hier.
+              {t.species.thatIs}{" "}
+              <span className="text-patina">{suggestion}</span>{" "}
+              {t.species.inCatalog}
             </>
           ) : (
-            <>
-              Diese Spezies kennt der Katalog nicht — wähle eine andere aus
-              oder lege sie unten selbst an.
-            </>
+            t.species.unknown
           )}
         </p>
       ) : null}
@@ -159,6 +159,7 @@ function applyHint(
   def: SpeciesDef | null,
   scores: AbilityScores,
   appliedFrom: SpeciesDef | null,
+  t: Messages,
 ): string {
   if (!def) return "";
 
@@ -176,7 +177,7 @@ function applyHint(
   // abgezogen. Ungesagt wäre das eine böse Überraschung.
   const swap =
     appliedFrom && appliedFrom.key !== def.key
-      ? `Nimmt zuerst die Boni von ${appliedFrom.name} zurück (${bonusSummary(appliedFrom)}). `
+      ? t.species.swap(appliedFrom.name, bonusSummary(appliedFrom))
       : "";
 
   // Der Rest der Vorhersage rechnet auf dem Zustand *nach* dem Zurücknehmen
@@ -192,7 +193,7 @@ function applyHint(
   // sonst drückt man und hält das Ergebnis für einen Fehler.
   const effect =
     changes.length === 0
-      ? "Kein Modifikator ändert sich dadurch."
+      ? t.species.noChange
       : changes
           .map(
             ({ ability, from, to }) =>
@@ -200,5 +201,5 @@ function applyHint(
           )
           .join(", ");
 
-  return `${swap}Addiert ${list} auf die Attribute und setzt die Bewegungsrate auf ${def.speed} ft. ${effect}`;
+  return `${swap}${t.species.adds(list, def.speed, effect)}`;
 }
