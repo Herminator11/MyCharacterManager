@@ -3,7 +3,8 @@
 import { ACTION_TONE, ActionShape, ChevronDownIcon } from "@/components/icons";
 import { cx } from "@/components/ui";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
-import { ACTION_SLOTS, ACTION_LABELS, type ActionSlot } from "@/lib/rules/actions";
+import { useT } from "@/lib/i18n/client";
+import { ACTION_SLOTS, type ActionSlot } from "@/lib/rules/actions";
 
 /**
  * Was im laufenden Zug noch übrig ist.
@@ -49,6 +50,7 @@ export function TurnBar({
   expanded: ActionSlot | null;
   onToggle: (slot: ActionSlot | null) => void;
 }) {
+  const t = useT();
   const { turn } = state;
   const spent = ACTION_SLOTS.filter((slot) => turn[slot]).length;
   // Im Kampf schaltet "Zug beenden" auch die Runde weiter — das muss
@@ -60,7 +62,7 @@ export function TurnBar({
   return (
     <section className="rounded-lg border border-edge bg-panel px-4 py-3">
       <div className="mb-2.5 flex items-baseline justify-between gap-3">
-        <h2 className="label">Zug</h2>
+        <h2 className="label">{t.battle.turn}</h2>
         {/* min-h-11 mit negativem Rand: volles Tippziel, ohne die
             Kopfzeile aufzublähen. */}
         <button
@@ -72,7 +74,7 @@ export function TurnBar({
           disabled={!canEnd}
           className="-my-3 inline-flex min-h-11 items-center text-xs text-mute transition-colors hover:text-patina disabled:opacity-40 disabled:hover:text-mute"
         >
-          Zug beenden
+          {t.battle.endTurn}
         </button>
       </div>
 
@@ -117,10 +119,10 @@ export function TurnBar({
                 className="size-[1.05rem] shrink-0"
               />
               <span className="max-w-full text-center break-words hyphens-auto">
-                {ACTION_LABELS[slot]}
+                {t.actionCost(slot)}
               </span>
               <span className="flex items-center gap-0.5 text-[0.625rem] font-normal tracking-wide uppercase">
-                {used ? "verbraucht" : "frei"}
+                {used ? t.battle.used : t.battle.free}
                 {!used ? (
                   <ChevronDownIcon
                     className={cx(

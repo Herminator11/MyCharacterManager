@@ -8,6 +8,7 @@ import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
 import { ACTION_TONE, ActionShape, CrossedSwordsIcon, PlayIcon } from "@/components/icons";
 import { cx, Panel, SectionLabel } from "@/components/ui";
 import { characterPath } from "@/lib/characterUrl";
+import { useT } from "@/lib/i18n/client";
 import { useLive } from "@/lib/live-context";
 import type { LiveMutation } from "@/lib/live-types";
 import {
@@ -53,6 +54,7 @@ export function BattleMode({
   characterName: string;
 }) {
   const { state, send, connected } = useLive();
+  const t = useT();
   const [casting, setCasting] = useState<CastableSpell | null>(null);
   const [expandedSlot, setExpandedSlot] = useState<ActionSlot | null>(null);
   const router = useRouter();
@@ -69,10 +71,10 @@ export function BattleMode({
     <div className="mx-auto max-w-2xl space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl leading-tight font-semibold tracking-tight text-ember">
-          Kampf
+          {t.battle.title}
           {state.round > 0 ? (
             <span className="ml-2 text-base font-normal text-mute">
-              Runde {state.round}
+              {t.play.round(state.round)}
             </span>
           ) : null}
         </h1>
@@ -82,14 +84,14 @@ export function BattleMode({
             onClick={finish}
             className="-my-3 inline-flex min-h-11 items-center text-sm text-mute transition-colors hover:text-patina"
           >
-            Kampf beenden
+            {t.battle.endBattle}
           </button>
         ) : (
           <Link
             href={overviewHref}
             className="-my-3 inline-flex min-h-11 items-center text-sm text-mute transition-colors hover:text-patina"
           >
-            Zur Übersicht
+            {t.battle.toOverview}
           </Link>
         )}
       </div>
@@ -106,13 +108,13 @@ export function BattleMode({
         >
           <span className="flex items-center gap-2.5 font-semibold tracking-tight">
             <CrossedSwordsIcon className="size-5" />
-            Neuen Kampf beginnen
+            {t.battle.newBattle}
           </span>
           {/* Früher "Log auf null" — gemeint ist, dass der neue Kampf das
               Kampflog des letzten leert. Das soll man vor dem Tippen
               verstehen, nicht danach. */}
           <span className="text-right text-xs font-normal text-mute">
-            leert das Kampflog
+            {t.battle.clearsLog}
           </span>
         </button>
       ) : null}
@@ -177,8 +179,7 @@ export function BattleMode({
 
       {!connected ? (
         <p className="pt-2 text-center text-xs text-brass">
-          Keine Live-Verbindung — Änderungen werden gespeichert, andere Geräte
-          sehen sie aber erst nach dem Neuladen.
+          {t.play.offline}
         </p>
       ) : null}
 
@@ -221,6 +222,7 @@ function TurnOptions({
   onAttack: () => void;
   onMarkUsed: () => void;
 }) {
+  const t = useT();
   if (!slot) return null;
 
   const readySpells = favorites.filter((spell) => {
@@ -243,7 +245,7 @@ function TurnOptions({
     <div className="-mt-1 space-y-2 rounded-lg border border-edge bg-ink px-3.5 py-3">
       {empty ? (
         <p className="text-sm text-faint">
-          Nichts hinterlegt, das {COST_LABEL[slot]} kostet.
+          {t.battle.nothingFor(t.actionCost(slot))}
         </p>
       ) : (
         <div className="space-y-1.5">
@@ -261,15 +263,15 @@ function TurnOptions({
                   {spell.name}
                 </span>
                 <span className="text-xs text-faint">
-                  {spell.level === 0 ? "Zaubertrick" : `Grad ${spell.level}`}
-                  {spell.concentration ? " · K" : ""}
+                  {spell.level === 0 ? t.term.cantrip : t.term.spellLevel(spell.level)}
+                  {spell.concentration ? ` · ${t.battle.concentrationMark}` : ""}
                 </span>
               </button>
               <button
                 type="button"
                 onClick={() => onQuickCast(spell)}
-                aria-label={`${spell.name} direkt wirken`}
-                title="Direkt wirken"
+                aria-label={t.battle.quickCastOf(spell.name)}
+                title={t.battle.quickCast}
                 className="flex size-7 shrink-0 items-center justify-center rounded text-patina transition-colors hover:bg-patina-deep"
               >
                 <PlayIcon className="size-3.5" />
@@ -301,7 +303,7 @@ function TurnOptions({
         onClick={onMarkUsed}
         className="text-xs text-faint transition-colors hover:text-patina"
       >
-        Ohne Auswahl als verbraucht markieren
+        {t.battle.markUsed}
       </button>
     </div>
   );
@@ -341,10 +343,11 @@ function quickCastMutation(
  * Form am Knopf, und man findet es eine Handbreit weiter oben wieder.
  */
 function CostBadge({ cost }: { cost: ActionCost }) {
+  const t = useT();
   if (cost === "long") {
     return (
-      <span className="shrink-0 text-[0.625rem] text-faint" title="Dauert länger">
-        lang
+      <span className="shrink-0 text-[0.625rem] text-faint" title={t.battle.takesLonger}>
+        {t.battle.longShort}
       </span>
     );
   }
@@ -355,8 +358,8 @@ function CostBadge({ cost }: { cost: ActionCost }) {
   // sonst liest ein Screenreader an dieser Stelle gar nichts vor.
   return (
     <span
-      title={COST_LABEL[cost]}
-      aria-label={`kostet ${COST_LABEL[cost]}`}
+      title={t.actionCost(cost)}
+      aria-label={t.battle.costs(t.actionCost(cost))}
       className={cx("shrink-0", tone)}
     >
       <ActionShape kind={cost} className="size-3" />
@@ -364,8 +367,4 @@ function CostBadge({ cost }: { cost: ActionCost }) {
   );
 }
 
-const COST_LABEL = {
-  action: "Aktion",
-  bonus: "Bonusaktion",
-  reaction: "Reaktion",
-} as const;
+

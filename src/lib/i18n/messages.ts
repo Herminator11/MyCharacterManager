@@ -1,3 +1,5 @@
+import type { ActionCost } from "@/lib/rules/actions";
+
 import { localeOf, termLanguage, uiLanguage, type Mode } from "./modes";
 import { termsDe, termsEn, type Terms } from "./terms";
 import { uiDe, uiEn, type Ui } from "./ui";
@@ -20,6 +22,8 @@ export type Messages = Ui & {
    * übersetzt sie nicht.
    */
   poolName: (pool: { name: string; autoKey: string }) => string;
+  /** Was eine Wirkzeit kostet, als Regelbegriff: Aktion / Action … */
+  actionCost: (cost: ActionCost) => string;
 };
 
 /**
@@ -49,6 +53,15 @@ export function getMessages(mode: Mode): Messages {
       if (pool.autoKey === "spellcasting" && pool.name === "Zauberplätze") return term.spellSlots;
       if (pool.autoKey === "pact-magic" && pool.name === "Pact Magic") return term.pactMagic;
       return pool.name;
+    },
+    actionCost: (cost) => {
+      const term = termLanguage(mode) === "en" ? termsEn : termsDe;
+      return {
+        action: term.action,
+        bonus: term.bonusAction,
+        reaction: term.reaction,
+        long: term.longerAction,
+      }[cost];
     },
   };
 }

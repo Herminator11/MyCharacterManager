@@ -3,6 +3,7 @@
 import { ACTION_TONE, ActionShape } from "@/components/icons";
 import { Panel, SectionLabel, cx } from "@/components/ui";
 import type { LiveLogEntry, LiveState } from "@/lib/live-types";
+import { useT } from "@/lib/i18n/client";
 import { groupByRound } from "@/lib/rules/combatLog";
 
 /**
@@ -18,22 +19,22 @@ import { groupByRound } from "@/lib/rules/combatLog";
  * Tisch zählt die Reihenfolge, nicht die Minute.
  */
 export function CombatLog({ state }: { state: LiveState }) {
+  const t = useT();
   const rounds = groupByRound(state.log);
 
   return (
     <Panel>
-      <SectionLabel>Kampflog</SectionLabel>
+      <SectionLabel>{t.battle.log}</SectionLabel>
 
       {state.log.length === 0 ? (
         <p className="text-sm text-faint">
-          Noch nichts passiert. Schaden, Heilung, gewirkte Zauber und
-          verbrauchte Ressourcen stehen hier, sobald du sie einträgst.
+          {t.battle.logEmpty}
         </p>
       ) : (
         <div className="space-y-3">
           {rounds.map(([round, entries]) => (
             <div key={round}>
-              <p className="label mb-1 text-faint">Runde {round}</p>
+              <p className="label mb-1 text-faint">{t.play.round(round)}</p>
               <ul className="space-y-1">
                 {entries.map((entry) => (
                   <CombatLogRow key={entry.id} entry={entry} />
