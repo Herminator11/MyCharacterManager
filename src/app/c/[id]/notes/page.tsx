@@ -4,6 +4,8 @@ import { AddIcon, ChevronDownIcon, CrossedSwordsIcon } from "@/components/icons"
 import { CombatLogRow } from "@/components/play/CombatLog";
 import { Button, Panel, SectionLabel } from "@/components/ui";
 import { characterIdFromParam } from "@/lib/characterUrl";
+import { getT } from "@/lib/i18n/server";
+import type { Messages } from "@/lib/i18n/messages";
 import type { LiveLogEntry } from "@/lib/live-types";
 import { groupByRound } from "@/lib/rules/combatLog";
 import {
@@ -44,6 +46,7 @@ export default async function CampaignLogPage({
   const character = getCharacter(characterId);
   if (!character) notFound();
 
+  const t = await getT();
   const notes = getCampaignLog(characterId);
   const combat = getCombatLog(characterId);
 
@@ -111,7 +114,7 @@ export default async function CampaignLogPage({
         <SectionLabel
           right={
             <div className="flex items-center gap-2 text-xs text-mute">
-              <span>Session</span>
+              <span>{t.notes.session}</span>
               <form
                 action={async (formData: FormData) => {
                   "use server";
@@ -126,11 +129,11 @@ export default async function CampaignLogPage({
                   type="number"
                   min={0}
                   defaultValue={character.currentSession}
-                  aria-label="Session-Nummer setzen"
-                  className="min-h-8 w-14 rounded-md border border-edge bg-ink px-1.5 text-center tabular-nums focus:border-patina focus:outline-none"
+                  aria-label={t.notes.setSession}
+                  className="min-h-11 w-14 rounded-md border border-edge bg-ink px-1.5 text-center tabular-nums focus:border-patina focus:outline-none"
                 />
                 <button type="submit" className="sr-only">
-                  Session-Nummer speichern
+                  {t.notes.saveSession}
                 </button>
               </form>
               <form
@@ -141,15 +144,15 @@ export default async function CampaignLogPage({
               >
                 <button
                   type="submit"
-                  className="transition-colors hover:text-patina"
+                  className="inline-flex min-h-11 items-center transition-colors hover:text-patina"
                 >
-                  nächste →
+                  {t.notes.nextSession}
                 </button>
               </form>
             </div>
           }
         >
-          Festhalten
+          {t.notes.capture}
         </SectionLabel>
         <form
           action={async (formData: FormData) => {
@@ -161,26 +164,24 @@ export default async function CampaignLogPage({
           <input
             name="body"
             required
-            placeholder="Was ist gerade passiert?"
-            aria-label="Ereignis festhalten"
+            placeholder={t.notes.placeholder}
+            aria-label={t.notes.captureLabel}
             className="min-h-12 min-w-0 flex-1 rounded-md border border-edge bg-ink px-3 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
           />
           <Button type="submit">
             <AddIcon />
-            Notieren
+            {t.notes.submit}
           </Button>
         </form>
       </Panel>
 
       {timeline.length === 0 ? (
         <p className="text-sm text-faint">
-          Noch nichts festgehalten. Ein Satz, Eingabetaste, fertig — Kämpfe
-          tragen sich von selbst ein, solange der nächste noch nicht
-          begonnen hat.
+          {t.notes.empty}
         </p>
       ) : (
         <Panel>
-          <SectionLabel>Verlauf</SectionLabel>
+          <SectionLabel>{t.notes.history}</SectionLabel>
           <ul className="space-y-2.5">
             {timeline.map((item) => {
               if (item.type === "note") {
@@ -197,8 +198,8 @@ export default async function CampaignLogPage({
                     >
                       <button
                         type="submit"
-                        aria-label="Eintrag löschen"
-                        className="px-1 text-faint transition-colors hover:text-ember"
+                        aria-label={t.notes.deleteEntry}
+                        className="-my-3 min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
                       >
                         ✕
                       </button>
@@ -211,6 +212,7 @@ export default async function CampaignLogPage({
                 return (
                   <li key="combat">
                     <CombatBlock
+                      t={t}
                       entries={item.entries}
                       remove={async () => {
                         "use server";
@@ -226,7 +228,7 @@ export default async function CampaignLogPage({
                   <details className="group">
                     <summary className="flex cursor-pointer list-none items-center gap-3 text-sm [&::-webkit-details-marker]:hidden">
                       <span className="min-w-0 flex-1 font-semibold text-patina">
-                        Session {item.session}
+                        {t.notes.sessionNumber(item.session)}
                       </span>
                       <ChevronDownIcon className="size-4 shrink-0 text-faint transition-transform group-open:rotate-180" />
                     </summary>
@@ -244,8 +246,8 @@ export default async function CampaignLogPage({
                           >
                             <button
                               type="submit"
-                              aria-label="Eintrag löschen"
-                              className="px-1 text-faint transition-colors hover:text-ember"
+                              aria-label={t.notes.deleteEntry}
+                              className="-my-3 min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
                             >
                               ✕
                             </button>
@@ -254,6 +256,7 @@ export default async function CampaignLogPage({
                       ))}
                       {item.combat.length > 0 ? (
                         <CombatBlock
+                          t={t}
                           entries={item.combat}
                           remove={async () => {
                             "use server";
@@ -282,9 +285,11 @@ export default async function CampaignLogPage({
 function CombatBlock({
   entries,
   remove,
+  t,
 }: {
   entries: LiveLogEntry[];
   remove: () => Promise<void>;
+  t: Messages;
 }) {
   return (
     <div className="flex items-start gap-3">
@@ -292,14 +297,14 @@ function CombatBlock({
         <summary className="flex cursor-pointer list-none items-center gap-3 text-sm [&::-webkit-details-marker]:hidden">
           <CrossedSwordsIcon className="size-4 shrink-0 text-ember" />
           <span className="min-w-0 flex-1">
-            Kampf · {entries.length === 1 ? "1 Eintrag" : `${entries.length} Einträge`}
+            {t.notes.combatEntries(entries.length)}
           </span>
           <ChevronDownIcon className="size-4 shrink-0 text-faint transition-transform group-open:rotate-180" />
         </summary>
         <div className="mt-2 ml-7 space-y-3">
           {groupByRound(entries).map(([round, roundEntries]) => (
             <div key={round}>
-              <p className="label mb-1 text-faint">Runde {round}</p>
+              <p className="label mb-1 text-faint">{t.play.round(round)}</p>
               <ul className="space-y-1">
                 {roundEntries.map((entry) => (
                   <CombatLogRow key={entry.id} entry={entry} />
@@ -312,8 +317,8 @@ function CombatBlock({
       <form action={remove}>
         <button
           type="submit"
-          aria-label="Kampf-Log löschen"
-          className="px-1 text-faint transition-colors hover:text-ember"
+          aria-label={t.notes.deleteCombat}
+          className="-my-3 min-h-11 min-w-11 text-faint transition-colors hover:text-ember"
         >
           ✕
         </button>
