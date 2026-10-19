@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useSelectedLayoutSegment } from "next/navigation";
 
 import { characterPath } from "@/lib/characterUrl";
 
@@ -35,18 +35,26 @@ export function TabBar({
   characterId: number;
   characterName: string;
 }) {
-  const pathname = usePathname();
+  // Das Segment unter /c/[id] statt des ganzen Pfads: der Vergleich mit
+  // dem kanonischen Slug schlug bei /c/5, einem alten Slug nach dem
+  // Umbenennen oder einem kodierten Umlaut fehl — dann war kein Reiter
+  // aktiv, und Übersicht und Zauber sahen gleich aus.
+  const segment = useSelectedLayoutSegment() ?? "";
   const base = characterPath(characterId, characterName);
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-edge bg-panel/95 backdrop-blur"
+      // Deckend: bei /95 mit Blur schien in Safari der Text darunter durch.
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-edge bg-panel"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto flex max-w-2xl">
+      {/* Seitenabstand, damit "Übersicht" und "Notizen" nicht am
+          Bildschirmrand kleben — bei sechs Reitern auf 390 px zählt jeder
+          Pixel, deshalb auch Normalschrift statt gesperrter Versalien. */}
+      <ul className="mx-auto flex max-w-2xl px-2">
         {TABS.map((tab) => {
           const href = tab.segment ? `${base}/${tab.segment}` : base;
-          const active = pathname === href;
+          const active = segment === tab.segment;
 
           return (
             <li key={tab.segment} className="flex-1">
@@ -54,15 +62,15 @@ export function TabBar({
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cx(
-                  "flex min-h-14 flex-col items-center justify-center gap-0.5 py-1.5 text-[0.625rem] font-semibold tracking-wide uppercase transition-colors",
-                  active ? "text-patina" : "text-faint hover:text-mute",
+                  "flex min-h-14 flex-col items-center justify-center gap-0.5 py-1.5 text-[0.6875rem] leading-tight font-semibold transition-colors",
+                  active ? "text-patina" : "text-faint hover:text-fg",
                 )}
               >
                 {/* Der aktive Reiter bekommt eine Marke oben, damit man ihn
                     auch im Augenwinkel erkennt. */}
                 <span
                   className={cx(
-                    "h-0.5 w-6 rounded-full transition-colors",
+                    "h-[3px] w-7 rounded-full transition-colors",
                     active ? "bg-patina" : "bg-transparent",
                   )}
                 />

@@ -26,7 +26,9 @@ export default async function CharacterLayout({
     .join(" / ");
 
   return (
-    <div className="pb-20">
+    // Platz für die Reiterleiste samt Home-Indikator: 5rem allein lag auf
+    // dem iPhone unter der Leiste (56 px + 34 px Safe Area).
+    <div className="pb-[calc(5rem+env(safe-area-inset-bottom))]">
       <ClassBackground
         enabled={sheet.character.backgroundThemeEnabled}
         classes={sheet.classes}
