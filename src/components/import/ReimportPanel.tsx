@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Button, cx, Panel, SectionLabel } from "@/components/ui";
 import type { PlanResult } from "@/app/import/actions";
 import type { ReimportPlan } from "@/lib/server/reimport";
+import { useT } from "@/lib/i18n/client";
 
 export type ImportTarget = { id: number; name: string; summary: string };
 
@@ -35,6 +36,7 @@ export function ReimportPanel({
   onCommitUpdate: (characterId: number) => void;
   busy: boolean;
 }) {
+  const t = useT();
   const [selected, setSelected] = useState<number | "new">("new");
   const [, startTransition] = useTransition();
 
@@ -55,7 +57,7 @@ export function ReimportPanel({
           onClick={onCommitNew}
           disabled={busy}
         >
-          {busy ? "Wird angelegt…" : `${draftName} anlegen`}
+          {busy ? t.import.creating : t.import.createNamed(draftName)}
         </Button>
       </Panel>
     );
@@ -63,21 +65,21 @@ export function ReimportPanel({
 
   return (
     <Panel>
-      <SectionLabel>Wohin soll der Bogen?</SectionLabel>
+      <SectionLabel>{t.import.where}</SectionLabel>
 
       <div className="space-y-2">
         <Choice
           active={selected === "new"}
           onClick={() => setSelected("new")}
-          title={`Als neuen Charakter anlegen`}
-          hint={`„${draftName}“ kommt zusätzlich in die Liste.`}
+          title={t.import.asNew}
+          hint={t.import.asNewHint(draftName)}
         />
         {targets.map((target) => (
           <Choice
             key={target.id}
             active={selected === target.id}
             onClick={() => setSelected(target.id)}
-            title={`${target.name} aktualisieren`}
+            title={t.import.updateNamed(target.name)}
             hint={target.summary}
           />
         ))}
@@ -86,7 +88,7 @@ export function ReimportPanel({
       {selected !== "new" ? (
         <div className="mt-4">
           {plan ? <Diff plan={plan} /> : (
-            <p className="text-sm text-faint">Vergleich wird berechnet…</p>
+            <p className="text-sm text-faint">{t.import.comparing}</p>
           )}
         </div>
       ) : null}
@@ -101,10 +103,10 @@ export function ReimportPanel({
         }
       >
         {busy
-          ? "Wird übernommen…"
+          ? t.import.applying
           : selected === "new"
-            ? `${draftName} anlegen`
-            : `${plan?.characterName ?? "Charakter"} aktualisieren`}
+            ? t.import.createNamed(draftName)
+            : t.import.updateNamed(plan?.characterName ?? t.import.character)}
       </Button>
     </Panel>
   );
@@ -149,18 +151,18 @@ function Choice({
 }
 
 function Diff({ plan }: { plan: ReimportPlan }) {
+  const t = useT();
   const changed = plan.changes.filter((c) => c.changed);
 
   return (
     <div className="space-y-3 rounded-md border border-edge bg-ink px-3.5 py-3">
       {changed.length === 0 ? (
         <p className="text-sm text-mute">
-          Der Bogen entspricht dem, was schon gespeichert ist — es ändert sich
-          nichts.
+          {t.import.unchanged}
         </p>
       ) : (
         <div>
-          <p className="label mb-2">Wird ersetzt</p>
+          <p className="label mb-2">{t.import.replaced}</p>
           <ul className="space-y-1">
             {changed.map((line) => (
               <li key={line.label} className="flex gap-2 text-sm">
@@ -180,7 +182,7 @@ function Diff({ plan }: { plan: ReimportPlan }) {
 
       {plan.newSpells.length > 0 ? (
         <p className="text-sm">
-          <span className="label">Neue Zauber</span>
+          <span className="label">{t.import.newSpells}</span>
           <br />
           <span className="text-patina">{plan.newSpells.join(", ")}</span>
         </p>
@@ -188,17 +190,17 @@ function Diff({ plan }: { plan: ReimportPlan }) {
 
       {plan.removedSpells.length > 0 ? (
         <p className="text-sm">
-          <span className="label">Nicht mehr im Bogen</span>
+          <span className="label">{t.import.removedSpells}</span>
           <br />
           <span className="text-mute">{plan.removedSpells.join(", ")}</span>
           <span className="mt-0.5 block text-xs text-faint">
-            Bleiben erhalten — entfernen kannst du sie in der Zauberliste.
+            {t.import.removedSpellsHint}
           </span>
         </p>
       ) : null}
 
       <div>
-        <p className="label mb-1.5">Bleibt unangetastet</p>
+        <p className="label mb-1.5">{t.import.preserved}</p>
         <p className="text-xs leading-relaxed text-mute">
           {plan.preserved.join(" · ")}
         </p>

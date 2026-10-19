@@ -4,6 +4,7 @@ import { BrandMark } from "@/components/Brand";
 import { ImportScreen } from "@/components/import/ImportScreen";
 import { className as classLabel } from "@/lib/rules/classes";
 import { listCharacters } from "@/lib/server/characters";
+import { getT } from "@/lib/i18n/server";
 
 import {
   commitImportAction,
@@ -14,14 +15,15 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default function ImportPage() {
+export default async function ImportPage() {
+  const t = await getT();
   const targets = listCharacters().map((character) => ({
     id: character.id,
     name: character.name,
     summary:
       character.classes
         .map((c) => `${classLabel(c.classKey)} ${c.level}`)
-        .join(" / ") || "Ohne Klasse",
+        .join(" / ") || t.header.noClass,
   }));
 
   return (
@@ -34,10 +36,10 @@ export default function ImportPage() {
           href="/"
           className="label -my-3 inline-flex min-h-11 items-center gap-2 transition-colors hover:text-patina"
         >
-          <BrandMark className="size-5" />← Charaktere
+          <BrandMark className="size-5" />{t.import.back}
         </Link>
         <h1 className="mt-2 text-[2rem] leading-none font-semibold tracking-tight">
-          Bogen importieren
+          {t.import.title}
         </h1>
       </header>
 

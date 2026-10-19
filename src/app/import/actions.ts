@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { characterPath } from "@/lib/characterUrl";
+import { getT } from "@/lib/i18n/server";
 import type { ImportedCharacter } from "@/lib/import/types";
 import { parseSheet, UnknownSheetFormatError } from "@/lib/import/parseSheet";
 import { readPdfFields, SheetReadError } from "@/lib/import/readPdfFields";
@@ -26,14 +27,15 @@ export type ReadResult =
  */
 export async function readSheetAction(formData: FormData): Promise<ReadResult> {
   const file = formData.get("sheet");
+  const t = await getT();
 
   if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, error: "Keine Datei ausgewählt." };
+    return { ok: false, error: t.import.noFile };
   }
   if (file.size > MAX_BYTES) {
     return {
       ok: false,
-      error: `Die Datei ist ${(file.size / 1024 / 1024).toFixed(1)} MB groß. Mehr als 25 MB nimmt der Import nicht an.`,
+      error: t.import.tooLarge(t.number(file.size / 1024 / 1024, { maximumFractionDigits: 1 })),
     };
   }
 
@@ -76,7 +78,7 @@ export async function planReimportAction(
   const plan = planReimport(characterId, JSON.parse(draftJson));
   return plan
     ? { ok: true, plan }
-    : { ok: false, error: "Diesen Charakter gibt es nicht mehr." };
+    : { ok: false, error: (await getT()).import.gone };
 }
 
 /** Übernimmt den neuen Bauplan und lässt den Spielstand stehen. */

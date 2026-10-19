@@ -5,6 +5,8 @@ import { useRef, useState, useTransition } from "react";
 
 import { Button, cx, Panel, SectionLabel } from "@/components/ui";
 import type { ImportedCharacter } from "@/lib/import/types";
+import { useT } from "@/lib/i18n/client";
+import type { Messages } from "@/lib/i18n/messages";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS, SKILLS } from "@/lib/rules/skills";
@@ -14,10 +16,10 @@ import type { SheetFormat } from "@/lib/import/types";
 import type { ReimportPlan } from "@/lib/server/reimport";
 import { ReimportPanel, type ImportTarget } from "./ReimportPanel";
 
-const FORMAT_LABELS: Record<SheetFormat, string> = {
-  official: "Offizieller Bogen",
-  custom: "Erweitertes Format",
-  aurora: "Aurora-Bogen",
+const FORMAT_LABELS: Record<SheetFormat, (t: Messages) => string> = {
+  official: (t) => t.import.formatOfficial,
+  custom: (t) => t.import.formatCustom,
+  aurora: (t) => t.import.formatAurora,
 };
 
 /**
@@ -42,6 +44,7 @@ export function ImportScreen({
   plan: (characterId: number, draftJson: string) => Promise<PlanResult>;
   commitUpdate: (characterId: number, draftJson: string) => Promise<void>;
 }) {
+  const t = useT();
   const input = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<ImportedCharacter | null>(null);
   const [fileName, setFileName] = useState("");
@@ -106,12 +109,13 @@ export function ImportScreen({
   return (
     <div className="space-y-3">
       <Panel>
-        <SectionLabel>Charakterbogen hochladen</SectionLabel>
+        <SectionLabel>{t.import.uploadTitle}</SectionLabel>
         <p className="text-sm text-mute">
-          Der Import liest den <strong>offiziellen D&amp;D-Charakterbogen</strong>{" "}
-          von Wizards of the Coast — den Bogen, den auch Aurora ausgibt.
-          Wichtig ist nur, dass es die <em>ausfüllbare</em> Fassung ist: ein
-          Scan oder Ausdruck enthält keine Daten zum Auslesen.
+          {t.import.introBefore}
+          <strong>{t.import.introStrong}</strong>
+          {t.import.introMiddle}
+          <em>{t.import.introEm}</em>
+          {t.import.introAfter}
         </p>
 
         <button
@@ -124,10 +128,10 @@ export function ImportScreen({
           )}
         >
           <span className="text-base font-semibold">
-            {reading ? "Wird gelesen…" : "PDF auswählen"}
+            {reading ? t.import.reading : t.import.pick}
           </span>
           <span className="text-xs text-faint">
-            Nichts wird gespeichert, bevor du es bestätigst.
+            {t.import.nothingSaved}
           </span>
         </button>
 
@@ -151,9 +155,9 @@ export function ImportScreen({
       </Panel>
 
       <p className="text-center text-xs text-faint">
-        Lieber von Hand?{" "}
+        {t.import.byHand}{" "}
         <Link href="/" className="text-patina underline-offset-4 hover:underline">
-          Charakter selbst anlegen
+          {t.import.byHandLink}
         </Link>
       </p>
     </div>
@@ -178,6 +182,7 @@ function Review({
   /** Zielauswahl: neuer Charakter oder bestehenden aktualisieren. */
   target: React.ReactNode;
 }) {
+  const t = useT();
   const proficientSkills = SKILLS.filter((s) => (draft.skills[s.key] ?? 0) > 0);
   const proficientSaves = Object.entries(draft.saves)
     .filter(([, level]) => level > 0)
@@ -189,11 +194,11 @@ function Review({
         <SectionLabel
           right={
             <span className="text-[0.6875rem] text-faint">
-              {FORMAT_LABELS[draft.format]}
+              {FORMAT_LABELS[draft.format](t)}
             </span>
           }
         >
-          Gefunden in {fileName}
+          {t.import.foundIn(fileName)}
         </SectionLabel>
 
         <h1 className="text-2xl font-semibold tracking-tight">{draft.name}</h1>
@@ -204,18 +209,18 @@ function Review({
                   `${c.known ? classLabel(c.classKey) : c.rawName} ${c.level}`,
                 )
                 .join(" / ")
-            : "Ohne Klasse"}
+            : t.header.noClass}
         </p>
         <p className="mt-0.5 text-xs text-faint">
           {[draft.race, draft.background, draft.alignment]
             .filter(Boolean)
-            .join(" · ") || "Keine weiteren Angaben"}
+            .join(" · ") || t.import.noDetails}
         </p>
       </Panel>
 
       {draft.warnings.length > 0 ? (
         <Panel className="border-brass/40 bg-brass/5">
-          <SectionLabel>Bitte einmal ansehen</SectionLabel>
+          <SectionLabel>{t.import.pleaseCheck}</SectionLabel>
           <ul className="space-y-2">
             {draft.warnings.map((warning, index) => (
               <li key={index} className="flex gap-2 text-sm text-mute">
@@ -231,7 +236,7 @@ function Review({
 
       <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
         <Panel>
-          <SectionLabel>Attribute</SectionLabel>
+          <SectionLabel>{t.import.abilities}</SectionLabel>
           <div className="grid grid-cols-3 gap-2.5">
             {(
               Object.entries(draft.scores) as [
@@ -258,25 +263,25 @@ function Review({
         </Panel>
 
         <Panel>
-          <SectionLabel>Kampfwerte</SectionLabel>
+          <SectionLabel>{t.import.combatValues}</SectionLabel>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm sm:grid-cols-3">
-            <Value label="Max. TP" value={draft.hpMaxOverride} />
-            <Value label="Aktuell" value={draft.hpCurrent ?? "voll"} />
-            <Value label="Temp" value={draft.hpTemp || "—"} />
-            <Value label="RK" value={draft.acOverride} />
+            <Value label={`${t.import.maxHp} ${t.term.hitPointsShort}`} value={draft.hpMaxOverride} />
+            <Value label={t.import.current} value={draft.hpCurrent ?? t.import.full} />
+            <Value label={t.import.temp} value={draft.hpTemp || "—"} />
+            <Value label={t.term.armorClassShort} value={draft.acOverride} />
             <Value
-              label="Initiative"
+              label={t.term.initiative}
               value={
                 draft.initiativeOverride === null
                   ? null
                   : formatModifier(draft.initiativeOverride)
               }
             />
-            <Value label="Bewegung" value={draft.speed} />
-            <Value label="Wahrn. (passiv)" value={draft.passivePerceptionOverride} />
-            <Value label="Zauber-SG" value={draft.spellSaveDcOverride} />
+            <Value label={t.term.speed} value={draft.speed} />
+            <Value label={t.term.passivePerception} value={draft.passivePerceptionOverride} />
+            <Value label={t.term.spellSaveDc} value={draft.spellSaveDcOverride} />
             <Value
-              label="Zauberangriff"
+              label={t.term.spellAttackShort}
               value={
                 draft.spellAttackOverride === null
                   ? null
@@ -288,41 +293,41 @@ function Review({
       </div>
 
       <Panel>
-        <SectionLabel>Übungen</SectionLabel>
+        <SectionLabel>{t.import.proficiencies}</SectionLabel>
         <p className="text-sm">
-          <span className="label">Rettungswürfe</span>
+          <span className="label">{t.import.savingThrows}</span>
           <br />
           <span className="text-mute">
-            {proficientSaves.length > 0 ? proficientSaves.join(", ") : "keine"}
+            {proficientSaves.length > 0 ? proficientSaves.join(", ") : t.import.none}
           </span>
         </p>
         <p className="mt-3 text-sm">
-          <span className="label">Fertigkeiten</span>
+          <span className="label">{t.import.skills}</span>
           <br />
           <span className="text-mute">
             {proficientSkills.length > 0
               ? proficientSkills
                   .map(
                     (s) =>
-                      `${s.name}${draft.skills[s.key] === 2 ? " (Expertise)" : ""}`,
+                      `${s.name}${draft.skills[s.key] === 2 ? ` (${t.import.expertise})` : ""}`,
                   )
                   .join(", ")
-              : "keine"}
+              : t.import.none}
           </span>
         </p>
       </Panel>
 
       <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
         <ListPanel
-          title="Zauber"
-          empty="Keine im Bogen gefunden."
+          title={t.import.spells}
+          empty={t.import.noneFound}
           items={draft.spells.map(
-            (s) => `${s.name} · ${s.level === 0 ? "Cantrip" : `Grad ${s.level}`}`,
+            (s) => `${s.name} · ${s.level === 0 ? t.term.cantrip : t.term.spellLevel(s.level)}`,
           )}
         />
         <ListPanel
-          title="Angriffe"
-          empty="Keine im Bogen gefunden."
+          title={t.import.attacks}
+          empty={t.import.noneFound}
           items={draft.attacks.map((a) =>
             [
               a.name,
@@ -334,13 +339,13 @@ function Review({
           )}
         />
         <ListPanel
-          title="Ausrüstung"
-          empty="Nichts im Bogen gefunden."
+          title={t.import.equipment}
+          empty={t.import.nothingFound}
           items={draft.items.map((i) => i.name)}
         />
         <ListPanel
-          title="Fähigkeiten"
-          empty="Keine im Bogen gefunden."
+          title={t.import.features}
+          empty={t.import.noneFound}
           items={draft.features.map((f) => f.name)}
         />
       </div>
@@ -353,7 +358,7 @@ function Review({
         disabled={busy}
         className="w-full py-2 text-sm text-faint underline-offset-4 hover:text-mute hover:underline disabled:opacity-40"
       >
-        Andere Datei wählen
+        {t.import.otherFile}
       </button>
     </div>
   );
@@ -366,6 +371,7 @@ function Value({
   label: string;
   value: string | number | null;
 }) {
+  const t = useT();
   return (
     <div>
       <dt className="label">{label}</dt>
@@ -375,7 +381,7 @@ function Value({
           value === null && "font-normal text-faint",
         )}
       >
-        {value ?? "nicht im Bogen"}
+        {value ?? t.import.notInSheet}
       </dd>
     </div>
   );
