@@ -368,7 +368,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
           <input
             name="name"
             required
-            placeholder="z.B. Sneak Attack"
+            placeholder="z. B. Sneak Attack"
             aria-label="Name der neuen Fähigkeit"
             className={inputClass}
           />

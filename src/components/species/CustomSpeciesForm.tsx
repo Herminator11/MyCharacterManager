@@ -35,7 +35,7 @@ export function CustomSpeciesForm({
           <input
             name="name"
             required
-            placeholder="Aasimar"
+            placeholder="z. B. Aasimar"
             className={inputClass}
           />
         </Field>

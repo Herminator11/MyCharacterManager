@@ -47,7 +47,7 @@ export function CustomSpellForm({
             <input
               name="name"
               required
-              placeholder="Flammender Krähenruf"
+              placeholder="z. B. Flammender Krähenruf"
               className={inputClass}
             />
           </Field>
@@ -77,25 +77,25 @@ export function CustomSpellForm({
             <Field label="Casting Time">
               <input
                 name="castingTime"
-                placeholder="1 action"
+                placeholder="z. B. 1 action"
                 className={inputClass}
               />
             </Field>
             <Field label="Reichweite">
-              <input name="range" placeholder="60 ft." className={inputClass} />
+              <input name="range" placeholder="z. B. 60 ft." className={inputClass} />
             </Field>
 
             <Field label="Komponenten">
               <input
                 name="components"
-                placeholder="V, S, M"
+                placeholder="z. B. V, S, M"
                 className={inputClass}
               />
             </Field>
             <Field label="Wirkungsdauer">
               <input
                 name="duration"
-                placeholder="Instantaneous"
+                placeholder="z. B. Instantaneous"
                 className={inputClass}
               />
             </Field>

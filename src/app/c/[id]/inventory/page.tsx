@@ -132,7 +132,7 @@ export default async function InventoryPage({ params }: PageProps<"/c/[id]">) {
             <input
               name="name"
               required
-              placeholder="Rationen (1 Tag)"
+              placeholder="z. B. Rationen (1 Tag)"
               className={inputClass}
             />
           </Field>

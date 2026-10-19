@@ -24,7 +24,7 @@ export default function Page() {
   const characters = listCharacters();
 
   return (
-    <main className="mx-auto max-w-2xl px-5 pb-16 pt-10">
+    <main className="mx-auto max-w-2xl px-4 pb-16 pt-10">
       {/* Hier ist die Marke kein Weg, sondern ein Absender: die Startseite
           ist schon das Ziel, auf das sie überall sonst zeigt. */}
       <header className="flex items-center gap-3">
@@ -90,7 +90,7 @@ export default function Page() {
 
       <Link
         href="/import"
-        className="mt-10 flex items-center justify-between gap-4 rounded-lg border border-dashed border-edge-bright px-4 py-4 transition-colors hover:border-patina hover:bg-panel"
+        className="mt-6 flex items-center justify-between gap-4 rounded-lg border border-dashed border-edge-bright px-4 py-4 transition-colors hover:border-patina hover:bg-panel"
       >
         <span>
           <span className="block text-sm font-semibold">
@@ -113,7 +113,7 @@ export default function Page() {
               name="name"
               required
               autoComplete="off"
-              placeholder="Vex"
+              placeholder="z. B. Vex"
               className={inputClass}
             />
           </Field>
@@ -122,7 +122,7 @@ export default function Page() {
             <input
               name="race"
               autoComplete="off"
-              placeholder="Tiefling"
+              placeholder="z. B. Tiefling"
               className={inputClass}
             />
           </Field>

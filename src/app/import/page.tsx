@@ -25,7 +25,7 @@ export default function ImportPage() {
   }));
 
   return (
-    <main className="mx-auto max-w-3xl px-5 pb-16 pt-10">
+    <main className="mx-auto max-w-3xl px-4 pb-16 pt-10">
       <header className="mb-6">
         {/* Der Weg zurück trägt hier den Text mit: der Import ist eine
             Sackgasse, aus der man mit einem halb fertigen Bogen im Kopf

@@ -193,7 +193,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
             <input
               name="name"
               required
-              placeholder="Rapier"
+              placeholder="z. B. Rapier"
               className={inputClass}
             />
           </Field>
@@ -211,7 +211,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
               </select>
             </Field>
             <Field label="Reichweite">
-              <input name="range" placeholder="5 ft." className={inputClass} />
+              <input name="range" placeholder="z. B. 5 ft." className={inputClass} />
             </Field>
             <Field
               label="Kosten"
@@ -226,12 +226,12 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
               </select>
             </Field>
             <Field label="Schadenswürfel">
-              <input name="damageDice" placeholder="1d8" className={inputClass} />
+              <input name="damageDice" placeholder="z. B. 1d8" className={inputClass} />
             </Field>
             <Field label="Schadensart">
               <input
                 name="damageType"
-                placeholder="Piercing"
+                placeholder="z. B. Piercing"
                 className={inputClass}
               />
             </Field>
@@ -271,7 +271,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
               <Field label="Notiz">
                 <input
                   name="notes"
-                  placeholder="Finesse, +1 magisch"
+                  placeholder="z. B. Finesse, +1 magisch"
                   className={inputClass}
                 />
               </Field>
