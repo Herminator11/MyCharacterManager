@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 
 import { Button, cx, EmptyState, Panel } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 import type { LiveState } from "@/lib/live-types";
 import {
   ACTION_COSTS,
-  ACTION_LABELS,
   parseActionCost,
   type ActionCost,
 } from "@/lib/rules/actions";
@@ -42,6 +42,7 @@ export function SpellList({
   onRemove: (spellId: number) => void;
 }) {
   const { state, send } = useLiveState(initial);
+  const t = useT();
   const [casting, setCasting] = useState<SpellEntry | null>(null);
   const [filter, setFilter] = useState<Filter>({
     query: "",
@@ -109,7 +110,7 @@ export function SpellList({
         <div className="sticky top-[3.75rem] z-10 space-y-2 rounded-lg border border-edge bg-panel px-3 py-2.5">
           {state.pools.map((pool) => (
             <div key={pool.id} className="text-xs">
-              <p className="label mb-1.5 truncate">{pool.name}</p>
+              <p className="label mb-1.5 truncate">{t.poolName(pool)}</p>
               {/* Ausgeschrieben statt "1: 4": die nackte Zahl vor dem
                   Doppelpunkt las sich nicht als Grad, und ohne Gesamtzahl
                   sah man nicht, ob 2 viel oder wenig ist. */}
@@ -126,7 +127,7 @@ export function SpellList({
                           : "bg-ink text-faint",
                       )}
                     >
-                      Grad {slot.level} · {free}/{slot.total}
+                      {t.term.spellLevel(slot.level)} · {free}/{slot.total}
                     </span>
                   );
                 })}
@@ -142,7 +143,8 @@ export function SpellList({
           onChange={(event) =>
             setFilter((f) => ({ ...f, query: event.target.value }))
           }
-          placeholder="Zauber suchen…"
+          placeholder={t.spells.search}
+          aria-label={t.spells.search}
           className="w-full min-h-11 rounded-md border border-edge bg-ink px-3 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
         />
 
@@ -151,12 +153,12 @@ export function SpellList({
             zwischen Grad, Wirkzeit und dem Rest war nicht mehr zu sehen.
             -mx-4/px-4 lässt die Reihe bis an den Panelrand laufen, damit
             man sieht, dass sie weitergeht. */}
-        <div role="group" aria-label="Grad" className={FILTER_ROW}>
+        <div role="group" aria-label={t.spells.filterLevel} className={FILTER_ROW}>
           <FilterChip
             active={filter.level === "all"}
             onClick={() => setFilter((f) => ({ ...f, level: "all" }))}
           >
-            Alle Grade
+            {t.spells.allLevels}
           </FilterChip>
           {levels.map((level) => (
             <FilterChip
@@ -164,7 +166,7 @@ export function SpellList({
               active={filter.level === level}
               onClick={() => setFilter((f) => ({ ...f, level }))}
             >
-              {level === 0 ? "Zaubertricks" : `Grad ${level}`}
+              {level === 0 ? t.term.cantrips : t.term.spellLevel(level)}
             </FilterChip>
           ))}
         </div>
@@ -172,12 +174,12 @@ export function SpellList({
         {/* Die Frage mitten im Kampf lautet nicht "welchen Grad?", sondern
             "was geht als Bonusaktion noch?". Die Wirkzeit steht in jedem
             SRD-Eintrag — der Filter fällt daraus ab. */}
-        <div role="group" aria-label="Wirkzeit" className={FILTER_ROW}>
+        <div role="group" aria-label={t.term.castingTime} className={FILTER_ROW}>
           <FilterChip
             active={filter.cost === "all"}
             onClick={() => setFilter((f) => ({ ...f, cost: "all" }))}
           >
-            Jede Wirkzeit
+            {t.spells.anyCastingTime}
           </FilterChip>
           {costs.map((cost) => (
             <FilterChip
@@ -185,19 +187,19 @@ export function SpellList({
               active={filter.cost === cost}
               onClick={() => setFilter((f) => ({ ...f, cost }))}
             >
-              {ACTION_LABELS[cost]}
+              {t.actionCost(cost)}
             </FilterChip>
           ))}
         </div>
 
-        <div role="group" aria-label="Sonstiges" className={FILTER_ROW}>
+        <div role="group" aria-label={t.spells.filterOther} className={FILTER_ROW}>
           <FilterChip
             active={filter.preparedOnly}
             onClick={() =>
               setFilter((f) => ({ ...f, preparedOnly: !f.preparedOnly }))
             }
           >
-            Nur vorbereitete
+            {t.spells.preparedOnly}
           </FilterChip>
           {schools.length > 1 ? (
             <select
@@ -205,10 +207,10 @@ export function SpellList({
               onChange={(event) =>
                 setFilter((f) => ({ ...f, school: event.target.value }))
               }
-              aria-label="Schule"
+              aria-label={t.spells.school}
               className="min-h-11 shrink-0 rounded-md border border-edge-bright bg-panel-2 px-2.5 text-sm text-fg focus:border-patina focus:outline-none"
             >
-              <option value="all">Alle Schulen</option>
+              <option value="all">{t.spells.allSchools}</option>
               {schools.map((school) => (
                 <option key={school} value={school}>
                   {school}
@@ -223,19 +225,19 @@ export function SpellList({
         <EmptyState
           title={
             spells.length === 0
-              ? "Noch keine Zauber in deiner Liste."
-              : "Kein Zauber passt zu diesen Filtern."
+              ? t.spells.emptyList
+              : t.spells.emptyFilter
           }
         >
           {spells.length === 0
-            ? "Such unten im Katalog nach einem Zauber und füg ihn hinzu."
+            ? t.spells.emptyListHint
             : null}
         </EmptyState>
       ) : (
         grouped.map(([level, entries]) => (
           <Panel key={level}>
             <h2 className="label mb-2">
-              {level === 0 ? "Zaubertricks" : `Grad ${level}`}
+              {level === 0 ? t.term.cantrips : t.term.spellLevel(level)}
             </h2>
             <ul className="divide-y divide-edge">
               {entries.map((spell) => (
@@ -248,8 +250,8 @@ export function SpellList({
                     aria-pressed={spell.favorite}
                     aria-label={
                       spell.favorite
-                        ? `${spell.name} aus den Favoriten nehmen`
-                        : `${spell.name} favorisieren`
+                        ? t.spells.unfavorite(spell.name)
+                        : t.spells.favorite(spell.name)
                     }
                     className="flex min-h-11 w-11 shrink-0 items-center justify-center text-faint transition-colors hover:text-brass"
                   >
@@ -278,18 +280,18 @@ export function SpellList({
                       <span className="truncate font-medium">{spell.name}</span>
                       {spell.concentration ? (
                         <span
-                          title="Konzentration"
+                          title={t.term.concentration}
                           className="shrink-0 rounded bg-brass/15 px-1 text-[0.625rem] font-semibold text-brass"
                         >
-                          K
+                          {t.term.concentrationMark}
                         </span>
                       ) : null}
                       {spell.ritual ? (
                         <span
-                          title="Ritual"
+                          title={t.term.ritual}
                           className="shrink-0 rounded bg-panel-2 px-1 text-[0.625rem] font-semibold text-mute"
                         >
-                          R
+                          {t.term.ritualMark}
                         </span>
                       ) : null}
                     </span>
@@ -307,7 +309,7 @@ export function SpellList({
                         onTogglePrepared(spell.id, !spell.prepared)
                       }
                       aria-pressed={spell.prepared}
-                      aria-label={`${spell.name} vorbereiten`}
+                      aria-label={t.spells.prepare(spell.name)}
                       className={cx(
                         "min-h-11 shrink-0 rounded-md border px-2.5 text-xs font-semibold transition-colors",
                         spell.prepared
@@ -315,14 +317,14 @@ export function SpellList({
                           : "border-edge text-faint hover:text-mute",
                       )}
                     >
-                      {spell.prepared ? "Bereit" : "—"}
+                      {spell.prepared ? t.spells.prepared : "—"}
                     </button>
                   ) : null}
 
                   <button
                     type="button"
                     onClick={() => onRemove(spell.id)}
-                    aria-label={`${spell.name} entfernen`}
+                    aria-label={t.spells.remove(spell.name)}
                     className="min-h-11 min-w-11 shrink-0 text-faint transition-colors hover:text-ember"
                   >
                     ✕

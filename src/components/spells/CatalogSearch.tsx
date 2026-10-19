@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 
 import { Button, Panel, SectionLabel } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 
 export type CatalogHit = {
   id: number;
@@ -32,6 +33,7 @@ export function CatalogSearch({
   classKeys: string[];
   onAdd: (spellId: number) => void;
 }) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [onlyMyClasses, setOnlyMyClasses] = useState(true);
   const [hits, setHits] = useState<CatalogHit[]>([]);
@@ -68,16 +70,17 @@ export function CatalogSearch({
     <Panel>
       <SectionLabel
         right={
-          loading ? <span className="text-xs text-faint">sucht…</span> : null
+          loading ? <span className="text-xs text-faint">{t.spells.searching}</span> : null
         }
       >
-        Zauber hinzufügen
+        {t.spells.catalogTitle}
       </SectionLabel>
 
       <input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Im SRD-Katalog suchen…"
+        placeholder={t.spells.catalogSearch}
+        aria-label={t.spells.catalogSearch}
         className="w-full min-h-11 rounded-md border border-edge bg-ink px-3 text-fg placeholder:text-faint focus:border-patina focus:outline-none"
       />
 
@@ -89,13 +92,13 @@ export function CatalogSearch({
             onChange={(event) => setOnlyMyClasses(event.target.checked)}
             className="size-4 accent-[var(--color-patina)]"
           />
-          Nur Zauber meiner Klassen
+          {t.spells.onlyMyClasses}
         </label>
       ) : null}
 
       {query.trim().length >= 2 && hits.length === 0 && !loading ? (
         <p className="mt-3 text-sm text-faint">
-          Nichts gefunden. Eigene Zauber lassen sich unten von Hand anlegen.
+          {t.spells.nothingFound}
         </p>
       ) : null}
 
@@ -108,12 +111,12 @@ export function CatalogSearch({
                   {hit.name}
                   {hit.concentration ? (
                     <span className="shrink-0 rounded bg-brass/15 px-1 text-[0.625rem] font-semibold text-brass">
-                      K
+                      {t.term.concentrationMark}
                     </span>
                   ) : null}
                 </p>
                 <p className="truncate text-xs text-faint">
-                  {hit.level === 0 ? "Zaubertrick" : `Grad ${hit.level}`}
+                  {hit.level === 0 ? t.term.cantrip : t.term.spellLevel(hit.level)}
                   {hit.school ? ` · ${hit.school}` : ""}
                   {hit.castingTime ? ` · ${hit.castingTime}` : ""}
                 </p>
@@ -127,7 +130,7 @@ export function CatalogSearch({
                   startTransition(() => onAdd(hit.id));
                 }}
               >
-                Hinzufügen
+                {t.common.add}
               </Button>
             </li>
           ))}

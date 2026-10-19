@@ -264,7 +264,7 @@ function TurnOptions({
                 </span>
                 <span className="text-xs text-faint">
                   {spell.level === 0 ? t.term.cantrip : t.term.spellLevel(spell.level)}
-                  {spell.concentration ? ` · ${t.battle.concentrationMark}` : ""}
+                  {spell.concentration ? ` · ${t.term.concentrationMark}` : ""}
                 </span>
               </button>
               <button

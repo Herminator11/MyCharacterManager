@@ -1,4 +1,5 @@
 import { Button, Field, inputClass, Panel } from "@/components/ui";
+import { getT } from "@/lib/i18n/server";
 
 /** Die acht SRD-Schulen — als Auswahl, damit die Filterleiste der
  *  Zauberliste eigene Zauber mit den Katalogzaubern zusammenfasst. */
@@ -24,16 +25,17 @@ const textareaClass =
  * kommt fertig gebunden von der Seite herein, damit das Formular selbst
  * nichts über den Charakter wissen muss.
  */
-export function CustomSpellForm({
+export async function CustomSpellForm({
   action,
 }: {
   action: (formData: FormData) => void | Promise<void>;
 }) {
+  const t = await getT();
   return (
     <Panel>
       <details className="group">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-          <span className="label">Eigenen Zauber von Hand anlegen</span>
+          <span className="label">{t.spells.customTitle}</span>
           <span
             aria-hidden
             className="text-lg leading-none text-mute transition-transform group-open:rotate-45"
@@ -43,29 +45,29 @@ export function CustomSpellForm({
         </summary>
 
         <form action={action} className="mt-3 space-y-3">
-          <Field label="Name">
+          <Field label={t.home.name}>
             <input
               name="name"
               required
-              placeholder="z. B. Flammender Krähenruf"
+              placeholder={t.common.example(t.spells.exampleName)}
               className={inputClass}
             />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Grad">
+            <Field label={t.spells.level}>
               <select name="level" defaultValue="0" className={inputClass}>
-                <option value="0">Zaubertrick</option>
+                <option value="0">{t.term.cantrip}</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((level) => (
                   <option key={level} value={level}>
-                    Grad {level}
+                    {t.term.spellLevel(level)}
                   </option>
                 ))}
               </select>
             </Field>
-            <Field label="Schule">
+            <Field label={t.spells.school}>
               <select name="school" defaultValue="" className={inputClass}>
-                <option value="">— keine —</option>
+                <option value="">{t.spells.noSchool}</option>
                 {SCHOOLS.map((school) => (
                   <option key={school} value={school}>
                     {school}
@@ -74,28 +76,28 @@ export function CustomSpellForm({
               </select>
             </Field>
 
-            <Field label="Wirkzeit">
+            <Field label={t.spells.castingTime}>
               <input
                 name="castingTime"
-                placeholder="z. B. 1 action"
+                placeholder={t.common.example("1 action")}
                 className={inputClass}
               />
             </Field>
-            <Field label="Reichweite">
-              <input name="range" placeholder="z. B. 60 ft." className={inputClass} />
+            <Field label={t.spells.range}>
+              <input name="range" placeholder={t.common.example("60 ft.")} className={inputClass} />
             </Field>
 
-            <Field label="Komponenten">
+            <Field label={t.spells.components}>
               <input
                 name="components"
-                placeholder="z. B. V, S, M"
+                placeholder={t.common.example("V, S, M")}
                 className={inputClass}
               />
             </Field>
-            <Field label="Wirkungsdauer">
+            <Field label={t.spells.durationLong}>
               <input
                 name="duration"
-                placeholder="z. B. Instantaneous"
+                placeholder={t.common.example("Instantaneous")}
                 className={inputClass}
               />
             </Field>
@@ -107,7 +109,7 @@ export function CustomSpellForm({
               name="concentration"
               className="size-4 accent-[var(--color-patina)]"
             />
-            Concentration — nur ein solcher Zauber gleichzeitig
+            {t.term.concentration} — {t.spells.concentrationHint}
           </label>
 
           <label className="flex min-h-11 items-center gap-2 text-sm text-mute">
@@ -116,29 +118,29 @@ export function CustomSpellForm({
               name="ritual"
               className="size-4 accent-[var(--color-patina)]"
             />
-            Ritual — auch ohne Slot wirkbar, +10 Minuten
+            {t.term.ritual} — {t.spells.ritualHint}
           </label>
 
-          <Field label="Beschreibung">
+          <Field label={t.spells.description}>
             <textarea
               name="description"
               rows={5}
-              placeholder="Was der Zauber bewirkt — Würfe, Saves, Schaden."
+              placeholder={t.spells.descriptionPlaceholder}
               className={textareaClass}
             />
           </Field>
 
-          <Field label="Auf höherem Grad" hint="At Higher Levels — optional">
+          <Field label={t.spells.higherLevel} hint={t.spells.higherLevelHint}>
             <textarea
               name="higherLevel"
               rows={2}
-              placeholder="Je Grad über dem ersten +1d6 Schaden."
+              placeholder={t.spells.higherLevelPlaceholder}
               className={textareaClass}
             />
           </Field>
 
           <Button type="submit" variant="solid" size="lg" className="w-full">
-            Zauber anlegen
+            {t.spells.createSpell}
           </Button>
         </form>
       </details>

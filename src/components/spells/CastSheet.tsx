@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 import { Button, cx } from "@/components/ui";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
-import { ACTION_LABELS, isSlotCost, parseActionCost } from "@/lib/rules/actions";
+import { useT } from "@/lib/i18n/client";
+import { isSlotCost, parseActionCost } from "@/lib/rules/actions";
 
 export type CastableSpell = {
   id: number;
@@ -44,6 +45,7 @@ export function CastSheet({
   onCast: (mutation: LiveMutation) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const isCantrip = spell.level === 0;
   const [level, setLevel] = useState(Math.max(spell.level, 1));
 
@@ -92,7 +94,7 @@ export function CastSheet({
     <div className="fixed inset-0 z-40 flex items-end justify-center">
       <button
         type="button"
-        aria-label="Schließen"
+        aria-label={t.common.close}
         onClick={onClose}
         className="absolute inset-0 bg-ink/80 backdrop-blur-sm"
       />
@@ -100,7 +102,7 @@ export function CastSheet({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`${spell.name} wirken`}
+        aria-label={t.spells.castDialog(spell.name)}
         className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border-t border-edge-bright bg-panel"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1rem)" }}
       >
@@ -112,24 +114,24 @@ export function CastSheet({
                 {spell.name}
               </h2>
               <p className="mt-1 text-xs text-mute">
-                {isCantrip ? "Zaubertrick" : `Grad ${spell.level}`}
+                {isCantrip ? t.term.cantrip : t.term.spellLevel(spell.level)}
                 {spell.school ? ` · ${spell.school}` : ""}
-                {spell.ritual ? " · Ritual" : ""}
-                {spell.concentration ? " · Konzentration" : ""}
+                {spell.ritual ? ` · ${t.term.ritual}` : ""}
+                {spell.concentration ? ` · ${t.term.concentration}` : ""}
               </p>
             </div>
             <Button size="sm" variant="ghost" onClick={onClose}>
-              Schließen
+              {t.common.close}
             </Button>
           </div>
         </div>
 
         <div className="px-5 py-4">
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm sm:grid-cols-4">
-            <Detail label="Wirkzeit" value={spell.castingTime} />
-            <Detail label="Reichweite" value={spell.range} />
-            <Detail label="Dauer" value={spell.duration} />
-            <Detail label="Komponenten" value={spell.components} />
+            <Detail label={t.spells.castingTime} value={spell.castingTime} />
+            <Detail label={t.spells.range} value={spell.range} />
+            <Detail label={t.spells.duration} value={spell.duration} />
+            <Detail label={t.spells.components} value={spell.components} />
           </dl>
 
           {(() => {
@@ -139,16 +141,16 @@ export function CastSheet({
             if (!isSlotCost(cost) || !state.turn[cost]) return null;
             return (
               <p className="mt-4 rounded-md border border-ember-dim bg-ember-deep/50 px-3 py-2.5 text-sm text-ember">
-                Deine {ACTION_LABELS[cost]} ist in diesem Zug schon verbraucht.
+                {t.spells.turnUsed(t.actionCost(cost))}
               </p>
             );
           })()}
 
           {spell.concentration && state.concentration ? (
             <p className="mt-4 rounded-md border border-brass/50 bg-brass/10 px-3 py-2.5 text-sm text-brass">
-              Ersetzt die laufende Konzentration auf{" "}
+              {t.spells.replacesConcentration}{" "}
               <span className="font-semibold">
-                {state.concentration.label || "einen anderen Zauber"}
+                {state.concentration.label || t.spells.anotherSpell}
               </span>
               .
             </p>
@@ -157,24 +159,23 @@ export function CastSheet({
           <div className="mt-5">
             {isCantrip ? (
               <>
-                <p className="label mb-2">Zaubertrick — kein Zauberplatz nötig</p>
+                <p className="label mb-2">{t.spells.noSlotNeeded(t.term.cantrip)}</p>
                 <Button
                   variant="solid"
                   size="lg"
                   className="w-full"
                   onClick={() => cast(null)}
                 >
-                  Wirken
+                  {t.spells.cast}
                 </Button>
               </>
             ) : availableLevels.length === 0 ? (
               <p className="rounded-md border border-edge bg-ink px-3 py-3 text-sm text-mute">
-                Für Grad {spell.level} hast du keinen Pool mit passenden
-                Zauberplätzen. Über den Charakterbogen lässt sich einer anlegen.
+                {t.spells.noPool(t.term.spellLevel(spell.level))}
               </p>
             ) : (
               <>
-                <p className="label mb-2">Mit welchem Grad wirken?</p>
+                <p className="label mb-2">{t.spells.whichLevel}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {availableLevels.map((option) => (
                     <button
@@ -192,7 +193,7 @@ export function CastSheet({
                       {option}
                       {option > spell.level ? (
                         <span className="ml-1 text-[0.625rem] font-normal opacity-70">
-                          hoch
+                          {t.spells.upcast}
                         </span>
                       ) : null}
                     </button>
@@ -201,10 +202,10 @@ export function CastSheet({
 
                 {level > spell.level ? (
                   <div className="mt-3 rounded-md border border-edge bg-ink px-3 py-2.5">
-                    <p className="label">Hochgewirkt auf Grad {level}</p>
+                    <p className="label">{t.spells.upcastAt(t.term.spellLevel(level))}</p>
                     {damage[level] ? (
                       <p className="mt-1.5 text-sm">
-                        Schaden{" "}
+                        {t.spells.damage}{" "}
                         <span className="font-semibold text-patina">
                           {damage[level]}
                         </span>
@@ -214,7 +215,7 @@ export function CastSheet({
                         {damage[spell.level] ? (
                           <span className="text-faint">
                             {" "}
-                            (statt {damage[spell.level]})
+                            {t.spells.instead(damage[spell.level])}
                           </span>
                         ) : null}
                       </p>
@@ -227,7 +228,7 @@ export function CastSheet({
                   </div>
                 ) : null}
 
-                <p className="label mt-4 mb-2">Aus welchem Pool?</p>
+                <p className="label mt-4 mb-2">{t.spells.whichPool}</p>
                 <div className="space-y-2">
                   {poolsAtLevel.map(({ pool, free, total }) => (
                     <Button
@@ -238,15 +239,15 @@ export function CastSheet({
                       className="w-full justify-between"
                       onClick={() => cast(pool.id)}
                     >
-                      <span>{pool.name}</span>
+                      <span>{t.poolName(pool)}</span>
                       <span className="text-sm font-normal opacity-80">
-                        {free === 0 ? "leer" : `${free} von ${total} frei`}
+                        {free === 0 ? t.spells.poolEmpty : t.spells.poolFree(free, total)}
                       </span>
                     </Button>
                   ))}
                   {poolsAtLevel.length === 0 ? (
                     <p className="text-sm text-mute">
-                      Kein Pool bietet Grad {level} an.
+                      {t.spells.noPoolAt(t.term.spellLevel(level))}
                     </p>
                   ) : null}
                 </div>
@@ -256,7 +257,7 @@ export function CastSheet({
                   onClick={() => cast(null)}
                   className="mt-3 w-full py-2 text-sm text-faint underline-offset-4 hover:text-mute hover:underline"
                 >
-                  Ohne Zauberplatz wirken
+                  {t.spells.castWithoutSlot}
                 </button>
               </>
             )}
@@ -265,7 +266,7 @@ export function CastSheet({
           {spell.description ? (
             <details className="mt-5">
               <summary className="cursor-pointer text-sm font-medium text-mute">
-                Beschreibung
+                {t.spells.description}
               </summary>
               <p className="mt-2 text-sm leading-relaxed whitespace-pre-line text-mute">
                 {spell.description}
