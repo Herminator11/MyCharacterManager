@@ -1,6 +1,7 @@
 "use client";
 
 import { cx, Tooltip } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 import { useLive } from "@/lib/live-context";
 
 /**
@@ -18,11 +19,12 @@ import { useLive } from "@/lib/live-context";
  */
 export function InspirationToggle({ className }: { className?: string }) {
   const { state, send } = useLive();
+  const t = useT();
   const on = state.inspiration;
 
   return (
     <Tooltip
-      label={on ? "Inspiration vorhanden — antippen zum Ausgeben" : "Keine Inspiration"}
+      label={on ? t.profile.inspirationOn : t.profile.inspirationOff}
       className={className}
       // Am rechten Rand: zentriert ragte das unsichtbare Label über den
       // Bildschirm hinaus und machte die ganze Übersicht seitlich
@@ -33,9 +35,7 @@ export function InspirationToggle({ className }: { className?: string }) {
         type="button"
         onClick={() => send({ type: "inspiration.set", value: !on })}
         aria-pressed={on}
-        aria-label={
-          on ? "Inspiration ausgeben" : "Inspiration erhalten"
-        }
+        aria-label={on ? t.profile.inspirationSpend : t.profile.inspirationGain}
         className={cx(
           "flex min-h-11 min-w-14 flex-col items-center justify-center gap-0.5 transition-colors",
           on ? "text-brass" : "text-faint hover:text-fg",
@@ -45,7 +45,7 @@ export function InspirationToggle({ className }: { className?: string }) {
         {/* Sichtbares Wort statt nur Tooltip: die Flamme allein sagt am
             Handy niemandem, wofür sie steht. */}
         <span className="text-[0.625rem] leading-none font-medium">
-          Inspiration
+          {t.term.inspiration}
         </span>
       </button>
     </Tooltip>

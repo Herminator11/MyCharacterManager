@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 
 import { characterPath } from "@/lib/characterUrl";
+import { useT } from "@/lib/i18n/client";
+import type { Messages } from "@/lib/i18n/messages";
 
 import {
   BackpackIcon,
@@ -20,13 +22,17 @@ import { cx } from "./ui";
  * das Handy einhändig am Spieltisch hält.
  */
 const TABS = [
-  { segment: "", label: "Übersicht", Icon: BustIcon },
-  { segment: "spells", label: "Zauber", Icon: SparkIcon },
-  { segment: "combat", label: "Angriffe", Icon: SwordIcon },
-  { segment: "inventory", label: "Gepäck", Icon: BackpackIcon },
-  { segment: "sheet", label: "Bogen", Icon: SheetIcon },
-  { segment: "notes", label: "Notizen", Icon: BookIcon },
-] as const;
+  { segment: "", label: "overview", Icon: BustIcon },
+  { segment: "spells", label: "spells", Icon: SparkIcon },
+  { segment: "combat", label: "attacks", Icon: SwordIcon },
+  { segment: "inventory", label: "inventory", Icon: BackpackIcon },
+  { segment: "sheet", label: "sheet", Icon: SheetIcon },
+  { segment: "notes", label: "notes", Icon: BookIcon },
+] as const satisfies readonly {
+  segment: string;
+  label: Exclude<keyof Messages["tabs"], "label">;
+  Icon: unknown;
+}[];
 
 export function TabBar({
   characterId,
@@ -40,10 +46,12 @@ export function TabBar({
   // Umbenennen oder einem kodierten Umlaut fehl — dann war kein Reiter
   // aktiv, und Übersicht und Zauber sahen gleich aus.
   const segment = useSelectedLayoutSegment() ?? "";
+  const t = useT();
   const base = characterPath(characterId, characterName);
 
   return (
     <nav
+      aria-label={t.tabs.label}
       // Deckend: bei /95 mit Blur schien in Safari der Text darunter durch.
       className="fixed inset-x-0 bottom-0 z-30 border-t border-edge bg-panel"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
@@ -79,7 +87,7 @@ export function TabBar({
                     Wort wiedererkannt. Das Wort bleibt trotzdem stehen —
                     sechs Formen auswendig zu lernen ist kein Fortschritt. */}
                 <tab.Icon className="size-[1.15rem]" />
-                {tab.label}
+                {t.tabs[tab.label]}
               </Link>
             </li>
           );

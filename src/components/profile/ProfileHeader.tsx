@@ -7,6 +7,7 @@ import { KeyStats } from "@/components/profile/KeyStat";
 import { PortraitUpload } from "@/components/profile/PortraitUpload";
 import { Panel } from "@/components/ui";
 import { className as classLabel } from "@/lib/rules/classes";
+import { getT } from "@/lib/i18n/server";
 import { formatModifier } from "@/lib/rules/derive";
 import type { SheetView } from "@/lib/server/characters";
 
@@ -24,7 +25,7 @@ import type { SheetView } from "@/lib/server/characters";
  * entstehen mitten im Spiel — und das Portrait, das an keinem anderen Wert
  * hängt und deshalb hier wie im Bogen direkt wechselbar ist.
  */
-export function ProfileHeader({
+export async function ProfileHeader({
   sheet,
   pinCount,
   addPin,
@@ -36,6 +37,7 @@ export function ProfileHeader({
   uploadPortrait: (formData: FormData) => Promise<{ error?: string } | void>;
 }) {
   const { character } = sheet;
+  const t = await getT();
 
   const subtitle = [
     // Der Katalogname gewinnt, wenn eine Spezies verknüpft ist: er ist der,
@@ -91,7 +93,7 @@ export function ProfileHeader({
                   {c.subclass ? ` (${c.subclass})` : ""}
                 </span>
               ))
-            : "Ohne Klasse"}
+            : t.header.noClass}
         </p>
         {subtitle.length > 0 ? (
           <p className="mt-0.5 text-xs text-faint lg:truncate">

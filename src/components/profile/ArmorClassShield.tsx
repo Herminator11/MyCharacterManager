@@ -11,7 +11,7 @@
  * Übersicht, die sich unter dem Finger änderte — und damit die Ausnahme,
  * die die Regel „Übersicht zeigt, Bogen ändert“ unlesbar machte.
  */
-export function ArmorClassShield({ value }: { value: number }) {
+export function ArmorClassShield({ value, label }: { value: number; label: string }) {
   return (
     <div className="relative flex w-[4.5rem] shrink-0 flex-col items-center">
       <svg viewBox="0 0 44 50" aria-hidden className="h-[3.75rem] w-auto text-patina-dim">
@@ -29,7 +29,7 @@ export function ArmorClassShield({ value }: { value: number }) {
         {value}
       </dd>
 
-      <dt className="label mt-1 text-[0.625rem]">RK</dt>
+      <dt className="label mt-1 text-[0.625rem]">{label}</dt>
     </div>
   );
 }

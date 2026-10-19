@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { NoteIcon } from "@/components/icons";
 import { Button, cx, inputClass, Tooltip } from "@/components/ui";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * „Aktuell gilt für dich" — anlegen, wo man es anlegen will: oben in der Ecke.
@@ -25,6 +26,7 @@ export function PinButton({
   count: number;
   add: (formData: FormData) => Promise<void>;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
 
@@ -53,7 +55,7 @@ export function PinButton({
       type="button"
       onClick={() => setOpen(!open)}
       aria-expanded={open}
-      aria-label="Vermerk anlegen"
+      aria-label={t.profile.pinAdd}
       className={cx(
         "relative flex min-h-11 min-w-14 flex-col items-center justify-center gap-0.5 transition-colors",
         open || count > 0 ? "text-brass" : "text-faint hover:text-fg",
@@ -63,7 +65,7 @@ export function PinButton({
       {/* Ein Blatt ist keine Konvention wie Papierkorb oder Stift — das
           Wort steht deshalb sichtbar darunter, nicht nur im Tooltip, der
           auf dem Handy nie erscheint. */}
-      <span className="text-[0.625rem] leading-none font-medium">Vermerk</span>
+      <span className="text-[0.625rem] leading-none font-medium">{t.profile.pin}</span>
       {count > 0 ? (
         <span className="absolute top-0.5 right-2 flex size-3.5 items-center justify-center rounded-full bg-brass text-[0.55rem] leading-none font-semibold text-ink tabular-nums">
           {count}
@@ -80,7 +82,7 @@ export function PinButton({
       {open ? (
         trigger
       ) : (
-        <Tooltip label="Vermerk anlegen — was ab jetzt für dich gilt" align="end">
+        <Tooltip label={t.profile.pinTooltip} align="end">
           {trigger}
         </Tooltip>
       )}
@@ -96,18 +98,18 @@ export function PinButton({
               autoFocus
               name="title"
               required
-              placeholder="Woran musst du denken?"
-              aria-label="Vermerk"
+              placeholder={t.profile.pinTitlePlaceholder}
+              aria-label={t.profile.pin}
               className={inputClass}
             />
             <input
               name="body"
-              placeholder="Was bewirkt es? (optional)"
-              aria-label="Wirkung des Vermerks"
+              placeholder={t.profile.pinBodyPlaceholder}
+              aria-label={t.profile.pinBodyLabel}
               className={inputClass}
             />
             <Button type="submit" size="sm" variant="solid" className="w-full">
-              Anheften
+              {t.profile.pinSubmit}
             </Button>
           </form>
         </div>

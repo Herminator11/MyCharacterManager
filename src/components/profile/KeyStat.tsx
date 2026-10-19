@@ -1,4 +1,5 @@
 import { cx } from "@/components/ui";
+import { getT } from "@/lib/i18n/server";
 import { formatModifier } from "@/lib/rules/derive";
 import { ABILITY_LABELS } from "@/lib/rules/skills";
 import type { SheetView } from "@/lib/server/characters";
@@ -40,13 +41,14 @@ export function KeyStat({
  * "Wahrn." zeigt — auf der Übersicht fehlte sie bisher, die Leiste nannte
  * also eine Zahl, die man nirgends sonst fand.
  */
-export function KeyStats({
+export async function KeyStats({
   sheet,
   className,
 }: {
   sheet: NonNullable<SheetView>;
   className?: string;
 }) {
+  const t = await getT();
   return (
     <dl
       className={cx(
@@ -54,20 +56,20 @@ export function KeyStats({
         className,
       )}
     >
-      <KeyStat label="Übungsbonus" value={formatModifier(sheet.proficiencyBonus)} />
+      <KeyStat label={t.term.proficiencyBonus} value={formatModifier(sheet.proficiencyBonus)} />
       {sheet.spellcasting ? (
         <>
-          <KeyStat label="Zauber-SG" value={sheet.spellcasting.saveDc} />
+          <KeyStat label={t.term.spellSaveDc} value={sheet.spellcasting.saveDc} />
           <KeyStat
-            label={`Zauberangriff (${ABILITY_LABELS[sheet.spellcasting.ability].name})`}
+            label={t.term.spellAttack(ABILITY_LABELS[sheet.spellcasting.ability].name)}
             value={formatModifier(sheet.spellcasting.attackBonus)}
           />
         </>
       ) : null}
-      <KeyStat label="Wahrnehmung (passiv)" value={sheet.passivePerception} />
-      <KeyStat label="Motiv erkennen (passiv)" value={sheet.passiveInsight} />
+      <KeyStat label={t.term.passivePerception} value={sheet.passivePerception} />
+      <KeyStat label={t.term.passiveInsight} value={sheet.passiveInsight} />
       {sheet.character.xp > 0 ? (
-        <KeyStat label="EP" value={sheet.character.xp.toLocaleString("de-DE")} />
+        <KeyStat label={t.term.experience} value={t.number(sheet.character.xp)} />
       ) : null}
     </dl>
   );

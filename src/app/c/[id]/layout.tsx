@@ -7,6 +7,7 @@ import { StickyStats } from "@/components/StickyStats";
 import { TabBar } from "@/components/TabBar";
 import { characterIdFromParam, characterPath } from "@/lib/characterUrl";
 import { className as classLabel } from "@/lib/rules/classes";
+import { getT } from "@/lib/i18n/server";
 import { formatModifier } from "@/lib/rules/derive";
 import { getSheet } from "@/lib/server/characters";
 
@@ -20,6 +21,7 @@ export default async function CharacterLayout({
   const characterId = characterIdFromParam(id);
   const sheet = getSheet(characterId);
   if (!sheet) notFound();
+  const t = await getT();
 
   const classes = sheet.classes
     .map((c) => `${classLabel(c.classKey)} ${c.level}`)
@@ -49,7 +51,7 @@ export default async function CharacterLayout({
                 {sheet.character.name}
               </Link>
               <p className="truncate text-xs text-faint">
-                {classes || "Ohne Klasse"}
+                {classes || t.header.noClass}
                 {sheet.character.race ? ` · ${sheet.character.race}` : ""}
               </p>
             </div>
@@ -60,13 +62,13 @@ export default async function CharacterLayout({
                 fügt nichts hinzu. */}
             <StickyStats>
               <dl className="flex shrink-0 gap-3.5 text-center">
-                <MiniStat label="RK" value={sheet.armorClass} />
+                <MiniStat label={t.term.armorClassShort} value={sheet.armorClass} />
                 <MiniStat
-                  label="Init."
+                  label={t.term.initiativeShort}
                   value={formatModifier(sheet.initiative)}
                 />
-                <MiniStat label="Bew." value={sheet.character.speed} />
-                <MiniStat label="Wahrn." value={sheet.passivePerception} />
+                <MiniStat label={t.term.speedShort} value={sheet.character.speed} />
+                <MiniStat label={t.term.passivePerceptionShort} value={sheet.passivePerception} />
               </dl>
             </StickyStats>
           </div>

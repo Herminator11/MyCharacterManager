@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { ShoeIcon } from "@/components/icons";
+import { getT } from "@/lib/i18n/server";
 
 import { ArmorClassShield } from "./ArmorClassShield";
 
@@ -15,7 +16,7 @@ import { ArmorClassShield } from "./ArmorClassShield";
  * Zahl darin braucht keine Beschriftung — und genau eine Sonderform ist
  * genug, sonst wird die Reihe zum Jahrmarkt.
  */
-export function CombatStats({
+export async function CombatStats({
   armorClass,
   initiative,
   speed,
@@ -25,14 +26,15 @@ export function CombatStats({
   initiative: string;
   speed: number;
 }) {
+  const t = await getT();
   return (
     // Am Handy drei gleich breite Spalten über die volle Breite, jedes
     // Instrument darin mittig — vorher standen die drei linksbündig und
     // ließen ein Drittel leer. Ab lg wieder die kompakte Reihe rechts.
     <dl className="grid grid-cols-3 justify-items-center gap-2 lg:flex lg:shrink-0">
-      <ArmorClassShield value={armorClass} />
-      <Plate label="Initiative" value={initiative} icon={<BoltIcon />} />
-      <Plate label="Bewegung" value={speed} unit="ft" icon={<ShoeIcon />} />
+      <ArmorClassShield value={armorClass} label={t.term.armorClassShort} />
+      <Plate label={t.term.initiative} value={initiative} icon={<BoltIcon />} />
+      <Plate label={t.term.speed} value={speed} unit="ft" icon={<ShoeIcon />} />
     </dl>
   );
 }
