@@ -311,3 +311,7 @@ also auch deine Charaktere.
 
 Zauber, Conditions und die Klassen-Progression stammen aus dem SRD 5.1
 (CC-BY-4.0). Siehe [NOTICE.md](NOTICE.md).
+
+## Rechtlicher Hinweis
+
+Dies ist ein **privates, nicht kommerzielles** Werkzeug für meine eigenen Charaktere. *Dungeons & Dragons* und *D&D* sind Marken von Wizards of the Coast LLC; das Projekt ist inoffiziell und steht in keiner Verbindung zu Wizards of the Coast. Es enthält Material aus dem System Reference Document 5.1 („SRD 5.1“) von Wizards of the Coast LLC (<https://dnd.wizards.com/resources/systems-reference-document>), lizenziert unter der [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode). Alles darüber hinaus gehört seinen Inhabern; Details in [NOTICE.md](NOTICE.md). Der Code steht unter der MIT-Lizenz, siehe [LICENSE](LICENSE).
