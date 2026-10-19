@@ -9,6 +9,7 @@ import kaelFields from "@/test/fixtures/kael-sheet-fields.json";
 
 import {
   deleteCharacter,
+  getAttacks,
   getCharacterSpells,
   getFeatures,
   getInventory,
@@ -145,6 +146,25 @@ describe("Bauplan wird ersetzt", () => {
     expect(getCharacterSpells(id).map((e) => e.spell.name)).toContain(
       "Fireball",
     );
+  });
+
+  it("zerlegt den Schadenstext auch beim Re-Import", () => {
+    const draft = leveledUp();
+    draft.attacks = [
+      {
+        name: "Rapier",
+        attackBonus: 7,
+        damage: "1d8+3 piercing",
+        range: "",
+        notes: "",
+      },
+    ];
+    applyReimport(id, draft);
+    expect(getAttacks(id)[0]).toMatchObject({
+      damageDice: "1d8",
+      damageBonusOverride: 3,
+      damageType: "piercing",
+    });
   });
 
   it("hebt das HP-Maximum", () => {

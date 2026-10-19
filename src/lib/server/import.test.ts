@@ -171,6 +171,16 @@ describe("Angriffe und Ausrüstung", () => {
     });
   });
 
+  it("lässt einen Schadenstext, der sich nicht sicher zerlegen lässt, stehen", () => {
+    // "per beam" ist keine Schadensart. Bonus 0, damit die +5 im Text
+    // nicht noch um den Attributsmodifikator ergänzt werden.
+    expect(getAttacks(id)[0]).toMatchObject({
+      damageDice: "2d10 +5 force damage per beam",
+      damageBonusOverride: 0,
+      damageType: "",
+    });
+  });
+
   it("übernimmt Gegenstände und Rucksackinhalt", () => {
     const names = getInventory(id).map((i) => i.name);
     expect(names).toContain("Blood Vial +2");
@@ -258,6 +268,16 @@ describe("Offizieller Bogen", () => {
     // seinem letzten Nutzer wieder verschwinden darf.
     expect(entry!.spell.source).toBe("imported");
     expect(entry!.spell.level).toBe(4);
+  });
+
+  it("zerlegt den Waffenschaden in Würfel, Bonus und Schadensart", () => {
+    const list = getAttacks(officialId);
+    expect(
+      list.map((a) => [a.name, a.damageDice, a.damageBonusOverride, a.damageType]),
+    ).toEqual([
+      ["Dagger", "1d4", 1, "piercing"],
+      ["Quarterstaff", "1d6", -1, "bludgeoning"],
+    ]);
   });
 
   it("legt beide Zauberplatz-Pools an", () => {

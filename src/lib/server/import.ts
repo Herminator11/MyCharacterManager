@@ -15,6 +15,7 @@ import {
   spells,
   type Ability,
 } from "@/db/schema";
+import { parseDamage } from "@/lib/import/damage";
 import type { ImportedCharacter } from "@/lib/import/parseSheet";
 
 import { getLiveState, refreshDerived } from "./characters";
@@ -115,6 +116,7 @@ export function importCharacter(draft: ImportedCharacter): number {
     }
 
     draft.attacks.forEach((attack, index) => {
+      const damage = parseDamage(attack.damage);
       db.insert(attacks)
         .values({
           characterId: id,
@@ -122,7 +124,11 @@ export function importCharacter(draft: ImportedCharacter): number {
           // Der Bogen nennt den fertigen Bonus, ohne zu verraten, aus
           // welchem Attribut er stammt — deshalb als Override übernehmen.
           attackBonusOverride: attack.attackBonus,
-          damageDice: attack.damage,
+          // Getrennt, sonst hängt die Anzeige den Attributsmodifikator
+          // an einen Text, der den Bonus schon enthält.
+          damageDice: damage.dice,
+          damageBonusOverride: damage.bonus,
+          damageType: damage.type,
           range: attack.range,
           notes: attack.notes,
           proficient: true,

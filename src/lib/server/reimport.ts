@@ -13,6 +13,7 @@ import {
   spells,
   type Ability,
 } from "@/db/schema";
+import { parseDamage } from "@/lib/import/damage";
 import type { ImportedCharacter } from "@/lib/import/types";
 import { className as classLabel } from "@/lib/rules/classes";
 import { SKILLS } from "@/lib/rules/skills";
@@ -274,12 +275,17 @@ function replaceAttacks(characterId: number, draft: ImportedCharacter) {
   db.delete(attacks).where(eq(attacks.characterId, characterId)).run();
 
   draft.attacks.forEach((attack, index) => {
+    const damage = parseDamage(attack.damage);
     db.insert(attacks)
       .values({
         characterId,
         name: attack.name,
         attackBonusOverride: attack.attackBonus,
-        damageDice: attack.damage,
+        // Getrennt, sonst hängt die Anzeige den Attributsmodifikator
+        // an einen Text, der den Bonus schon enthält.
+        damageDice: damage.dice,
+        damageBonusOverride: damage.bonus,
+        damageType: damage.type,
         range: attack.range,
         notes: attack.notes,
         proficient: true,
