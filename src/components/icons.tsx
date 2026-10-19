@@ -589,6 +589,17 @@ export function SwitchIcon({ on, className }: IconProps & { on: boolean }) {
  * `filled` unterscheidet frei von verbraucht: eine volle Form ist da,
  * ein Umriss ist die Erinnerung daran, dass sie es einmal war.
  */
+/**
+ * Die Farbe zur Form, an einer Stelle — Zugleiste, Kampflog und
+ * Kostenmarken lagen vorher auseinander, und das Log malte eine Reaktion
+ * als rotes Bonus-Dreieck.
+ */
+export const ACTION_TONE = {
+  action: "text-patina",
+  bonus: "text-bonus",
+  reaction: "text-brass",
+} as const;
+
 export function ActionShape({
   kind,
   filled = true,

@@ -66,7 +66,7 @@ export function CustomSpeciesForm({
           <div className="mt-1.5 grid grid-cols-3 gap-2.5">
             {ABILITIES.map((ability) => (
               <label key={ability} className="block">
-                <span className="label text-[0.5625rem]">
+                <span className="label text-[0.625rem]">
                   {ABILITY_LABELS[ability].name}
                 </span>
                 <input

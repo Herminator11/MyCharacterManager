@@ -35,7 +35,7 @@ export function AbilityColumn({ ability }: { ability: AbilityEntry }) {
       {/* self-start, damit der Kasten seine natürliche Höhe behält — sonst
           zöge ihn eine lange Fertigkeitsliste wie bei INT in die Länge. */}
       <div className="flex w-[4.5rem] shrink-0 flex-col items-center self-start rounded-lg border border-edge bg-panel-2 px-2 py-2.5">
-        <span className="label text-[0.5625rem]">{label.name}</span>
+        <span className="label text-[0.625rem]">{label.name}</span>
         <span className="mt-1 text-[1.75rem] leading-none font-semibold tracking-tight tabular-nums">
           {formatModifier(ability.modifier)}
         </span>

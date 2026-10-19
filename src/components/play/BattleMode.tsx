@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CastSheet, type CastableSpell } from "@/components/spells/CastSheet";
-import { ActionShape, CrossedSwordsIcon, PlayIcon } from "@/components/icons";
+import { ACTION_TONE, ActionShape, CrossedSwordsIcon, PlayIcon } from "@/components/icons";
 import { cx, Panel, SectionLabel } from "@/components/ui";
 import { characterPath } from "@/lib/characterUrl";
 import { useLive } from "@/lib/live-context";
@@ -344,12 +344,7 @@ function CostBadge({ cost }: { cost: ActionCost }) {
     );
   }
 
-  const tone =
-    cost === "action"
-      ? "text-patina"
-      : cost === "bonus"
-        ? "text-ember"
-        : "text-brass";
+  const tone = ACTION_TONE[cost];
 
   // Die Form selbst ist `aria-hidden`; der Name gehört an die Hülle,
   // sonst liest ein Screenreader an dieser Stelle gar nichts vor.

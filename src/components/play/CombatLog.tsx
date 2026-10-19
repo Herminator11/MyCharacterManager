@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionShape } from "@/components/icons";
+import { ACTION_TONE, ActionShape } from "@/components/icons";
 import { Panel, SectionLabel, cx } from "@/components/ui";
 import type { LiveLogEntry, LiveState } from "@/lib/live-types";
 import { groupByRound } from "@/lib/rules/combatLog";
@@ -76,16 +76,16 @@ export function CombatLogRow({ entry }: { entry: LiveLogEntry }) {
  */
 function Marker({ entry }: { entry: LiveLogEntry }) {
   if (entry.kind === "cast" && entry.actionCost && entry.actionCost !== "long") {
-    const isAction = entry.actionCost === "action";
+    const cost = entry.actionCost;
     return (
       <span
         aria-hidden
         className={cx(
           "mt-0.5 flex size-3 shrink-0 items-center justify-center",
-          isAction ? "text-patina" : "text-ember",
+          ACTION_TONE[cost],
         )}
       >
-        <ActionShape kind={isAction ? "action" : "bonus"} className="size-3" />
+        <ActionShape kind={cost} className="size-3" />
       </span>
     );
   }

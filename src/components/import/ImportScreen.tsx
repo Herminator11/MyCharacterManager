@@ -243,7 +243,7 @@ function Review({
                 key={ability}
                 className="rounded-md border border-edge bg-panel-2 px-2 py-2 text-center"
               >
-                <p className="label text-[0.5625rem]">
+                <p className="label text-[0.625rem]">
                   {ABILITY_LABELS[ability].name}
                 </p>
                 <p className="mt-1 text-xl leading-none font-semibold tabular-nums">

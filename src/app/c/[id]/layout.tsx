@@ -87,7 +87,7 @@ function MiniStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
       <dd className="text-base leading-none font-semibold">{value}</dd>
-      <dt className="label mt-1 text-[0.5625rem]">{label}</dt>
+      <dt className="label mt-1 text-[0.625rem]">{label}</dt>
     </div>
   );
 }

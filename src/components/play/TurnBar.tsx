@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionShape, ChevronDownIcon } from "@/components/icons";
+import { ACTION_TONE, ActionShape, ChevronDownIcon } from "@/components/icons";
 import { cx } from "@/components/ui";
 import type { LiveMutation, LiveState } from "@/lib/live-types";
 import { ACTION_SLOTS, ACTION_LABELS, type ActionSlot } from "@/lib/rules/actions";
@@ -28,12 +28,13 @@ import { ACTION_SLOTS, ACTION_LABELS, type ActionSlot } from "@/lib/rules/action
 /**
  * Farbe gehört zur Form: Grün heißt "das Große geht noch", Orange "nur
  * noch das Kleine". Verbraucht ist alles gleich grau — dann zählt nur
- * noch, was übrig ist.
+ * noch, was übrig ist. Die Bonusaktion war hier einmal Ember-Rot, die
+ * Farbe von Schaden — sie hat ihr eigenes Orange bekommen.
  */
 const SLOT_TONE = {
-  action: { border: "border-patina-dim bg-patina-deep", text: "text-patina" },
-  bonus: { border: "border-ember-dim bg-ember-deep", text: "text-ember" },
-  reaction: { border: "border-brass/50 bg-brass/10", text: "text-brass" },
+  action: { border: "border-patina-dim bg-patina-deep", text: ACTION_TONE.action },
+  bonus: { border: "border-bonus-dim bg-bonus-deep", text: ACTION_TONE.bonus },
+  reaction: { border: "border-brass/50 bg-brass/10", text: ACTION_TONE.reaction },
 } as const;
 
 export function TurnBar({

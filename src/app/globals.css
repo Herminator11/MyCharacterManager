@@ -25,6 +25,14 @@
 
   --color-brass: #c9a227;
 
+  /* Bonusaktion. Eigenes Orange statt Ember: Ember heißt Schaden und
+     Gefahr, und die Bonusaktion stand damit rot neben dem Schaden-Knopf,
+     als wäre sie etwas Bedrohliches. Orange wie das Dreieck in Baldur's
+     Gate, klar wärmer als das Messing der Reaktion. */
+  --color-bonus: #e8913a;
+  --color-bonus-dim: #85541f;
+  --color-bonus-deep: #311f0d;
+
   /* Zauberplätze. Eigene Farbe, weil sie als Einzige nicht "verfügbar"
      oder "Gefahr" bedeuten, sondern schlicht Magie — dieselbe Trennung
      wie in Baldur's Gate, wo die Slots hellblau neben den Aktionen
@@ -35,7 +43,10 @@
 
   --color-fg: #e6ecef;
   --color-mute: #8b99a3;
-  --color-faint: #5c6970;
+  /* 4.5:1 auf Panel und Panel-2 (WCAG AA für kleinen Text). Das frühere
+     #5c6970 lag bei 3:1 — und genau in dieser Farbe stehen die kleinsten
+     Texte der App: Labels, Hinweise, Einheiten. */
+  --color-faint: #808e97;
 
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;

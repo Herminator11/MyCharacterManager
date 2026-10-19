@@ -102,7 +102,7 @@ export function SpeciesPanel({
                   <dd className="text-lg leading-none font-semibold tabular-nums text-patina">
                     {formatModifier(bonus)}
                   </dd>
-                  <dt className="label mt-1 text-[0.5625rem]">
+                  <dt className="label mt-1 text-[0.625rem]">
                     {ABILITY_LABELS[ability].name}
                   </dt>
                 </div>

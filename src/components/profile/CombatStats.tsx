@@ -58,7 +58,7 @@ function Plate({
           ) : null}
         </dd>
       </div>
-      <dt className="label mt-1 text-[0.5625rem]">{label}</dt>
+      <dt className="label mt-1 text-[0.625rem]">{label}</dt>
     </div>
   );
 }
