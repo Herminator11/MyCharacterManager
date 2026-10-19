@@ -46,7 +46,7 @@ export function AbilityColumn({ ability }: { ability: AbilityEntry }) {
 
       <ul className="min-w-0 flex-1 space-y-px self-start pt-1">
         <ProficiencyLine
-          label="Saving Throw"
+          label="Rettungswurf"
           bonus={ability.save}
           level={ability.saveProficient ? 1 : 0}
           isSave

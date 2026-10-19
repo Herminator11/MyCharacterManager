@@ -85,7 +85,7 @@ export function CustomSpeciesForm({
         </div>
 
         <Field
-          label="Traits"
+          label="Merkmale"
           hint="Ein Trait je Absatz, Name und Text mit — getrennt."
         >
           <textarea

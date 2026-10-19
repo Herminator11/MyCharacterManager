@@ -280,7 +280,7 @@ function DyingSaves({
     <div className="mt-4 space-y-2.5 rounded-md border border-ember-dim bg-ember-deep/40 px-3.5 py-3">
       <p className="flex items-center gap-2 text-sm font-semibold text-ember">
         <SkullIcon className="size-4" />
-        Bewusstlos — Death Saves
+        Bewusstlos — Todesrettungswürfe
       </p>
       {row("Erfolge", state.deathSaveSuccesses, "patina", (successes) =>
         send({

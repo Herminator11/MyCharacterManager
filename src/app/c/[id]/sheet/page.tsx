@@ -180,7 +180,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             // aus dem Panel.
             <div className="flex flex-wrap items-center justify-end gap-x-3">
               <span className="text-xs text-mute">
-                Gesamtlevel {sheet.level} · Prof {formatModifier(sheet.proficiencyBonus)}
+                Gesamtlevel {sheet.level} · Übung {formatModifier(sheet.proficiencyBonus)}
               </span>
               <ClassThemeToggle
                 enabled={character.backgroundThemeEnabled}
@@ -493,7 +493,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             ein und nimmt sie hinterher ebenso schnell wieder zurück.
           </p>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Max. HP">
+            <Field label="Max. Trefferpunkte">
               <input
                 name="hpMaxOverride"
                 type="number"
@@ -530,7 +530,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Passive Perception">
+            <Field label="Wahrnehmung (passiv)">
               <input
                 name="passivePerceptionOverride"
                 type="number"
@@ -539,7 +539,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Passive Insight">
+            <Field label="Motiv erkennen (passiv)">
               <input
                 name="passiveInsightOverride"
                 type="number"
@@ -651,7 +651,7 @@ export default async function SheetPage({ params }: PageProps<"/c/[id]">) {
             </div>
             <div>
               <dd className="text-xl font-semibold">{sheet.spellcasting.saveDc}</dd>
-              <dt className="label mt-1">Save DC</dt>
+              <dt className="label mt-1">Zauber-SG</dt>
             </div>
             <div>
               <dd className="text-xl font-semibold">

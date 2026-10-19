@@ -29,7 +29,7 @@ export function ArmorClassShield({ value }: { value: number }) {
         {value}
       </dd>
 
-      <dt className="label mt-1 text-[0.5625rem]">AC</dt>
+      <dt className="label mt-1 text-[0.625rem]">RK</dt>
     </div>
   );
 }

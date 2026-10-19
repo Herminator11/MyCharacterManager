@@ -260,10 +260,10 @@ function Review({
         <Panel>
           <SectionLabel>Kampfwerte</SectionLabel>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm sm:grid-cols-3">
-            <Value label="Max. HP" value={draft.hpMaxOverride} />
+            <Value label="Max. TP" value={draft.hpMaxOverride} />
             <Value label="Aktuell" value={draft.hpCurrent ?? "voll"} />
             <Value label="Temp" value={draft.hpTemp || "—"} />
-            <Value label="AC" value={draft.acOverride} />
+            <Value label="RK" value={draft.acOverride} />
             <Value
               label="Initiative"
               value={
@@ -272,9 +272,9 @@ function Review({
                   : formatModifier(draft.initiativeOverride)
               }
             />
-            <Value label="Speed" value={draft.speed} />
-            <Value label="Passive Perc." value={draft.passivePerceptionOverride} />
-            <Value label="Spell DC" value={draft.spellSaveDcOverride} />
+            <Value label="Bewegung" value={draft.speed} />
+            <Value label="Wahrn. (passiv)" value={draft.passivePerceptionOverride} />
+            <Value label="Zauber-SG" value={draft.spellSaveDcOverride} />
             <Value
               label="Zauberangriff"
               value={

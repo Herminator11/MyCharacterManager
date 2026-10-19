@@ -60,13 +60,13 @@ export default async function CharacterLayout({
                 fügt nichts hinzu. */}
             <StickyStats>
               <dl className="flex shrink-0 gap-3.5 text-center">
-                <MiniStat label="AC" value={sheet.armorClass} />
+                <MiniStat label="RK" value={sheet.armorClass} />
                 <MiniStat
-                  label="Init"
+                  label="Init."
                   value={formatModifier(sheet.initiative)}
                 />
-                <MiniStat label="Speed" value={sheet.character.speed} />
-                <MiniStat label="PP" value={sheet.passivePerception} />
+                <MiniStat label="Bew." value={sheet.character.speed} />
+                <MiniStat label="Wahrn." value={sheet.passivePerception} />
               </dl>
             </StickyStats>
           </div>

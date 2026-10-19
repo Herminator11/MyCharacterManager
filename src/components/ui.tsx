@@ -54,7 +54,7 @@ export const TEXT_ACTION =
 /**
  * Der Umschalter in den Bearbeiten-Modus.
  *
- * Heißt überall gleich und trägt überall denselben Stift: „Edit“ ist an
+ * Heißt überall gleich und trägt überall denselben Stift: „Bearbeiten“ ist an
  * genug Stellen dasselbe Versprechen, dass es sich lohnt, es nicht jedes
  * Mal neu zu formulieren. Im aktiven Zustand steht dort „Fertig“ — ohne
  * Stift, denn dann ist nichts mehr zu öffnen.
@@ -79,7 +79,7 @@ export function EditToggle({
       )}
     >
       {editing ? null : <PenIcon />}
-      {editing ? "Fertig" : "Edit"}
+      {editing ? "Fertig" : "Bearbeiten"}
     </button>
   );
 }
@@ -95,7 +95,7 @@ export function EditToggle({
 export function EditLink({
   href,
   className,
-  label = "Edit",
+  label = "Bearbeiten",
 }: {
   href: string;
   className?: string;

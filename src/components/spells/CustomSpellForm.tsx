@@ -55,7 +55,7 @@ export function CustomSpellForm({
           <div className="grid grid-cols-2 gap-3">
             <Field label="Grad">
               <select name="level" defaultValue="0" className={inputClass}>
-                <option value="0">Cantrip</option>
+                <option value="0">Zaubertrick</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((level) => (
                   <option key={level} value={level}>
                     Grad {level}
@@ -74,7 +74,7 @@ export function CustomSpellForm({
               </select>
             </Field>
 
-            <Field label="Casting Time">
+            <Field label="Wirkzeit">
               <input
                 name="castingTime"
                 placeholder="z. B. 1 action"

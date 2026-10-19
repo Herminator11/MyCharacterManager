@@ -113,7 +113,7 @@ export function CatalogSearch({
                   ) : null}
                 </p>
                 <p className="truncate text-xs text-faint">
-                  {hit.level === 0 ? "Cantrip" : `Grad ${hit.level}`}
+                  {hit.level === 0 ? "Zaubertrick" : `Grad ${hit.level}`}
                   {hit.school ? ` · ${hit.school}` : ""}
                   {hit.castingTime ? ` · ${hit.castingTime}` : ""}
                 </p>

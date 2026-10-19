@@ -106,9 +106,14 @@ export function BattleMode({
         >
           <span className="flex items-center gap-2.5 font-semibold tracking-tight">
             <CrossedSwordsIcon className="size-5" />
-            Combat Mode
+            Neuen Kampf beginnen
           </span>
-          <span className="text-sm font-normal text-mute">Log auf null</span>
+          {/* Früher "Log auf null" — gemeint ist, dass der neue Kampf das
+              Kampflog des letzten leert. Das soll man vor dem Tippen
+              verstehen, nicht danach. */}
+          <span className="text-right text-xs font-normal text-mute">
+            leert das Kampflog
+          </span>
         </button>
       ) : null}
 
@@ -256,7 +261,7 @@ function TurnOptions({
                   {spell.name}
                 </span>
                 <span className="text-xs text-faint">
-                  {spell.level === 0 ? "Cantrip" : `Grad ${spell.level}`}
+                  {spell.level === 0 ? "Zaubertrick" : `Grad ${spell.level}`}
                   {spell.concentration ? " · K" : ""}
                 </span>
               </button>

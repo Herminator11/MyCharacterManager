@@ -55,7 +55,7 @@ export function Dashboard({
           Profilkopf — man sucht sie nicht, man muss an sie erinnert
           werden, sonst verfällt sie ungenutzt. */}
       <Panel>
-        <SectionLabel>Hit Dice</SectionLabel>
+        <SectionLabel>Trefferwürfel</SectionLabel>
         <div className="divide-y divide-edge">
           {state.hitDice.map((entry) => (
             <HitDiceRow
@@ -150,7 +150,7 @@ function RollInitiative({
     >
       <span className="flex items-center gap-2.5 font-semibold tracking-tight">
         <CrossedSwordsIcon className="size-5" />
-        Combat Mode
+        Kampf beginnen
       </span>
       <span aria-hidden>→</span>
     </button>
@@ -347,7 +347,7 @@ export function Conditions({
           </button>
         }
       >
-        Conditions
+        Zustände
         {active.length > 0 ? (
           <span className="ml-2 font-normal tracking-normal normal-case text-ember">
             {active.length} aktiv
@@ -445,8 +445,8 @@ function RestControls({
 
   const longEffects = [
     "Trefferpunkte",
-    "Death Saves",
-    "die Hälfte der Hit Dice",
+    "Todesrettungswürfe",
+    "die Hälfte der Trefferwürfel",
     "Konzentration",
     ...state.pools.map((p) => p.name),
     ...state.resources.map((r) => r.name),

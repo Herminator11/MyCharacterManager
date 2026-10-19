@@ -235,7 +235,7 @@ export function SpellList({
         grouped.map(([level, entries]) => (
           <Panel key={level}>
             <h2 className="label mb-2">
-              {level === 0 ? "Cantrips" : `Grad ${level}`}
+              {level === 0 ? "Zaubertricks" : `Grad ${level}`}
             </h2>
             <ul className="divide-y divide-edge">
               {entries.map((spell) => (

@@ -112,7 +112,7 @@ export function CastSheet({
                 {spell.name}
               </h2>
               <p className="mt-1 text-xs text-mute">
-                {isCantrip ? "Cantrip" : `Grad ${spell.level}`}
+                {isCantrip ? "Zaubertrick" : `Grad ${spell.level}`}
                 {spell.school ? ` · ${spell.school}` : ""}
                 {spell.ritual ? " · Ritual" : ""}
                 {spell.concentration ? " · Konzentration" : ""}
@@ -157,7 +157,7 @@ export function CastSheet({
           <div className="mt-5">
             {isCantrip ? (
               <>
-                <p className="label mb-2">Cantrip — kein Zauberplatz nötig</p>
+                <p className="label mb-2">Zaubertrick — kein Zauberplatz nötig</p>
                 <Button
                   variant="solid"
                   size="lg"

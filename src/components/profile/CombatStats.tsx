@@ -11,7 +11,7 @@ import { ArmorClassShield } from "./ArmorClassShield";
  * deshalb im Profilkopf in eigenen Rahmen statt in einer Textzeile: eine
  * Form, die man aus zwei Metern findet, ohne zu lesen.
  *
- * Die AC bekommt als einzige eine eigene Silhouette. Ein Schild mit einer
+ * Die RK bekommt als einzige eine eigene Silhouette. Ein Schild mit einer
  * Zahl darin braucht keine Beschriftung — und genau eine Sonderform ist
  * genug, sonst wird die Reihe zum Jahrmarkt.
  */
@@ -32,7 +32,7 @@ export function CombatStats({
     <dl className="grid grid-cols-3 justify-items-center gap-2 lg:flex lg:shrink-0">
       <ArmorClassShield value={armorClass} />
       <Plate label="Initiative" value={initiative} icon={<BoltIcon />} />
-      <Plate label="Speed" value={speed} unit="ft" icon={<ShoeIcon />} />
+      <Plate label="Bewegung" value={speed} unit="ft" icon={<ShoeIcon />} />
     </dl>
   );
 }

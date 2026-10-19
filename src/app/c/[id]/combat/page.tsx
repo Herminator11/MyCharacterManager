@@ -41,7 +41,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
           <SectionLabel>Zauberangriffe</SectionLabel>
           <div className="flex gap-6">
             <p className="text-sm">
-              <span className="label block">Save DC</span>
+              <span className="label block">Zauber-SG</span>
               <span className="text-xl font-semibold">
                 {sheet.spellcasting.saveDc}
               </span>
@@ -244,7 +244,7 @@ export default async function CombatPage({ params }: PageProps<"/c/[id]">) {
               defaultChecked
               className="size-4 accent-[var(--color-patina)]"
             />
-            Geübt — Proficiency Bonus zählt zum Angriff
+            Geübt — Übungsbonus zählt zum Angriff
           </label>
 
           <details>
