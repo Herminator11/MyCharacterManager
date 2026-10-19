@@ -6,6 +6,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["next", "dev", "-p", "3111"],
       "port": 3111
+    },
+    {
+      "name": "test-db",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "DATABASE_PATH=$PWD/data/test.db DATA_DIR=$PWD/data-test exec npx next dev -p 3100"],
+      "port": 3100
     }
   ]
 }

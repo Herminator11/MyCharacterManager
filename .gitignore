@@ -48,3 +48,9 @@ next-env.d.ts
 
 # Hochgeladene Portraits gehören dir, nicht dem Repository.
 /data/portraits/
+
+# Eigene Test-DB für Browser-Prüfungen, getrennt von den echten Daten.
+/data/test.db
+/data/test.db-shm
+/data/test.db-wal
+/data-test/
