@@ -531,6 +531,13 @@ export const combatLog = sqliteTable(
      * stammt.
      */
     session: integer("session"),
+    /**
+     * Der Eintrag als Schlüssel mit Werten (JSON, siehe LogMessage in
+     * rules/combatLog), damit die Anzeige ihn in der Sprache des Geräts
+     * bilden kann. Null bei Einträgen aus der Zeit vor dieser Spalte —
+     * die zeigen weiter ihren gespeicherten deutschen `text`.
+     */
+    message: text("message"),
   },
   (t) => [index("idx_combatlog_character").on(t.characterId)],
 );

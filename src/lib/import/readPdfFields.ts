@@ -4,7 +4,15 @@ import { PDFDocument } from "pdf-lib";
 
 import type { FieldMap } from "./parseSheet";
 
-export class SheetReadError extends Error {}
+/**
+ * Das PDF ließ sich nicht auslesen. Trägt die Art statt eines Satzes — den
+ * bildet die Server Action in der Sprache des Geräts.
+ */
+export class SheetReadError extends Error {
+  constructor(readonly kind: "notPdf" | "noFields") {
+    super(kind);
+  }
+}
 
 /**
  * Liest die Formularfelder eines Character-Sheet-PDFs aus.
@@ -18,18 +26,13 @@ export async function readPdfFields(bytes: Uint8Array): Promise<FieldMap> {
   try {
     doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   } catch {
-    throw new SheetReadError(
-      "Die Datei lässt sich nicht als PDF lesen. Ist es wirklich ein PDF?",
-    );
+    throw new SheetReadError("notPdf");
   }
 
   const fields = doc.getForm().getFields();
 
   if (fields.length === 0) {
-    throw new SheetReadError(
-      "Dieses PDF hat keine Formularfelder. Der Import braucht einen " +
-        "ausfüllbaren Bogen — ein Scan oder Ausdruck reicht nicht.",
-    );
+    throw new SheetReadError("noFields");
   }
 
   const map: FieldMap = {};

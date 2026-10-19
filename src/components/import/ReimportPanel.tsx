@@ -4,7 +4,8 @@ import { useEffect, useState, useTransition } from "react";
 
 import { Button, cx, Panel, SectionLabel } from "@/components/ui";
 import type { PlanResult } from "@/app/import/actions";
-import type { ReimportPlan } from "@/lib/server/reimport";
+import type { DiffField, PreservedField, ReimportPlan } from "@/lib/server/reimport";
+import type { Messages } from "@/lib/i18n/messages";
 import { useT } from "@/lib/i18n/client";
 
 export type ImportTarget = { id: number; name: string; summary: string };
@@ -165,9 +166,9 @@ function Diff({ plan }: { plan: ReimportPlan }) {
           <p className="label mb-2">{t.import.replaced}</p>
           <ul className="space-y-1">
             {changed.map((line) => (
-              <li key={line.label} className="flex gap-2 text-sm">
+              <li key={line.field} className="flex gap-2 text-sm">
                 <span className="w-28 shrink-0 truncate text-faint">
-                  {line.label}
+                  {diffLabel(t, line.field)}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="text-mute line-through">{line.before}</span>
@@ -202,11 +203,43 @@ function Diff({ plan }: { plan: ReimportPlan }) {
       <div>
         <p className="label mb-1.5">{t.import.preserved}</p>
         <p className="text-xs leading-relaxed text-mute">
-          {plan.preserved.join(" · ")}
+          {plan.preserved.map((field) => preservedLabel(t, field)).join(" · ")}
         </p>
       </div>
     </div>
   );
+}
+
+/** Beschriftung einer Vergleichszeile — Regelbegriffe aus dem Glossar. */
+function diffLabel(t: Messages, field: DiffField): string {
+  switch (field) {
+    case "classes":
+      return t.reimport.classes;
+    case "maxHp":
+      return t.sheet.maxHp(t.term.hitPointsShort);
+    case "ac":
+      return t.term.armorClassShort;
+    case "spellDc":
+      return t.term.spellSaveDc;
+    case "skills":
+      return t.reimport.skills;
+    default:
+      return field.toUpperCase();
+  }
+}
+
+function preservedLabel(t: Messages, field: PreservedField): string {
+  const p = t.reimport.preserved;
+  switch (field) {
+    case "currentHp":
+      return p.currentHp(t.term.hitPoints);
+    case "spentResources":
+      return p.spentResources(t.term.hitDice);
+    case "conditions":
+      return p.conditions(t.term.conditions, t.term.concentration);
+    default:
+      return p[field];
+  }
 }
 
 export type { PlanResult };

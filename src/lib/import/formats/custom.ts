@@ -14,6 +14,7 @@ import type {
   ImportedAttack,
   ImportedCharacter,
   ImportedResource,
+  ImportWarning,
 } from "../types";
 
 /**
@@ -48,7 +49,7 @@ const SCORE_FIELD: Record<Ability, string> = {
 };
 
 export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
-  const warnings: string[] = [];
+  const warnings: ImportWarning[] = [];
 
   /* --- Attribute und Proficiencies --- */
 
@@ -56,9 +57,7 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
   for (const ability of ABILITIES) {
     const value = number(fields, SCORE_FIELD[ability]);
     if (value === null) {
-      warnings.push(
-        `Der Attributwert für ${ability.toUpperCase()} fehlt im Bogen; ich habe 10 eingesetzt.`,
-      );
+      warnings.push({ key: "missingScore", params: { ability: ability.toUpperCase() } });
     }
     scores[ability] = value ?? 10;
   }
@@ -88,9 +87,7 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
         .map((rawName, index) => {
           const level = number(fields, `Front_Level ${index + 1}`);
           if (level === null) {
-            warnings.push(
-              `Für „${rawName}“ stand kein Level im Bogen; ich habe 1 eingesetzt.`,
-            );
+            warnings.push({ key: "missingLevel", params: { name: rawName } });
           }
           // Der Bogen hat nur ein Archetyp-Feld; bei Multiclass gehört es
           // zur erstgenannten Klasse.
@@ -104,9 +101,7 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
     : [];
 
   if (classes.length === 0) {
-    warnings.push(
-      "Im Bogen steht keine Klasse. Ohne Klasse gibt es keine Zauberplätze und keine Trefferwürfel — bitte unten ergänzen.",
-    );
+    warnings.push({ key: "noClass", params: {} });
   }
 
   noteDerivedHitDice(classes, text(fields, "Front_Total Hit Dice"), warnings);
@@ -151,9 +146,7 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
   }
 
   if (attacks.length === 0) {
-    warnings.push(
-      "Im Bogen stand keine Waffe und kein Zauberangriff. Angriffe lassen sich später unter „Angriffe“ nachtragen.",
-    );
+    warnings.push({ key: "noWeaponOrSpellAttack", params: {} });
   }
 
   /* --- Ressourcen --- */
@@ -233,17 +226,13 @@ export function parseCustomSheet(fields: FieldMap): ImportedCharacter {
   ).length;
 
   if (usedSlots > 0) {
-    warnings.push(
-      `Im Bogen sind ${usedSlots} Zauberplätze als verbraucht markiert. Welcher Pool gemeint ist, geht daraus nicht hervor — der Import startet deshalb mit vollen Plätzen.`,
-    );
+    warnings.push({ key: "usedSlots", params: { count: usedSlots } });
   }
 
   const maxHp = number(fields, "Front_Max HP");
   const currentHp = number(fields, "Front_Current HP");
   if (currentHp === null && maxHp !== null) {
-    warnings.push(
-      "Die aktuellen Trefferpunkte waren leer; der Charakter startet mit vollen HP.",
-    );
+    warnings.push({ key: "emptyCurrentHp", params: {} });
   }
 
   return {

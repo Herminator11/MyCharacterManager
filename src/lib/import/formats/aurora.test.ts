@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { germanWarnings } from "@/test/warnings";
+
 import { detectFormat, parseSheet } from "@/lib/import/parseSheet";
 import type { FieldMap } from "@/lib/import/types";
 import erisFields from "@/test/fixtures/eris-sheet-fields.json";
@@ -66,7 +68,7 @@ describe("Attribute", () => {
   it("setzt fehlende Werte auf 10 und meldet das", () => {
     const result = parseSheet(minimal());
     expect(result.scores.int).toBe(10);
-    expect(result.warnings.some((w) => w.includes("INT"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("INT"))).toBe(true);
   });
 });
 
@@ -138,19 +140,19 @@ describe("Klasse und Rasse aus details_build", () => {
       minimal({ details_build: "Level 4 Human Blood Hunter" }),
     );
     expect(result.classes[0]).toMatchObject({ classKey: "", known: false });
-    expect(result.warnings.some((w) => w.includes("Blood Hunter"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("Blood Hunter"))).toBe(true);
   });
 
   it("meldet einen Bogen ganz ohne Klasse", () => {
     const result = parseSheet(minimal());
     expect(result.classes).toEqual([]);
-    expect(result.warnings.some((w) => w.includes("keine Klasse"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("keine Klasse"))).toBe(true);
   });
 
   it("leitet die Trefferwürfel nicht neu her, wenn der Bogen sie nennt", () => {
     // details_hd steht als „5d6“ im Bogen — kein Hinweis nötig.
     expect(
-      eris().warnings.some((w) => w.includes("Trefferwürfel")),
+      germanWarnings(eris()).some((w) => w.includes("Trefferwürfel")),
     ).toBe(false);
   });
 });
@@ -181,7 +183,7 @@ describe("Multiclass in details_build", () => {
 
   it("meldet die Trefferwürfel nicht neu, weil der Bogen sie für beide Klassen kombiniert nennt", () => {
     // details_hd steht als „4d6/5d8“ — passt zu Sorcerer 4 + Warlock 5.
-    expect(kael().warnings.some((w) => w.includes("Trefferwürfel"))).toBe(false);
+    expect(germanWarnings(kael()).some((w) => w.includes("Trefferwürfel"))).toBe(false);
   });
 
   it("erkennt eine dritte Klasse ohne Rasse davor genauso", () => {
@@ -218,7 +220,7 @@ describe("Kampfwerte", () => {
     const result = eris();
     expect(result.hpMaxOverride).toBe(32);
     expect(result.hpCurrent).toBeNull();
-    expect(result.warnings.some((w) => w.includes("vollen HP"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("vollen TP"))).toBe(true);
   });
 });
 
@@ -242,7 +244,7 @@ describe("Zauber", () => {
 describe("Angriffe", () => {
   it("meldet einen Bogen ganz ohne Waffe", () => {
     expect(eris().attacks).toHaveLength(0);
-    expect(eris().warnings.some((w) => w.includes("keine Waffe"))).toBe(true);
+    expect(germanWarnings(eris()).some((w) => w.includes("keine Waffe"))).toBe(true);
   });
 
   it("liest eingetragene Waffen mit Bonus, Schaden und Reichweite", () => {

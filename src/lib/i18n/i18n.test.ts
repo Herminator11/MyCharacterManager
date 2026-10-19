@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { renderLogLine } from "./log";
 import { getMessages } from "./messages";
 import { isMode, localeOf, MODES, resolveMode } from "./modes";
 import { termsDe, termsEn } from "./terms";
@@ -89,5 +90,67 @@ describe("Modus bestimmen", () => {
   it("ein manipulierter Cookie fällt auf die Browsersprache zurück", () => {
     expect(isMode("fr")).toBe(false);
     expect(resolveMode("fr", "en-US")).toBe("en");
+  });
+});
+
+describe("Kampflog in drei Modi", () => {
+  const damage = {
+    text: "12 Schaden",
+    detail: "30 → 20 · 2 über temporäre HP",
+    message: {
+      key: "damage" as const,
+      params: { amount: 12, from: 30, to: 20, absorbed: 2 },
+    },
+  };
+
+  it("Deutsch bildet den Satz aus der Meldung, mit TP", () => {
+    expect(renderLogLine(getMessages("de"), damage)).toEqual({
+      text: "12 Schaden",
+      detail: "30 → 20 · 2 über temporäre TP",
+    });
+  });
+
+  it("gemischter Modus: deutscher Satz, englischer Regelbegriff", () => {
+    expect(renderLogLine(getMessages("de-en"), damage).detail).toBe(
+      "30 → 20 · 2 über temporäre HP",
+    );
+  });
+
+  it("Englisch", () => {
+    expect(renderLogLine(getMessages("en"), damage)).toEqual({
+      text: "12 damage",
+      detail: "30 → 20 · 2 absorbed by temporary HP",
+    });
+  });
+
+  it("ein gewirkter Zauber nennt Grad und Pool in der Sprache des Geräts", () => {
+    const cast = {
+      text: "Fireball",
+      detail: "Grad 3 · Zauberplätze",
+      message: {
+        key: "cast" as const,
+        params: { spell: "Fireball", level: 3, pool: "Zauberplätze", poolAutoKey: "spellcasting" },
+      },
+    };
+    expect(renderLogLine(getMessages("en"), cast)).toEqual({
+      text: "Fireball",
+      detail: "Level 3 · Spell Slots",
+    });
+  });
+
+  it("der Todesrettungswurf steht in der Einzahl, in beiden Glossaren", () => {
+    const save = {
+      text: "",
+      detail: "",
+      message: { key: "deathSave" as const, params: { successes: 1, failures: 2 } },
+    };
+    expect(renderLogLine(getMessages("de"), save).text).toBe("Todesrettungswurf");
+    expect(renderLogLine(getMessages("en"), save).text).toBe("Death Save");
+  });
+
+  it("alte Einträge ohne Meldung zeigen ihren gespeicherten Satz", () => {
+    expect(
+      renderLogLine(getMessages("en"), { text: "12 Schaden", detail: "30 → 18", message: null }),
+    ).toEqual({ text: "12 Schaden", detail: "30 → 18" });
   });
 });

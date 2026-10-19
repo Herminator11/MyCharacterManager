@@ -1,5 +1,6 @@
 import type { CombatLogKind, Recovery } from "@/db/schema";
 import type { ActionCost, ActionSlot } from "@/lib/rules/actions";
+import type { LogMessage } from "@/lib/rules/combatLog";
 
 /**
  * Der Teil des Charakters, der sich mitten im Kampf ständig ändert.
@@ -68,6 +69,8 @@ export type LiveLogEntry = {
   detail: string;
   /** Nur bei `kind: "cast"` gesetzt — steuert Kreis vs. Dreieck im Log. */
   actionCost: ActionCost | null;
+  /** Null bei alten Einträgen — dann gilt `text`/`detail`. */
+  message: LogMessage | null;
 };
 
 export type LiveConcentration = {

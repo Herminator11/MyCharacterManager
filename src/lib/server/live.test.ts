@@ -613,6 +613,18 @@ describe("Kampflog", () => {
     expect(state.log[1].detail).toContain("→");
   });
 
+  it("speichert jede Zeile auch als Meldung, aus der die Anzeige den Satz bildet", () => {
+    send({ type: "battle.start" });
+    const state = send({ type: "hp.delta", amount: -6 });
+
+    // Durch die echte Spalte und zurück — der Live-State liefert die
+    // Meldung gelesen, nicht als JSON-Text.
+    expect(state.log[0].message).toEqual({
+      key: "damage",
+      params: { amount: 6, from: state.hpCurrent + 6, to: state.hpCurrent, absorbed: 0 },
+    });
+  });
+
   it("zählt mit 'Zug beenden' die Runde hoch und ordnet Einträge zu", () => {
     send({ type: "battle.start" });
     send({ type: "hp.delta", amount: -3 });

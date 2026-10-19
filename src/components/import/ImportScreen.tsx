@@ -6,6 +6,7 @@ import { useRef, useState, useTransition } from "react";
 import { Button, cx, Panel, SectionLabel } from "@/components/ui";
 import type { ImportedCharacter } from "@/lib/import/types";
 import { useT } from "@/lib/i18n/client";
+import { renderImportWarning } from "@/lib/i18n/importWarnings";
 import type { Messages } from "@/lib/i18n/messages";
 import { className as classLabel } from "@/lib/rules/classes";
 import { formatModifier } from "@/lib/rules/derive";
@@ -227,7 +228,7 @@ function Review({
                 <span aria-hidden className="text-brass">
                   •
                 </span>
-                <span>{warning}</span>
+                <span>{renderImportWarning(t, warning)}</span>
               </li>
             ))}
           </ul>

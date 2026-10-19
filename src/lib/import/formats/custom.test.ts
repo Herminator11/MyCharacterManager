@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { germanWarnings } from "@/test/warnings";
+
 import kaelFields from "@/test/fixtures/kael-sheet-fields.json";
 
 import { parseSheet } from "@/lib/import/parseSheet";
@@ -44,7 +46,7 @@ describe("Attribute", () => {
   it("setzt fehlende Werte auf 10 und meldet das", () => {
     const result = parseSheet({ "Front_Character Name": "Leer", "Front_Class Name": "" });
     expect(result.scores.str).toBe(10);
-    expect(result.warnings.some((w) => w.includes("STR"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("STR"))).toBe(true);
   });
 });
 
@@ -124,7 +126,7 @@ describe("Klassen", () => {
       "5d8",
     ]);
     expect(
-      kael().warnings.some((w) => w.includes("5d6 + 5d8")),
+      germanWarnings(kael()).some((w) => w.includes("5d6 + 5d8")),
     ).toBe(true);
   });
 
@@ -152,13 +154,13 @@ describe("Klassen", () => {
       rawName: "Blood Hunter",
       known: false,
     });
-    expect(result.warnings.some((w) => w.includes("Blood Hunter"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("Blood Hunter"))).toBe(true);
   });
 
   it("meldet einen Bogen ganz ohne Klasse", () => {
     const result = parseSheet({ "Front_Character Name": "Namenlos", "Front_Class Name": "" });
     expect(result.classes).toEqual([]);
-    expect(result.warnings.some((w) => w.includes("keine Klasse"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("keine Klasse"))).toBe(true);
   });
 });
 
@@ -183,7 +185,7 @@ describe("Kampfwerte", () => {
     const result = kael();
     expect(result.hpMaxOverride).toBe(46);
     expect(result.hpCurrent).toBeNull();
-    expect(result.warnings.some((w) => w.includes("vollen HP"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("vollen TP"))).toBe(true);
   });
 });
 
@@ -217,7 +219,7 @@ describe("Angriffe", () => {
 
   it("meldet einen Bogen ganz ohne Angriffe", () => {
     const result = parseSheet({ "Front_Character Name": "Leer", "Front_Class Name": "" });
-    expect(result.warnings.some((w) => w.includes("keine Waffe"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("keine Waffe"))).toBe(true);
   });
 });
 
@@ -288,12 +290,12 @@ describe("Zauberplätze", () => {
       "Front_Spell Slot 1st 1": true,
       "Front_Spell Slot 1st 2": true,
     });
-    expect(result.warnings.some((w) => w.includes("2 Zauberplätze"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("2 Zauberplätze"))).toBe(true);
   });
 
   it("schweigt, wenn nichts angekreuzt ist", () => {
     expect(
-      kael().warnings.some((w) => w.includes("Zauberplätze als verbraucht")),
+      germanWarnings(kael()).some((w) => w.includes("Zauberplätze als verbraucht")),
     ).toBe(false);
   });
 });

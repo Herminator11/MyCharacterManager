@@ -348,6 +348,7 @@ function record(
       kind: line.kind,
       text: line.text,
       detail: line.detail,
+      message: JSON.stringify(line.message),
       actionCost: line.actionCost,
       amount: line.amount,
       at: Math.floor(Date.now() / 1000),

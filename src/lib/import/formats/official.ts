@@ -11,7 +11,7 @@ import {
   parseClassLevelString,
   text,
 } from "../fields";
-import type { FieldMap, ImportedCharacter, ImportedSpell } from "../types";
+import type { FieldMap, ImportedCharacter, ImportedSpell, ImportWarning } from "../types";
 
 /**
  * Der offizielle Bogen von Wizards of the Coast — das Format, das Aurora
@@ -56,7 +56,7 @@ export function isOfficialSheet(fields: FieldMap): boolean {
 }
 
 export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
-  const warnings: string[] = [];
+  const warnings: ImportWarning[] = [];
 
   /* --- Attribute --- */
 
@@ -65,9 +65,7 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
     const key = ability.toUpperCase();
     const value = number(fields, key);
     if (value === null) {
-      warnings.push(
-        `Der Attributwert für ${key} fehlt im Bogen; ich habe 10 eingesetzt.`,
-      );
+      warnings.push({ key: "missingScore", params: { ability: key } });
     }
     scores[ability] = value ?? 10;
   }
@@ -89,9 +87,7 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
   const classes = classLevel ? parseClassLevelString(classLevel, warnings) : [];
 
   if (classes.length === 0) {
-    warnings.push(
-      "Im Bogen steht keine Klasse. Ohne Klasse gibt es keine Zauberplätze und keine Trefferwürfel — bitte unten ergänzen.",
-    );
+    warnings.push({ key: "noClass", params: {} });
   }
 
   noteDerivedHitDice(classes, text(fields, "HD"), warnings);
@@ -116,9 +112,7 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
     .filter((attack) => attack.name.length > 0);
 
   if (attacks.length === 0) {
-    warnings.push(
-      "Im Bogen stand keine Waffe. Angriffe lassen sich später unter „Angriffe“ nachtragen.",
-    );
+    warnings.push({ key: "noWeapon", params: {} });
   }
 
   /* --- Zauber --- */
@@ -143,9 +137,10 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
   ).length;
 
   if (deathSuccesses > 0 || deathFailures > 0) {
-    warnings.push(
-      `Im Bogen sind Death Saves angekreuzt (${deathSuccesses} Erfolge, ${deathFailures} Fehlschläge). Die gelten nur für einen laufenden Kampf und werden nicht übernommen.`,
-    );
+    warnings.push({
+      key: "deathSavesCounted",
+      params: { successes: deathSuccesses, failures: deathFailures },
+    });
   }
 
   /* --- Fähigkeiten --- */
@@ -202,9 +197,7 @@ export function parseOfficialSheet(fields: FieldMap): ImportedCharacter {
   const maxHp = number(fields, "HPMax");
   const currentHp = number(fields, "HPCurrent");
   if (currentHp === null && maxHp !== null) {
-    warnings.push(
-      "Die aktuellen Trefferpunkte waren leer; der Charakter startet mit vollen HP.",
-    );
+    warnings.push({ key: "emptyCurrentHp", params: {} });
   }
 
   return {

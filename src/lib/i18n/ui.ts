@@ -470,6 +470,83 @@ export const uiDe = {
     combatEntries: (n: number) => `Kampf · ${n === 1 ? "1 Eintrag" : `${n} Einträge`}`,
     deleteCombat: "Kampf-Log löschen",
   },
+  log: {
+    damage: (amount: number) => `${amount} Schaden`,
+    absorbed: (amount: number, hp: string) => `${amount} über temporäre ${hp}`,
+    healed: (amount: number) => `${amount} geheilt`,
+    hpCorrected: (hp: string) => `${hp} korrigiert`,
+    tempHp: (value: number, hp: string) => `${value} temporäre ${hp}`,
+    tempHpGone: (hp: string) => `Temporäre ${hp} weg`,
+    spellCast: "Zauber gewirkt",
+    conditionEnded: (name: string) => `${name} beendet`,
+    concentrationOn: (label: string) => `Konzentration: ${label}`,
+    active: "aktiv",
+    concentrationLost: "Konzentration verloren",
+    stabilized: "Stabilisiert",
+    stabilizedDetail: (hp: string) => `keine Würfe mehr, weiter bei 0 ${hp}`,
+    died: "Gestorben",
+    diedDetail: "drei Fehlschläge",
+    deathSaveDetail: (s: number, f: number) => `${s} Erfolge · ${f} Fehlschläge`,
+    resourceSpent: (name: string) => `${name} eingesetzt`,
+    resourceReturned: (name: string) => `${name} zurückgelegt`,
+    inspirationGained: (term: string) => `${term} erhalten`,
+    inspirationSpent: (term: string) => `${term} eingesetzt`,
+  },
+  importWarnings: {
+    unknownClass: (name: string) => `Die Klasse „${name}“ kenne ich nicht — bitte unten von Hand zuordnen.`,
+    missingLevel: (name: string) => `Für „${name}“ stand kein Level im Bogen; ich habe 1 eingesetzt.`,
+    derivedHitDice: (dice: string, hitDice: string) =>
+      `${hitDice} standen nicht im Bogen. Aus den Klassen ergibt sich ${dice} — so übernommen.`,
+    missingExpertise: (classes: string[]) =>
+      `Der offizielle Bogen hat keine Kästchen für Expertise. Für ${classes.join(" und ")} musst du sie im Charakterbogen nachtragen.`,
+    missingScore: (ability: string) => `Der Attributwert für ${ability} fehlt im Bogen; ich habe 10 eingesetzt.`,
+    noClass: (hitDice: string) =>
+      `Im Bogen steht keine Klasse. Ohne Klasse gibt es keine Zauberplätze und keine ${hitDice} — bitte unten ergänzen.`,
+    noWeapon: "Im Bogen stand keine Waffe. Angriffe lassen sich später unter „Angriffe“ nachtragen.",
+    noWeaponOrSpellAttack:
+      "Im Bogen stand keine Waffe und kein Zauberangriff. Angriffe lassen sich später unter „Angriffe“ nachtragen.",
+    usedSlots: (count: number) =>
+      `Im Bogen sind ${count} Zauberplätze als verbraucht markiert. Welcher Pool gemeint ist, geht daraus nicht hervor — der Import startet deshalb mit vollen Plätzen.`,
+    deathSaves: (term: string) =>
+      `Im Bogen sind ${term} angekreuzt. Die gelten nur für einen laufenden Kampf und werden nicht übernommen.`,
+    deathSavesCounted: (term: string, successes: number, failures: number) =>
+      `Im Bogen sind ${term} angekreuzt (${successes} Erfolge, ${failures} Fehlschläge). Die gelten nur für einen laufenden Kampf und werden nicht übernommen.`,
+    emptyCurrentHp: (hp: string) =>
+      `Die aktuellen Trefferpunkte waren leer; der Charakter startet mit vollen ${hp}.`,
+    unparsedClassLine: (line: string) =>
+      `Die Zeile „${line}“ ließ sich nicht in Rasse, Klasse und Level zerlegen — bitte unten prüfen.`,
+    notPdf: "Die Datei lässt sich nicht als PDF lesen. Ist es wirklich ein PDF?",
+    noFields:
+      "Dieses PDF hat keine Formularfelder. Der Import braucht einen ausfüllbaren Bogen — ein Scan oder Ausdruck reicht nicht.",
+    unknownFormat: (count: number) =>
+      `Dieses PDF hat ${count} Formularfelder, aber keine, die ich einem bekannten Bogen zuordnen kann. Der Import versteht den offiziellen D&D-Charakterbogen von Wizards of the Coast (den auch Aurora ausgibt), Auroras eigenen ausfüllbaren Bogen sowie das erweiterte Format mit Front_/Back_-Feldern.`,
+  },
+  reimport: {
+    classes: "Klassen",
+    skills: "Fertigkeiten",
+    replaced: {
+      classes: "Klassen und Level",
+      abilities: "Attribute",
+      proficiencies: "Rettungswürfe und Fertigkeiten",
+      basics: "Rasse, Hintergrund, Gesinnung",
+      combat: (ac: string, speed: string) => `${ac}, Initiative, ${speed}`,
+      maxHp: (hp: string) => `Maximale ${hp}`,
+      spellcasting: (dc: string) => `${dc} und Angriffsbonus`,
+      spells: "Zauberliste",
+      attacks: "Angriffe",
+    },
+    preserved: {
+      currentHp: (hp: string) => `Aktuelle und temporäre ${hp}`,
+      spentSlots: "Verbrauchte Zauberplätze",
+      spentResources: (hitDice: string) => `Verbrauchte Ressourcen und ${hitDice}`,
+      manualResources: "Von Hand angelegte Ressourcen",
+      conditions: (conditions: string, concentration: string) =>
+        `${conditions} und ${concentration}`,
+      inventory: "Inventar und Geldbeutel",
+      notes: "Notizen, Fähigkeiten und Hintergrundtexte",
+      portrait: "Portrait",
+    },
+  },
   language: {
     label: "Sprache",
     hint: "Gilt nur für dieses Gerät.",
@@ -933,6 +1010,82 @@ export const uiEn: Ui = {
     deleteEntry: "Delete entry",
     combatEntries: (n) => `Combat · ${n === 1 ? "1 entry" : `${n} entries`}`,
     deleteCombat: "Delete combat log",
+  },
+  log: {
+    damage: (amount) => `${amount} damage`,
+    absorbed: (amount, hp) => `${amount} absorbed by temporary ${hp}`,
+    healed: (amount) => `${amount} healed`,
+    hpCorrected: (hp) => `${hp} corrected`,
+    tempHp: (value, hp) => `${value} temporary ${hp}`,
+    tempHpGone: (hp) => `Temporary ${hp} gone`,
+    spellCast: "Spell cast",
+    conditionEnded: (name) => `${name} ended`,
+    concentrationOn: (label) => `Concentration: ${label}`,
+    active: "active",
+    concentrationLost: "Concentration lost",
+    stabilized: "Stabilized",
+    stabilizedDetail: (hp) => `no more rolls, staying at 0 ${hp}`,
+    died: "Died",
+    diedDetail: "three failures",
+    deathSaveDetail: (s, f) => `${s} successes · ${f} failures`,
+    resourceSpent: (name) => `${name} used`,
+    resourceReturned: (name) => `${name} restored`,
+    inspirationGained: (term) => `${term} gained`,
+    inspirationSpent: (term) => `${term} spent`,
+  },
+  importWarnings: {
+    unknownClass: (name) => `I don't know the class “${name}” — please assign it by hand below.`,
+    missingLevel: (name) => `The sheet had no level for “${name}”; I used 1.`,
+    derivedHitDice: (dice, hitDice) =>
+      `The sheet had no ${hitDice.toLowerCase()}. The classes give ${dice} — taken as is.`,
+    missingExpertise: (classes) =>
+      `The official sheet has no boxes for expertise. For ${classes.join(" and ")} you need to add it on the character sheet.`,
+    missingScore: (ability) => `The ${ability} score is missing from the sheet; I used 10.`,
+    noClass: (hitDice) =>
+      `The sheet has no class. Without a class there are no spell slots and no ${hitDice.toLowerCase()} — please add one below.`,
+    noWeapon: "The sheet had no weapon. You can add attacks later under “Attacks”.",
+    noWeaponOrSpellAttack:
+      "The sheet had no weapon and no spell attack. You can add attacks later under “Attacks”.",
+    usedSlots: (count) =>
+      `The sheet marks ${count} spell slots as used. It doesn't say which pool — so the import starts with full slots.`,
+    deathSaves: (term) =>
+      `The sheet has ${term.toLowerCase()} checked. They only apply to an ongoing fight and are not imported.`,
+    deathSavesCounted: (term, successes, failures) =>
+      `The sheet has ${term.toLowerCase()} checked (${successes} successes, ${failures} failures). They only apply to an ongoing fight and are not imported.`,
+    emptyCurrentHp: (hp) => `Current hit points were empty; the character starts at full ${hp}.`,
+    unparsedClassLine: (line) =>
+      `The line “${line}” could not be split into race, class and level — please check below.`,
+    notPdf: "The file can't be read as a PDF. Is it really a PDF?",
+    noFields:
+      "This PDF has no form fields. The import needs a fillable sheet — a scan or printout won't do.",
+    unknownFormat: (count) =>
+      `This PDF has ${count} form fields, but none I can match to a known sheet. The import understands the official D&D character sheet by Wizards of the Coast (which Aurora exports too), Aurora's own fillable sheet, and the extended format with Front_/Back_ fields.`,
+  },
+  reimport: {
+    classes: "Classes",
+    skills: "Skills",
+    replaced: {
+      classes: "Classes and levels",
+      abilities: "Ability scores",
+      proficiencies: "Saving throws and skills",
+      basics: "Race, background, alignment",
+      combat: (ac, speed) => `${ac}, initiative, ${speed.toLowerCase()}`,
+      maxHp: (hp) => `Maximum ${hp}`,
+      spellcasting: (dc) => `${dc} and attack bonus`,
+      spells: "Spell list",
+      attacks: "Attacks",
+    },
+    preserved: {
+      currentHp: (hp) => `Current and temporary ${hp}`,
+      spentSlots: "Spent spell slots",
+      spentResources: (hitDice) => `Spent resources and ${hitDice.toLowerCase()}`,
+      manualResources: "Resources added by hand",
+      conditions: (conditions, concentration) =>
+        `${conditions} and ${concentration.toLowerCase()}`,
+      inventory: "Inventory and purse",
+      notes: "Notes, features and background texts",
+      portrait: "Portrait",
+    },
   },
   language: {
     label: "Language",

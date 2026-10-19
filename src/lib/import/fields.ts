@@ -1,6 +1,6 @@
 import { CLASSES, getClass } from "@/lib/rules/classes";
 
-import type { FieldMap, ImportedClass } from "./types";
+import type { FieldMap, ImportedClass, ImportWarning } from "./types";
 
 /** Gemeinsame Lesehilfen für beide Bogenformate. */
 
@@ -64,14 +64,12 @@ export function buildClass(
   rawName: string,
   level: number,
   subclass: string,
-  warnings: string[],
+  warnings: ImportWarning[],
 ): ImportedClass {
   const classKey = resolveClassKey(rawName);
 
   if (!classKey) {
-    warnings.push(
-      `Die Klasse „${rawName}“ kenne ich nicht — bitte unten von Hand zuordnen.`,
-    );
+    warnings.push({ key: "unknownClass", params: { name: rawName } });
   }
 
   return {
@@ -98,7 +96,7 @@ export function buildClass(
  */
 export function parseClassLevelString(
   raw: string,
-  warnings: string[],
+  warnings: ImportWarning[],
 ): ImportedClass[] {
   return splitOutsideParentheses(raw)
     .map((part) => part.trim())
@@ -114,9 +112,7 @@ export function parseClassLevelString(
       const level = match ? Number(match[2]) : 1;
 
       if (!match && rawName) {
-        warnings.push(
-          `Für „${rawName}“ stand kein Level im Bogen; ich habe 1 eingesetzt.`,
-        );
+        warnings.push({ key: "missingLevel", params: { name: rawName } });
       }
 
       return buildClass(rawName, level, subclass, warnings);
@@ -128,7 +124,7 @@ export function parseClassLevelString(
 export function noteDerivedHitDice(
   classes: ImportedClass[],
   sheetValue: string,
-  warnings: string[],
+  warnings: ImportWarning[],
 ) {
   if (sheetValue || classes.length === 0) return;
 
@@ -138,9 +134,7 @@ export function noteDerivedHitDice(
     .join(" + ");
 
   if (derived) {
-    warnings.push(
-      `Trefferwürfel standen nicht im Bogen. Aus den Klassen ergibt sich ${derived} — so übernommen.`,
-    );
+    warnings.push({ key: "derivedHitDice", params: { dice: derived } });
   }
 }
 
@@ -150,16 +144,14 @@ export function noteDerivedHitDice(
  */
 export function noteMissingExpertise(
   classes: ImportedClass[],
-  warnings: string[],
+  warnings: ImportWarning[],
 ) {
   const affected = classes
     .filter((c) => c.classKey === "rogue" || c.classKey === "bard")
     .map((c) => c.rawName);
 
   if (affected.length > 0) {
-    warnings.push(
-      `Der offizielle Bogen hat keine Kästchen für Expertise. Für ${affected.join(" und ")} musst du sie im Charakterbogen nachtragen.`,
-    );
+    warnings.push({ key: "missingExpertise", params: { classes: affected } });
   }
 }
 

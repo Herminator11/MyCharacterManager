@@ -89,7 +89,7 @@ describe("Vorschau", () => {
     const before = getSheet(id)!.level;
     const plan = planReimport(id, leveledUp())!;
 
-    const klassen = plan.changes.find((c) => c.label === "Klassen")!;
+    const klassen = plan.changes.find((c) => c.field === "classes")!;
     expect(klassen.before).toBe("Sorcerer 5 / Warlock 5");
     expect(klassen.after).toBe("Sorcerer 6 / Warlock 5");
     expect(klassen.changed).toBe(true);
@@ -100,7 +100,7 @@ describe("Vorschau", () => {
 
   it("markiert unveränderte Werte als unverändert", () => {
     const plan = planReimport(id, leveledUp())!;
-    const cha = plan.changes.find((c) => c.label === "CHA")!;
+    const cha = plan.changes.find((c) => c.field === "cha")!;
     expect(cha.changed).toBe(false);
     expect(cha.after).toBe("20");
   });

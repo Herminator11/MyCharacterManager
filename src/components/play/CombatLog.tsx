@@ -4,6 +4,7 @@ import { ACTION_TONE, ActionShape } from "@/components/icons";
 import { Panel, SectionLabel, cx } from "@/components/ui";
 import type { LiveLogEntry, LiveState } from "@/lib/live-types";
 import { useT } from "@/lib/i18n/client";
+import { renderLogLine } from "@/lib/i18n/log";
 import { groupByRound } from "@/lib/rules/combatLog";
 
 /**
@@ -53,15 +54,17 @@ export function CombatLog({ state }: { state: LiveState }) {
  * außerhalb des laufenden Kampfs auftauchen, etwa im Kampagnen-Log.
  */
 export function CombatLogRow({ entry }: { entry: LiveLogEntry }) {
+  const t = useT();
+  const { text, detail } = renderLogLine(t, entry);
   return (
     <li className="flex items-baseline gap-2">
       <Marker entry={entry} />
       <span className="min-w-0 flex-1 text-sm">
-        <span className={TEXT[entry.kind]}>{entry.text}</span>
-        {entry.detail ? (
+        <span className={TEXT[entry.kind]}>{text}</span>
+        {detail ? (
           <span className="text-xs text-faint">
             {" · "}
-            {entry.detail}
+            {detail}
           </span>
         ) : null}
       </span>

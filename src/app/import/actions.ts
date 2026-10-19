@@ -43,11 +43,11 @@ export async function readSheetAction(formData: FormData): Promise<ReadResult> {
     const fields = await readPdfFields(new Uint8Array(await file.arrayBuffer()));
     return { ok: true, draft: parseSheet(fields) };
   } catch (error) {
-    if (
-      error instanceof SheetReadError ||
-      error instanceof UnknownSheetFormatError
-    ) {
-      return { ok: false, error: error.message };
+    if (error instanceof SheetReadError) {
+      return { ok: false, error: t.importWarnings[error.kind] };
+    }
+    if (error instanceof UnknownSheetFormatError) {
+      return { ok: false, error: t.importWarnings.unknownFormat(error.fieldCount) };
     }
     throw error;
   }

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { germanWarnings } from "@/test/warnings";
+
 import { parseSheet, detectFormat } from "@/lib/import/parseSheet";
 import type { FieldMap } from "@/lib/import/types";
 import { SKILLS } from "@/lib/rules/skills";
@@ -20,8 +22,10 @@ describe("Formaterkennung", () => {
   });
 
   it("weist ein PDF ohne bekannte Felder ab, statt zu raten", () => {
+    // Der Fehler trägt die Feldzahl; den Satz dazu bildet die Server
+    // Action in der Sprache des Geräts.
     expect(() => parseSheet({ Vorname: "Test", Nachname: "Fall" })).toThrow(
-      /keine, die ich einem bekannten Bogen zuordnen kann/,
+      expect.objectContaining({ fieldCount: 2 }),
     );
   });
 });
@@ -254,7 +258,7 @@ describe("Hinweise", () => {
       ProfBonus: "+3",
       "Check Box 11": false,
     });
-    expect(result.warnings.some((w) => w.includes("Expertise"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("Expertise"))).toBe(true);
   });
 
   it("schweigt zur Expertise bei Klassen, die keine bekommen", () => {
@@ -263,7 +267,7 @@ describe("Hinweise", () => {
       ProfBonus: "+3",
       "Check Box 11": false,
     });
-    expect(result.warnings.some((w) => w.includes("Expertise"))).toBe(false);
+    expect(germanWarnings(result).some((w) => w.includes("Expertise"))).toBe(false);
   });
 
   it("meldet angekreuzte Death Saves, statt sie zu übernehmen", () => {
@@ -276,7 +280,7 @@ describe("Hinweise", () => {
       "Check Box 16": true,
     });
     expect(
-      result.warnings.some((w) => w.includes("1 Erfolge, 2 Fehlschläge")),
+      germanWarnings(result).some((w) => w.includes("1 Erfolge, 2 Fehlschläge")),
     ).toBe(true);
   });
 
@@ -286,6 +290,6 @@ describe("Hinweise", () => {
       ProfBonus: "+4",
       "Check Box 11": false,
     });
-    expect(result.warnings.some((w) => w.includes("5d6 + 5d8"))).toBe(true);
+    expect(germanWarnings(result).some((w) => w.includes("5d6 + 5d8"))).toBe(true);
   });
 });

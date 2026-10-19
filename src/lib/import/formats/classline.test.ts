@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseClassLevelString } from "@/lib/import/fields";
+import type { ImportWarning } from "@/lib/import/types";
 import { combinedCasterLevel, spellcastingSlots } from "@/lib/rules/multiclass";
 
 /**
@@ -10,7 +11,7 @@ import { combinedCasterLevel, spellcastingSlots } from "@/lib/rules/multiclass";
  */
 
 const parse = (input: string) => {
-  const warnings: string[] = [];
+  const warnings: ImportWarning[] = [];
   return { classes: parseClassLevelString(input, warnings), warnings };
 };
 

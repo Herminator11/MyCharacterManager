@@ -34,33 +34,54 @@ import { linkSpellsFromCatalog } from "./import";
  * Spieltisch entsteht, bleibt unangetastet.
  */
 
-/** Felder, die der Bogen bestimmt. */
+/**
+ * Felder, die der Bogen bestimmt — als Schlüssel, die Texte dazu stehen im
+ * Wörterbuch (reimport.replaced). Die Vorschau läuft auf dem Server und
+ * kennt die Sprache des Geräts nicht.
+ */
 const REPLACED = [
-  "Klassen und Level",
-  "Attribute",
-  "Rettungswürfe und Fertigkeiten",
-  "Rasse, Hintergrund, Gesinnung",
-  "AC, Initiative, Bewegungsrate",
-  "Maximale Trefferpunkte",
-  "Zauber-DC und Angriffsbonus",
-  "Zauberliste",
-  "Angriffe",
+  "classes",
+  "abilities",
+  "proficiencies",
+  "basics",
+  "combat",
+  "maxHp",
+  "spellcasting",
+  "spells",
+  "attacks",
 ] as const;
 
-/** Felder, die der Manager behält. */
+/** Felder, die der Manager behält (Texte: reimport.preserved). */
 const PRESERVED = [
-  "Aktuelle und temporäre Trefferpunkte",
-  "Verbrauchte Zauberplätze",
-  "Verbrauchte Ressourcen und Trefferwürfel",
-  "Von Hand angelegte Ressourcen",
-  "Conditions und Konzentration",
-  "Inventar und Geldbeutel",
-  "Notizen, Fähigkeiten und Hintergrundtexte",
-  "Portrait",
+  "currentHp",
+  "spentSlots",
+  "spentResources",
+  "manualResources",
+  "conditions",
+  "inventory",
+  "notes",
+  "portrait",
 ] as const;
+
+export type ReplacedField = (typeof REPLACED)[number];
+export type PreservedField = (typeof PRESERVED)[number];
+
+/** Was eine Vergleichszeile beschreibt — die Beschriftung bildet die Anzeige. */
+export type DiffField =
+  | "classes"
+  | "str"
+  | "dex"
+  | "con"
+  | "int"
+  | "wis"
+  | "cha"
+  | "maxHp"
+  | "ac"
+  | "spellDc"
+  | "skills";
 
 export type DiffLine = {
-  label: string;
+  field: DiffField;
   before: string;
   after: string;
   changed: boolean;
@@ -72,8 +93,8 @@ export type ReimportPlan = {
   changes: DiffLine[];
   newSpells: string[];
   removedSpells: string[];
-  replaced: readonly string[];
-  preserved: readonly string[];
+  replaced: readonly ReplacedField[];
+  preserved: readonly PreservedField[];
 };
 
 /* ------------------------------------------------------------------ *
@@ -93,30 +114,32 @@ export function planReimport(
 
   const changes: DiffLine[] = [];
 
-  const line = (label: string, before: unknown, after: unknown) => {
+  const line = (field: DiffField, before: unknown, after: unknown) => {
     const b = format(before);
     const a = format(after);
-    changes.push({ label, before: b, after: a, changed: b !== a });
+    changes.push({ field, before: b, after: a, changed: b !== a });
   };
 
+  // Leere Werte werden zu "—" (siehe format) statt "keine" — so bleibt
+  // die Zeile in jeder Sprache lesbar.
   line(
-    "Klassen",
+    "classes",
     sheet.classes
       .map((c) => `${classLabel(c.classKey)} ${c.level}`)
-      .join(" / ") || "keine",
+      .join(" / "),
     draft.classes
       .map((c) => `${c.known ? classLabel(c.classKey) : c.rawName} ${c.level}`)
-      .join(" / ") || "keine",
+      .join(" / "),
   );
 
   for (const ability of ["str", "dex", "con", "int", "wis", "cha"] as Ability[]) {
-    line(ability.toUpperCase(), sheet.scores[ability], draft.scores[ability]);
+    line(ability, sheet.scores[ability], draft.scores[ability]);
   }
 
-  line("Max. HP", live.hpMax, draft.hpMaxOverride ?? live.hpMax);
-  line("AC", sheet.armorClass, draft.acOverride ?? sheet.armorClass);
+  line("maxHp", live.hpMax, draft.hpMaxOverride ?? live.hpMax);
+  line("ac", sheet.armorClass, draft.acOverride ?? sheet.armorClass);
   line(
-    "Zauber-DC",
+    "spellDc",
     sheet.spellcasting?.saveDc ?? "—",
     draft.spellSaveDcOverride ?? sheet.spellcasting?.saveDc ?? "—",
   );
@@ -128,7 +151,7 @@ export function planReimport(
   const afterSkills = SKILLS.filter((s) => (draft.skills[s.key] ?? 0) > 0)
     .map((s) => s.name)
     .sort();
-  line("Fertigkeiten", beforeSkills.join(", ") || "keine", afterSkills.join(", ") || "keine");
+  line("skills", beforeSkills.join(", "), afterSkills.join(", "));
 
   const existing = spellNamesOf(characterId);
   const incoming = new Set(draft.spells.map((s) => s.name.toLowerCase()));

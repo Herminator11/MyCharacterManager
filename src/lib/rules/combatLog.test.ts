@@ -62,6 +62,9 @@ describe("Schaden und Heilung", () => {
       kind: "damage",
       text: "7 Schaden",
       detail: "30 → 23",
+      // Dieselbe Zeile als Schlüssel mit Werten — daraus bildet die
+      // Anzeige den Satz in der Sprache des Geräts.
+      message: { key: "damage", params: { amount: 7, from: 30, to: 23, absorbed: 0 } },
       actionCost: null,
       amount: 7,
     });
@@ -122,6 +125,10 @@ describe("Zauber", () => {
       kind: "cast",
       text: "Misty Step",
       detail: "Grad 2 · Pact Magic",
+      message: {
+        key: "cast",
+        params: { spell: "Misty Step", level: 2, pool: "Pact Magic", poolAutoKey: "pact-magic" },
+      },
       actionCost: "bonus",
       amount: 0,
     });

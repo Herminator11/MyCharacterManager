@@ -1,0 +1,1 @@
+ALTER TABLE `combat_log` ADD `message` text;

@@ -16,6 +16,7 @@ import type {
   ImportedCharacter,
   ImportedClass,
   ImportedSpell,
+  ImportWarning,
 } from "../types";
 
 /**
@@ -67,7 +68,7 @@ export function isAuroraSheet(fields: FieldMap): boolean {
 }
 
 export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
-  const warnings: string[] = [];
+  const warnings: ImportWarning[] = [];
 
   /* --- Attribute --- */
 
@@ -76,9 +77,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
     // Achtung: der eigentliche Wert steht im _modifier-Feld (siehe oben).
     const value = number(fields, SCORE_FIELD[ability]);
     if (value === null) {
-      warnings.push(
-        `Der Attributwert für ${ability.toUpperCase()} fehlt im Bogen; ich habe 10 eingesetzt.`,
-      );
+      warnings.push({ key: "missingScore", params: { ability: ability.toUpperCase() } });
     }
     scores[ability] = value ?? 10;
   }
@@ -101,9 +100,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
   const { race, classes } = parseBuild(text(fields, "details_build"), warnings);
 
   if (classes.length === 0) {
-    warnings.push(
-      "Im Bogen steht keine Klasse. Ohne Klasse gibt es keine Zauberplätze und keine Trefferwürfel — bitte unten ergänzen.",
-    );
+    warnings.push({ key: "noClass", params: {} });
   }
 
   noteDerivedHitDice(classes, text(fields, "details_hd"), warnings);
@@ -124,9 +121,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
   }
 
   if (attacks.length === 0) {
-    warnings.push(
-      "Im Bogen stand keine Waffe. Angriffe lassen sich später unter „Angriffe“ nachtragen.",
-    );
+    warnings.push({ key: "noWeapon", params: {} });
   }
 
   /* --- Zauber --- */
@@ -137,9 +132,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
     (key) => /^slot\d/.test(key) && fields[key] === true,
   ).length;
   if (usedSlots > 0) {
-    warnings.push(
-      `Im Bogen sind ${usedSlots} Zauberplätze als verbraucht markiert. Welcher Pool gemeint ist, geht daraus nicht hervor — der Import startet deshalb mit vollen Plätzen.`,
-    );
+    warnings.push({ key: "usedSlots", params: { count: usedSlots } });
   }
 
   /* --- Todesrettungswürfe --- */
@@ -148,9 +141,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
     (key) => key.startsWith("details_death_save_") && fields[key] === true,
   ).length;
   if (deathChecked > 0) {
-    warnings.push(
-      "Im Bogen sind Death Saves angekreuzt. Die gelten nur für einen laufenden Kampf und werden nicht übernommen.",
-    );
+    warnings.push({ key: "deathSaves", params: {} });
   }
 
   const features = collectFeatures(fields);
@@ -165,9 +156,7 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
   const maxHp = number(fields, "details_hp_max");
   const currentHp = number(fields, "details_hp_current");
   if (currentHp === null && maxHp !== null) {
-    warnings.push(
-      "Die aktuellen Trefferpunkte waren leer; der Charakter startet mit vollen HP.",
-    );
+    warnings.push({ key: "emptyCurrentHp", params: {} });
   }
 
   return {
@@ -246,14 +235,12 @@ export function parseAuroraSheet(fields: FieldMap): ImportedCharacter {
  */
 function parseBuild(
   build: string,
-  warnings: string[],
+  warnings: ImportWarning[],
 ): { race: string; classes: ImportedClass[] } {
   const match = build.match(/^level\s+(\d+)\s+(.+)$/i);
   if (!match) {
     if (build.trim()) {
-      warnings.push(
-        `Die Zeile „${build}“ ließ sich nicht in Rasse, Klasse und Level zerlegen — bitte unten prüfen.`,
-      );
+      warnings.push({ key: "unparsedClassLine", params: { line: build } });
     }
     return { race: "", classes: [] };
   }
@@ -270,9 +257,7 @@ function parseBuild(
   segments.forEach((segment, index) => {
     const levelMatch = segment.match(/\((\d+)\)\s*$/);
     if (!levelMatch) {
-      warnings.push(
-        `Für „${segment.trim()}“ stand kein eigenes Level im Bogen; ich habe 1 eingesetzt.`,
-      );
+      warnings.push({ key: "missingLevel", params: { name: segment.trim() } });
     }
     const level = levelMatch ? Number(levelMatch[1]) : 1;
     const withoutLevel = levelMatch
@@ -296,7 +281,7 @@ function parseClassSegment(
   rest: string,
   level: number,
   withRace: boolean,
-  warnings: string[],
+  warnings: ImportWarning[],
 ): { race: string; classes: ImportedClass[] } {
   const [classPartRaw, ...subclassParts] = rest.split(/,\s*/);
   const subclass = subclassParts.join(", ").trim();

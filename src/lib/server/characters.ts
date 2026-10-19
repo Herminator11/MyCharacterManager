@@ -21,6 +21,7 @@ import {
   srdConditions,
   type Ability,
 } from "@/db/schema";
+import { parseLogMessage } from "@/lib/rules/combatLog";
 import { getClass } from "@/lib/rules/classes";
 import {
   abilityModifier,
@@ -290,6 +291,7 @@ export function getLiveState(characterId: number): LiveState | null {
       text: row.text,
       detail: row.detail,
       actionCost: row.actionCost,
+      message: parseLogMessage(row.message),
     })),
     hitDice: classes.map((c) => ({
       classId: c.id,
@@ -508,7 +510,8 @@ export function getCombatLog(characterId: number) {
     .from(combatLog)
     .where(eq(combatLog.characterId, characterId))
     .orderBy(desc(combatLog.at), desc(combatLog.id))
-    .all();
+    .all()
+    .map((row) => ({ ...row, message: parseLogMessage(row.message) }));
 }
 
 /**

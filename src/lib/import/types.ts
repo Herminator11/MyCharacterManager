@@ -5,6 +5,26 @@ export type FieldMap = Record<string, string | boolean>;
 
 export type SheetFormat = "official" | "custom" | "aurora";
 
+/**
+ * Ein Hinweis des Imports als Schlüssel mit Werten statt als Satz. Der
+ * Parser läuft auf dem Server ohne Wissen um die Sprache des Geräts; den
+ * Satz bildet erst die Prüfansicht (lib/i18n/importWarnings).
+ */
+export type ImportWarning =
+  | { key: "unknownClass"; params: { name: string } }
+  | { key: "missingLevel"; params: { name: string } }
+  | { key: "derivedHitDice"; params: { dice: string } }
+  | { key: "missingExpertise"; params: { classes: string[] } }
+  | { key: "missingScore"; params: { ability: string } }
+  | { key: "noClass"; params: Record<string, never> }
+  | { key: "noWeapon"; params: Record<string, never> }
+  | { key: "noWeaponOrSpellAttack"; params: Record<string, never> }
+  | { key: "usedSlots"; params: { count: number } }
+  | { key: "deathSaves"; params: Record<string, never> }
+  | { key: "deathSavesCounted"; params: { successes: number; failures: number } }
+  | { key: "emptyCurrentHp"; params: Record<string, never> }
+  | { key: "unparsedClassLine"; params: { line: string } };
+
 export type ImportedClass = {
   classKey: string;
   /** Name so, wie er im Bogen steht — für unbekannte Klassen. */
@@ -83,5 +103,5 @@ export type ImportedCharacter = {
   features: { name: string; description: string }[];
 
   /** Was der Bogen nicht hergab oder was Aufmerksamkeit braucht. */
-  warnings: string[];
+  warnings: ImportWarning[];
 };

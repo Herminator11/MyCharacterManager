@@ -20,13 +20,10 @@ export * from "./types";
  */
 
 export class UnknownSheetFormatError extends Error {
+  // Der Satz dazu steht im Wörterbuch (importWarnings.unknownFormat) —
+  // hier nur die Zahl, die er braucht.
   constructor(readonly fieldCount: number) {
-    super(
-      `Dieses PDF hat ${fieldCount} Formularfelder, aber keine, die ich einem bekannten Bogen zuordnen kann. ` +
-        "Der Import versteht den offiziellen D&D-Charakterbogen von Wizards of the Coast " +
-        "(den auch Aurora ausgibt), Auroras eigenen ausfüllbaren Bogen sowie das " +
-        "erweiterte Format mit Front_/Back_-Feldern.",
-    );
+    super(`unknownFormat:${fieldCount}`);
   }
 }
 

@@ -16,10 +16,41 @@ import type { ActionCost } from "./actions";
  * `null` heißt „nicht erwähnenswert“. Das ist die häufigste Antwort und
  * soll es bleiben — ein Log, das jede Korrektur mitschreibt, liest keiner.
  */
+/**
+ * Derselbe Eintrag als Schlüssel mit Werten statt als fertiger Satz.
+ *
+ * `text`/`detail` bleiben daneben bestehen, auf Deutsch: Einträge aus der
+ * Zeit vor dieser Spalte haben nur sie, und ein Satz, der mitgespeichert
+ * ist, stimmt auch dann noch, wenn sich eine Übersetzung später ändert.
+ * Angezeigt wird aber die Meldung, in der Sprache des Geräts (siehe
+ * lib/i18n/log). Namen — Zauber, Ressource, Pool — stehen als Text darin,
+ * aus demselben Grund wie in `text`: sie sollen stimmen, auch wenn der
+ * Zauber später aus der Liste fliegt.
+ */
+export type LogMessage =
+  | { key: "damage"; params: { amount: number; from: number; to: number; absorbed: number } }
+  | { key: "heal"; params: { amount: number; from: number; to: number } }
+  | { key: "hpCorrected"; params: { from: number; to: number } }
+  | { key: "tempHp"; params: { value: number } }
+  | { key: "tempHpGone"; params: Record<string, never> }
+  | { key: "hitDie"; params: { die: number; healed: number; from: number; to: number } }
+  | { key: "cast"; params: { spell: string; level: number; pool: string; poolAutoKey: string } }
+  | { key: "condition"; params: { condition: string; active: boolean } }
+  | { key: "concentration"; params: { label: string } }
+  | { key: "concentrationLost"; params: { label: string } }
+  | { key: "stabilized"; params: Record<string, never> }
+  | { key: "died"; params: Record<string, never> }
+  | { key: "deathSave"; params: { successes: number; failures: number } }
+  | { key: "resource"; params: { name: string; spent: boolean; current: number; max: number } }
+  | { key: "inspiration"; params: { gained: boolean } }
+  | { key: "shortRest"; params: Record<string, never> }
+  | { key: "longRest"; params: Record<string, never> };
+
 export type CombatLogLine = {
   kind: CombatLogKind;
   text: string;
   detail: string;
+  message: LogMessage;
   /**
    * Nur bei `kind: "cast"` gesetzt — steuert Kreis (Aktion) oder Dreieck
    * (Bonusaktion/Reaktion) in der Anzeige, statt das Wort im Text zu
@@ -29,6 +60,21 @@ export type CombatLogLine = {
   /** Schaden bzw. geheilte HP, sonst 0 — nur für die Zusammenfassung. */
   amount: number;
 };
+
+/**
+ * Liest die gespeicherte Meldung zurück. Was sich nicht lesen lässt — eine
+ * leere Spalte bei alten Einträgen, ein kaputtes JSON —, wird `null`, und
+ * die Anzeige fällt auf den gespeicherten Text zurück, statt zu scheitern.
+ */
+export function parseLogMessage(json: string | null): LogMessage | null {
+  if (!json) return null;
+  try {
+    const value = JSON.parse(json) as LogMessage;
+    return value && typeof value.key === "string" && value.params ? value : null;
+  } catch {
+    return null;
+  }
+}
 
 export function describeMutation(
   mutation: LiveMutation,
@@ -50,6 +96,10 @@ export function describeMutation(
           kind: "damage",
           text: `${-amount} Schaden`,
           detail: absorbed > 0 ? `${range} · ${absorbed} über temporäre HP` : range,
+          message: {
+            key: "damage",
+            params: { amount: -amount, from: before.hpCurrent, to: after.hpCurrent, absorbed },
+          },
           actionCost: null,
           amount: -amount,
         };
@@ -58,6 +108,10 @@ export function describeMutation(
         kind: "heal",
         text: `${amount} geheilt`,
         detail: range,
+        message: {
+          key: "heal",
+          params: { amount, from: before.hpCurrent, to: after.hpCurrent },
+        },
         actionCost: null,
         amount: after.hpCurrent - before.hpCurrent,
       };
@@ -70,6 +124,7 @@ export function describeMutation(
         kind: up ? "heal" : "damage",
         text: "HP korrigiert",
         detail: `${before.hpCurrent} → ${after.hpCurrent}`,
+        message: { key: "hpCorrected", params: { from: before.hpCurrent, to: after.hpCurrent } },
         actionCost: null,
         amount: 0,
       };
@@ -84,6 +139,10 @@ export function describeMutation(
             ? `${after.hpTemp} temporäre HP`
             : "Temporäre HP weg",
         detail: "",
+        message:
+          after.hpTemp > 0
+            ? { key: "tempHp", params: { value: after.hpTemp } }
+            : { key: "tempHpGone", params: {} },
         actionCost: null,
         amount: 0,
       };
@@ -98,6 +157,10 @@ export function describeMutation(
         kind: "heal",
         text: `Trefferwürfel${die ? ` d${die.hitDie}` : ""}`,
         detail: `+${healed} HP · ${before.hpCurrent} → ${after.hpCurrent}`,
+        message: {
+          key: "hitDie",
+          params: { die: die?.hitDie ?? 0, healed, from: before.hpCurrent, to: after.hpCurrent },
+        },
         actionCost: null,
         amount: healed,
       };
@@ -124,6 +187,15 @@ export function describeMutation(
         kind: "cast",
         text: mutation.spellName || "Zauber gewirkt",
         detail,
+        message: {
+          key: "cast",
+          params: {
+            spell: mutation.spellName,
+            level: mutation.level,
+            pool: pool?.name ?? "",
+            poolAutoKey: pool?.autoKey ?? "",
+          },
+        },
         // "long" (z.B. Rituale mit langer Wirkzeit) bekommt keine eigene
         // Form — die Unterscheidung Aktion/Bonusaktion/Reaktion lohnt sich
         // nur, wenn sie auch ein Zugkonto belastet hat.
@@ -141,6 +213,10 @@ export function describeMutation(
           ? conditionLabel(mutation.key)
           : `${conditionLabel(mutation.key)} beendet`,
         detail: "",
+        message: {
+          key: "condition",
+          params: { condition: conditionLabel(mutation.key), active: isActive },
+        },
         actionCost: null,
         amount: 0,
       };
@@ -152,6 +228,7 @@ export function describeMutation(
         kind: "state",
         text: `Konzentration: ${after.concentration.label || "aktiv"}`,
         detail: "",
+        message: { key: "concentration", params: { label: after.concentration.label } },
         actionCost: null,
         amount: 0,
       };
@@ -162,6 +239,7 @@ export function describeMutation(
         kind: "state",
         text: "Konzentration verloren",
         detail: before.concentration.label,
+        message: { key: "concentrationLost", params: { label: before.concentration.label } },
         actionCost: null,
         amount: 0,
       };
@@ -174,6 +252,7 @@ export function describeMutation(
           kind: "heal",
           text: "Stabilisiert",
           detail: "keine Würfe mehr, weiter bei 0 HP",
+          message: { key: "stabilized", params: {} },
           actionCost: null,
           amount: 0,
         };
@@ -183,6 +262,7 @@ export function describeMutation(
           kind: "damage",
           text: "Gestorben",
           detail: "drei Fehlschläge",
+          message: { key: "died", params: {} },
           actionCost: null,
           amount: 0,
         };
@@ -198,6 +278,10 @@ export function describeMutation(
         kind: "damage",
         text: "Todesrettungswurf",
         detail: `${after.deathSaveSuccesses} Erfolge · ${after.deathSaveFailures} Fehlschläge`,
+        message: {
+          key: "deathSave",
+          params: { successes: after.deathSaveSuccesses, failures: after.deathSaveFailures },
+        },
         actionCost: null,
         amount: 0,
       };
@@ -214,6 +298,10 @@ export function describeMutation(
             ? `${is.name} eingesetzt`
             : `${is.name} zurückgelegt`,
         detail: `${is.current}/${is.max}`,
+        message: {
+          key: "resource",
+          params: { name: is.name, spent: is.current < was.current, current: is.current, max: is.max },
+        },
         actionCost: null,
         amount: 0,
       };
@@ -225,6 +313,7 @@ export function describeMutation(
         kind: "resource",
         text: after.inspiration ? "Inspiration erhalten" : "Inspiration eingesetzt",
         detail: "",
+        message: { key: "inspiration", params: { gained: after.inspiration } },
         actionCost: null,
         amount: 0,
       };
@@ -234,6 +323,7 @@ export function describeMutation(
         kind: "rest",
         text: "Kurze Rast",
         detail: "",
+        message: { key: "shortRest", params: {} },
         actionCost: null,
         amount: 0,
       };
@@ -243,6 +333,7 @@ export function describeMutation(
         kind: "rest",
         text: "Lange Rast",
         detail: "",
+        message: { key: "longRest", params: {} },
         actionCost: null,
         amount: 0,
       };
