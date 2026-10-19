@@ -1,6 +1,10 @@
 import { IBM_Plex_Mono, Rajdhani } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 
+import { I18nProvider } from "@/lib/i18n/client";
+import { localeOf } from "@/lib/i18n/modes";
+import { getMode } from "@/lib/i18n/server";
+
 import "./globals.css";
 
 // Zwei Schriften zusätzlich zur System-Sans, beide zur Build-Zeit
@@ -41,15 +45,22 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Der Modus kommt aus dem Cookie dieses Geräts (siehe lib/i18n/modes).
+  // `lang` folgt der Bedienung, damit Silbentrennung und Vorlesen zur
+  // Sprache der Sätze passen, nicht zu einzelnen Regelbegriffen darin.
+  const mode = await getMode();
+
   return (
     <html
-      lang="de"
+      lang={localeOf(mode).slice(0, 2)}
       className={`h-full ${rajdhani.variable} ${plexMono.variable}`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <I18nProvider mode={mode}>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

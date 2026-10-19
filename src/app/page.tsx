@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { BrandMark } from "@/components/Brand";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { CharacterLibrary } from "@/components/library/CharacterLibrary";
 import { Button, Field, inputClass, Panel } from "@/components/ui";
 import { CLASSES, className as classLabel } from "@/lib/rules/classes";
@@ -161,6 +162,12 @@ export default function Page() {
             dazu.
           </p>
         </form>
+      </Panel>
+
+      {/* Ganz unten: die Sprache stellt man einmal pro Gerät ein, danach
+          ist sie im Weg, wenn sie weiter oben stünde. */}
+      <Panel className="mt-6">
+        <LanguageSwitch />
       </Panel>
     </main>
   );

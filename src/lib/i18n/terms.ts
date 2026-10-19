@@ -1,0 +1,90 @@
+/**
+ * Die Regelbegriffe — getrennt von den übrigen Texten der Oberfläche.
+ *
+ * Diese Trennung ist der Kern der drei Sprachmodi. An deutschen Tischen
+ * sagt man oft "AC", "Spell DC" und "Saving Throw", auch wenn sonst
+ * deutsch gesprochen wird; die Begriffe stehen so auf den englischen
+ * Bögen, aus denen importiert wird, und im SRD. "Deutsch mit englischen
+ * Regelbegriffen" ist deshalb keine dritte Übersetzung, sondern deutsche
+ * Bedienung (Speichern, Hinzufügen, Übersicht) plus dieses Glossar auf
+ * Englisch.
+ *
+ * Was hier hineingehört: Wörter, die eine Spielregel benennen und die
+ * Spieler am Tisch laut sagen. Was nicht: Inhalte aus dem SRD (Zauber-,
+ * Klassen-, Zustandsnamen) — die bleiben in jedem Modus englisch, weil es
+ * für sie keine frei verwendbare deutsche Fassung gibt.
+ *
+ * Deutsch nach dem deutschen Spielerhandbuch. Ohne `as const`: die Werte
+ * sollen als `string` typisiert sein, damit die englische Fassung
+ * denselben Typ erfüllen muss, ohne dieselben Wörter zu enthalten.
+ */
+export const termsDe = {
+  armorClass: "Rüstungsklasse",
+  armorClassShort: "RK",
+  initiative: "Initiative",
+  initiativeShort: "Init.",
+  speed: "Bewegung",
+  speedShort: "Bew.",
+  passivePerception: "Wahrnehmung (passiv)",
+  passivePerceptionShort: "Wahrn.",
+  passiveInsight: "Motiv erkennen (passiv)",
+  proficiencyBonus: "Übungsbonus",
+  spellSaveDc: "Zauber-SG",
+  /** Mit dem Attributskürzel, aus dem der Bonus stammt: "Zauberangriff (INT)". */
+  spellAttack: (ability: string) => `Zauberangriff (${ability})`,
+  experience: "EP",
+  hitPoints: "Trefferpunkte",
+  hitDice: "Trefferwürfel",
+  deathSaves: "Todesrettungswürfe",
+  savingThrow: "Rettungswurf",
+  conditions: "Zustände",
+  cantrip: "Zaubertrick",
+  cantrips: "Zaubertricks",
+  spellLevel: (level: number) => `Grad ${level}`,
+  spellSlots: "Zauberplätze",
+  castingTime: "Wirkzeit",
+  action: "Aktion",
+  bonusAction: "Bonusaktion",
+  reaction: "Reaktion",
+  inspiration: "Inspiration",
+  concentration: "Konzentration",
+  shortRest: "Kurze Rast",
+  longRest: "Lange Rast",
+  traits: "Merkmale",
+};
+
+export type Terms = typeof termsDe;
+
+export const termsEn: Terms = {
+  armorClass: "Armor Class",
+  armorClassShort: "AC",
+  initiative: "Initiative",
+  initiativeShort: "Init",
+  speed: "Speed",
+  speedShort: "Speed",
+  passivePerception: "Passive Perception",
+  passivePerceptionShort: "PP",
+  passiveInsight: "Passive Insight",
+  proficiencyBonus: "Proficiency",
+  spellSaveDc: "Spell DC",
+  spellAttack: (ability) => `Spell Attack (${ability})`,
+  experience: "XP",
+  hitPoints: "Hit Points",
+  hitDice: "Hit Dice",
+  deathSaves: "Death Saves",
+  savingThrow: "Saving Throw",
+  conditions: "Conditions",
+  cantrip: "Cantrip",
+  cantrips: "Cantrips",
+  spellLevel: (level) => `Level ${level}`,
+  spellSlots: "Spell Slots",
+  castingTime: "Casting Time",
+  action: "Action",
+  bonusAction: "Bonus Action",
+  reaction: "Reaction",
+  inspiration: "Inspiration",
+  concentration: "Concentration",
+  shortRest: "Short Rest",
+  longRest: "Long Rest",
+  traits: "Traits",
+};
